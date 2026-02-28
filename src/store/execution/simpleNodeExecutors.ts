@@ -77,7 +77,8 @@ export async function executePromptConstructor(ctx: NodeExecutionContext): Promi
     const edges = getEdges();
     const nodes = getNodes();
 
-    // Collect text from connected input handles (text_input_1, text_input_2, etc.)
+    // Collect text from ALL connected input handles — no type restrictions.
+    // Just take the full output text of whatever node is connected.
     const inputTexts: string[] = [];
     for (let i = 1; i <= inputCount; i++) {
       const handleId = `text_input_${i}`;
@@ -85,80 +86,37 @@ export async function executePromptConstructor(ctx: NodeExecutionContext): Promi
       if (edge) {
         const sourceNode = nodes.find((n) => n.id === edge.source);
         if (sourceNode) {
-          let sourceText: string | null = null;
-          if (sourceNode.type === "prompt") {
-            sourceText = (sourceNode.data as PromptNodeData).prompt;
-          } else if (sourceNode.type === "promptConstructor") {
-            const pcData = sourceNode.data as PromptConstructorNodeData;
-            sourceText = pcData.outputText ?? null;
-          } else if (sourceNode.type === "promptConcatenator") {
-            sourceText = (sourceNode.data as PromptConcatenatorNodeData).outputText;
-          } else if (sourceNode.type === "llmGenerate") {
-            sourceText = (sourceNode.data as LLMGenerateNodeData).outputText;
-          }
-
-          if (sourceText && sourceText.trim()) {
-            inputTexts.push(sourceText);
+          // Read the full output text from the source node regardless of its type
+          const d = sourceNode.data as Record<string, unknown>;
+          const sourceText =
+            (d.outputText as string | null) ??
+            (d.prompt as string | null) ??
+            (d.outputImage as string | null) ??
+            null;
+          if (sourceText && String(sourceText).trim()) {
+            inputTexts.push(String(sourceText).trim());
           }
         }
       }
     }
 
-    // Build variable map from connected prompt nodes via legacy 'text' handle (backward compat)
-    const connectedPromptNodes = edges
-      .filter((e) => e.target === node.id && e.targetHandle === "text")
-      .map((e) => nodes.find((n) => n.id === e.source))
-      .filter((n): n is WorkflowNode => n !== undefined && n.type === "prompt");
-
-    const variableMap: Record<string, string> = {};
-    connectedPromptNodes.forEach((promptNode) => {
-      const promptData = promptNode.data as PromptNodeData;
-      if (promptData.variableName) {
-        variableMap[promptData.variableName] = promptData.prompt;
-      }
-    });
-
-    // Process @variable patterns in template
-    const varPattern = /@(\w+)/g;
-    const unresolvedVars: string[] = [];
-    let resolvedTemplate = template;
-
-    const matches = template.matchAll(varPattern);
-    for (const match of matches) {
-      const varName = match[1];
-      if (variableMap[varName] !== undefined) {
-        resolvedTemplate = resolvedTemplate.replaceAll(`@${varName}`, variableMap[varName]);
-      } else {
-        if (!unresolvedVars.includes(varName)) {
-          unresolvedVars.push(varName);
-        }
-      }
-    }
-
-    // Build final output: input texts (concatenated with newlines) + template + static text
+    // Build final output: all connected input texts + static text appended at end.
+    // Template and @variable logic removed — just pass full outputs through.
     const parts: string[] = [];
-    
-    // Add connected input texts first (in order, top to bottom)
+
     if (inputTexts.length > 0) {
-      parts.push(inputTexts.join("\n"));
-    }
-    
-    // Add resolved template (if not empty)
-    if (resolvedTemplate.trim()) {
-      parts.push(resolvedTemplate);
-    }
-    
-    // Add static text last (if not empty)
-    if (staticText.trim()) {
-      parts.push(staticText);
+      parts.push(inputTexts.join("\n\n"));
     }
 
-    // Join all parts with newlines
-    const outputText = parts.join("\n");
+    if (staticText.trim()) {
+      parts.push(staticText.trim());
+    }
+
+    const outputText = parts.join("\n\n");
 
     updateNodeData(node.id, {
       outputText: outputText || null,
-      unresolvedVars,
+      unresolvedVars: [],
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

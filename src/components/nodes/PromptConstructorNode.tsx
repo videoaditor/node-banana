@@ -187,21 +187,7 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
         })}
 
         <div className="relative flex flex-col gap-2 flex-1 min-h-0">
-          {/* Template section with @variable support */}
-          <div className="flex flex-col gap-1 flex-shrink-0">
-            <label className="text-[10px] text-neutral-400">Template (use @ for variables)</label>
-            <textarea
-              ref={templateTextareaRef}
-              value={localTemplate}
-              onChange={handleTemplateChange}
-              onFocus={handleTemplateFocus}
-              onBlur={handleTemplateBlur}
-              placeholder="Type @ to insert variables..."
-              className="nodrag nopan nowheel w-full h-[60px] p-2 text-xs leading-relaxed text-neutral-100 border border-neutral-700 rounded bg-neutral-900/50 resize-none focus:outline-none focus:ring-1 focus:ring-neutral-600 focus:border-neutral-600 placeholder:text-neutral-500"
-            />
-          </div>
-
-          {/* Static text section */}
+          {/* Static text section — appended after all connected inputs */}
           <div className="flex flex-col gap-1 flex-shrink-0">
             <label className="text-[10px] text-neutral-400">Static Text (appended to output)</label>
             <textarea
@@ -239,16 +225,11 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
             </button>
           </div>
 
-          {/* Footer showing connected inputs and available @variables */}
+          {/* Footer showing connected inputs */}
           <div className="flex flex-col gap-0.5 mt-1">
             {connectedInputLabels.length > 0 && (
               <div className="text-[10px] text-neutral-500">
                 Connected: {connectedInputLabels.join(", ")}
-              </div>
-            )}
-            {availableVariables.length > 0 && (
-              <div className="text-[10px] text-neutral-500">
-                Available: {availableVariables.map(v => `@${v.name}`).join(", ")}
               </div>
             )}
           </div>
