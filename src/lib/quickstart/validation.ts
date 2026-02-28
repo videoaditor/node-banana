@@ -230,6 +230,8 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
         template: "",
         outputText: null,
         unresolvedVars: [],
+        inputCount: 2,
+        staticText: "",
       };
     case "promptConcatenator":
       return {

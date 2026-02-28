@@ -15,6 +15,7 @@ import type {
   OutputNodeData,
   OutputGalleryNodeData,
   WorkflowNode,
+  LLMGenerateNodeData,
 } from "@/types";
 import type { NodeExecutionContext } from "./types";
 
