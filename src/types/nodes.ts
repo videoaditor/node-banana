@@ -217,6 +217,8 @@ export interface LLMGenerateNodeData extends BaseNodeData {
   inputImages: string[];
   inputImageRefs?: string[]; // External image references for storage optimization
   outputText: string | null;
+  outputHistory: string[]; // All past outputs, newest last
+  selectedHistoryIndex: number; // Which output is shown; -1 means latest
   provider: LLMProvider;
   model: LLMModelType;
   temperature: number;

@@ -279,6 +279,8 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
         inputPrompt: null,
         inputImages: [],
         outputText: null,
+        outputHistory: [],
+        selectedHistoryIndex: -1,
         provider: "google",
         model: "gemini-3-flash-preview",
         temperature: 0.7,

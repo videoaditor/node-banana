@@ -94,8 +94,11 @@ export async function executeLlmGenerate(
     const result = await response.json();
 
     if (result.success && result.text) {
+      const existingHistory = nodeData.outputHistory ?? [];
       updateNodeData(node.id, {
         outputText: result.text,
+        outputHistory: [...existingHistory, result.text],
+        selectedHistoryIndex: -1,
         status: "complete",
         error: null,
       });
