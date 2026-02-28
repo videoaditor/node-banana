@@ -98,6 +98,8 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
     case "prompt":
       return {
         prompt: "",
+        prompts: [""],
+        activePromptIndex: 0,
       } as PromptNodeData;
     case "promptConstructor":
       return {

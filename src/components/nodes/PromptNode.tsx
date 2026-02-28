@@ -21,8 +21,18 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
   const edges = useWorkflowStore((state) => state.edges);
   const [isModalOpenLocal, setIsModalOpenLocal] = useState(false);
 
+  // Prompt stack derived values
+  const prompts = useMemo(
+    () => (nodeData.prompts?.length ? nodeData.prompts : [nodeData.prompt || ""]),
+    [nodeData.prompts, nodeData.prompt]
+  );
+  const activeIndex = nodeData.activePromptIndex ?? 0;
+  const safeIndex = Math.min(activeIndex, prompts.length - 1);
+  const currentPrompt = prompts[safeIndex] ?? "";
+  const totalPrompts = prompts.length;
+
   // Local state for prompt to prevent cursor jumping during typing
-  const [localPrompt, setLocalPrompt] = useState(nodeData.prompt);
+  const [localPrompt, setLocalPrompt] = useState(currentPrompt);
   const [isEditing, setIsEditing] = useState(false);
 
   // Variable naming dialog state
@@ -44,20 +54,22 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
       // Only update if the incoming text changed (LLM node ran again)
       if (text !== null && text !== lastReceivedTextRef.current) {
         lastReceivedTextRef.current = text;
-        updateNodeData(id, { prompt: text });
+        const newPrompts = [...prompts];
+        newPrompts[safeIndex] = text;
+        updateNodeData(id, { prompt: text, prompts: newPrompts });
       }
     } else {
       // Clear tracking when connection is removed
       lastReceivedTextRef.current = null;
     }
-  }, [hasIncomingTextConnection, id, getConnectedInputs, updateNodeData]);
+  }, [hasIncomingTextConnection, id, getConnectedInputs, updateNodeData, prompts, safeIndex]);
 
-  // Sync from props when not actively editing
+  // Sync local prompt when active index changes or when not editing
   useEffect(() => {
     if (!isEditing) {
-      setLocalPrompt(nodeData.prompt);
+      setLocalPrompt(currentPrompt);
     }
-  }, [nodeData.prompt, isEditing]);
+  }, [currentPrompt, isEditing]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -72,10 +84,12 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
 
   const handleBlur = useCallback(() => {
     setIsEditing(false);
-    if (localPrompt !== nodeData.prompt) {
-      updateNodeData(id, { prompt: localPrompt });
+    if (localPrompt !== currentPrompt) {
+      const newPrompts = [...prompts];
+      newPrompts[safeIndex] = localPrompt;
+      updateNodeData(id, { prompt: localPrompt, prompts: newPrompts });
     }
-  }, [id, localPrompt, nodeData.prompt, updateNodeData]);
+  }, [id, localPrompt, currentPrompt, prompts, safeIndex, updateNodeData]);
 
   const handleOpenModal = useCallback(() => {
     setIsModalOpenLocal(true);
@@ -89,9 +103,11 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
 
   const handleSubmitModal = useCallback(
     (prompt: string) => {
-      updateNodeData(id, { prompt });
+      const newPrompts = [...prompts];
+      newPrompts[safeIndex] = prompt;
+      updateNodeData(id, { prompt, prompts: newPrompts });
     },
-    [id, updateNodeData]
+    [id, prompts, safeIndex, updateNodeData]
   );
 
   const handleSaveVariableName = useCallback(() => {
@@ -116,6 +132,41 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
       isAppInput: !nodeData.isAppInput,
     });
   }, [id, nodeData.isAppInput, updateNodeData]);
+
+  // Prompt stack navigation
+  const handleAddPrompt = useCallback(() => {
+    const newPrompts = [...prompts, ""];
+    const newIndex = newPrompts.length - 1;
+    updateNodeData(id, { prompts: newPrompts, activePromptIndex: newIndex, prompt: "" });
+  }, [id, prompts, updateNodeData]);
+
+  const handlePrevPrompt = useCallback(() => {
+    if (safeIndex > 0) {
+      // Flush any pending local edits before navigating
+      const newPrompts = [...prompts];
+      newPrompts[safeIndex] = localPrompt;
+      const newIndex = safeIndex - 1;
+      updateNodeData(id, {
+        prompts: newPrompts,
+        activePromptIndex: newIndex,
+        prompt: newPrompts[newIndex],
+      });
+    }
+  }, [safeIndex, prompts, localPrompt, id, updateNodeData]);
+
+  const handleNextPrompt = useCallback(() => {
+    if (safeIndex < totalPrompts - 1) {
+      // Flush any pending local edits before navigating
+      const newPrompts = [...prompts];
+      newPrompts[safeIndex] = localPrompt;
+      const newIndex = safeIndex + 1;
+      updateNodeData(id, {
+        prompts: newPrompts,
+        activePromptIndex: newIndex,
+        prompt: newPrompts[newIndex],
+      });
+    }
+  }, [safeIndex, totalPrompts, prompts, localPrompt, id, updateNodeData]);
 
   return (
     <>
@@ -183,7 +234,7 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
           data-handletype="text"
         />
 
-        <div className="relative flex-1 flex flex-col">
+        <div className="relative flex-1 flex flex-col gap-1">
           <textarea
             value={localPrompt}
             onChange={handleChange}
@@ -193,10 +244,43 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
             className="nodrag nopan nowheel w-full flex-1 min-h-[70px] p-2 text-xs leading-relaxed text-neutral-100 border border-neutral-700 rounded bg-neutral-900/50 resize-none focus:outline-none focus:ring-1 focus:ring-neutral-600 focus:border-neutral-600 placeholder:text-neutral-500"
           />
           {nodeData.variableName && (
-            <div className="mt-1 text-[10px] text-blue-400 px-2">
+            <div className="text-[10px] text-blue-400 px-0.5">
               @{nodeData.variableName}
             </div>
           )}
+          {/* Prompt stack nav bar */}
+          <div className="flex items-center justify-between px-0.5">
+            <button
+              onClick={handleAddPrompt}
+              className="nodrag nopan text-[10px] text-neutral-400 hover:text-neutral-200 transition-colors"
+              title="Add a new prompt slot"
+            >
+              + Add
+            </button>
+            {totalPrompts > 1 && (
+              <div className="flex items-center gap-0.5">
+                <button
+                  onClick={handlePrevPrompt}
+                  disabled={safeIndex === 0}
+                  className="nodrag nopan text-[10px] text-neutral-400 hover:text-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors px-1"
+                  title="Previous prompt"
+                >
+                  ‹
+                </button>
+                <span className="text-[10px] text-neutral-400 min-w-[28px] text-center tabular-nums">
+                  {safeIndex + 1} / {totalPrompts}
+                </span>
+                <button
+                  onClick={handleNextPrompt}
+                  disabled={safeIndex === totalPrompts - 1}
+                  className="nodrag nopan text-[10px] text-neutral-400 hover:text-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors px-1"
+                  title="Next prompt"
+                >
+                  ›
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Text output handle */}
@@ -212,7 +296,7 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
       {isModalOpenLocal && createPortal(
         <PromptEditorModal
           isOpen={isModalOpenLocal}
-          initialPrompt={nodeData.prompt}
+          initialPrompt={currentPrompt}
           onSubmit={handleSubmitModal}
           onClose={handleCloseModal}
         />,

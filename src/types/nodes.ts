@@ -74,7 +74,9 @@ export interface AudioInputNodeData extends BaseNodeData {
  * Prompt node - text input for AI generation
  */
 export interface PromptNodeData extends BaseNodeData {
-  prompt: string;
+  prompt: string;           // Active prompt (always = prompts[activePromptIndex])
+  prompts?: string[];       // Array of all stacked prompts
+  activePromptIndex?: number; // Which one is active (default 0)
   variableName?: string; // Optional variable name for use in PromptConstructor templates
   isAppInput?: boolean; // Mark as flexible input for App Mode
 }

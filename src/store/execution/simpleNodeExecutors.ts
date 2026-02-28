@@ -51,7 +51,12 @@ export async function executePrompt(ctx: NodeExecutionContext): Promise<void> {
   try {
     const { text: connectedText } = getConnectedInputs(node.id);
     if (connectedText !== null) {
-      updateNodeData(node.id, { prompt: connectedText });
+      const data = node.data as PromptNodeData;
+      const prompts = data.prompts?.length ? [...data.prompts] : [data.prompt || ""];
+      const idx = data.activePromptIndex ?? 0;
+      const safeIdx = Math.min(idx, prompts.length - 1);
+      prompts[safeIdx] = connectedText;
+      updateNodeData(node.id, { prompt: connectedText, prompts });
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
