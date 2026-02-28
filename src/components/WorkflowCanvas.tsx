@@ -123,7 +123,7 @@ const getNodeHandles = (nodeType: string): { inputs: string[]; outputs: string[]
     case "prompt":
       return { inputs: ["text"], outputs: ["text"] };
     case "promptConstructor":
-      return { inputs: ["text"], outputs: ["text"] };
+      return { inputs: ["text", "text_input_1", "text_input_2", "text_input_3", "text_input_4", "text_input_5", "text_input_6"], outputs: ["text"] };
     case "promptConcatenator":
       return { inputs: ["text"], outputs: ["text"] };
     case "nanoBanana":

@@ -82,31 +82,47 @@ export async function executePromptConstructor(ctx: NodeExecutionContext): Promi
     const edges = getEdges();
     const nodes = getNodes();
 
-    // Collect text from ALL connected input handles — no type restrictions.
-    // Just take the full output text of whatever node is connected.
+    // Collect text from ALL connected input handles.
+    // Primary: look for text_input_N handles (labeled inputs).
+    // Fallback: collect ANY incoming edge whose source outputs text (handles text, text-*, text_input_*, prompt, etc.)
+    const seenSourceIds = new Set<string>();
     const inputTexts: string[] = [];
+
+    // Helper: extract text output from any source node
+    function extractSourceText(sourceNode: WorkflowNode): string | null {
+      const d = sourceNode.data as Record<string, unknown>;
+      const val = (d.outputText as string | null) ?? (d.prompt as string | null) ?? null;
+      return val && String(val).trim() ? String(val).trim() : null;
+    }
+
+    // Pass 1: collect from labeled text_input_N handles (ordered)
     for (let i = 1; i <= inputCount; i++) {
       const handleId = `text_input_${i}`;
       const edge = edges.find((e) => e.target === node.id && e.targetHandle === handleId);
       if (edge) {
         const sourceNode = nodes.find((n) => n.id === edge.source);
         if (sourceNode) {
-          // Read the full output text from the source node regardless of its type
-          const d = sourceNode.data as Record<string, unknown>;
-          const sourceText =
-            (d.outputText as string | null) ??
-            (d.prompt as string | null) ??
-            (d.outputImage as string | null) ??
-            null;
-          if (sourceText && String(sourceText).trim()) {
-            inputTexts.push(String(sourceText).trim());
-          }
+          const text = extractSourceText(sourceNode);
+          if (text) { inputTexts.push(text); seenSourceIds.add(sourceNode.id); }
         }
       }
     }
 
-    // Build final output: all connected input texts + static text appended at end.
-    // Template and @variable logic removed — just pass full outputs through.
+    // Pass 2: collect from ANY other incoming text-typed edges not already captured
+    // This handles connections made to the node body or via 'text' handle fallback
+    const allIncomingEdges = edges.filter((e) => e.target === node.id);
+    for (const edge of allIncomingEdges) {
+      if (seenSourceIds.has(edge.source)) continue;
+      const th = edge.targetHandle || "";
+      const isTextEdge = th === "text" || th.startsWith("text") || th.includes("prompt") || !th;
+      if (!isTextEdge) continue;
+      const sourceNode = nodes.find((n) => n.id === edge.source);
+      if (!sourceNode) continue;
+      const text = extractSourceText(sourceNode);
+      if (text) { inputTexts.push(text); seenSourceIds.add(sourceNode.id); }
+    }
+
+    // Build final output: all connected input texts joined, then static text appended.
     const parts: string[] = [];
 
     if (inputTexts.length > 0) {
