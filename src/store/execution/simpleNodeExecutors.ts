@@ -60,7 +60,8 @@ export async function executePrompt(ctx: NodeExecutionContext): Promise<void> {
 }
 
 /**
- * PromptConstructor node: resolves @variables from connected prompt nodes.
+ * PromptConstructor node: concatenates multiple labeled text inputs with optional static text.
+ * Also supports @variable interpolation from connected prompt nodes (backward compatibility).
  */
 export async function executePromptConstructor(ctx: NodeExecutionContext): Promise<void> {
   const { node, updateNodeData, getFreshNode, getEdges, getNodes } = ctx;
@@ -68,18 +69,46 @@ export async function executePromptConstructor(ctx: NodeExecutionContext): Promi
     // Get fresh node data from store
     const freshNode = getFreshNode(node.id);
     const nodeData = (freshNode?.data || node.data) as PromptConstructorNodeData;
-    const template = nodeData.template;
+    const template = nodeData.template || "";
+    const staticText = nodeData.staticText || "";
+    const inputCount = nodeData.inputCount || 2;
 
     const edges = getEdges();
     const nodes = getNodes();
 
-    // Find connected prompt nodes via text edges
+    // Collect text from connected input handles (text_input_1, text_input_2, etc.)
+    const inputTexts: string[] = [];
+    for (let i = 1; i <= inputCount; i++) {
+      const handleId = `text_input_${i}`;
+      const edge = edges.find((e) => e.target === node.id && e.targetHandle === handleId);
+      if (edge) {
+        const sourceNode = nodes.find((n) => n.id === edge.source);
+        if (sourceNode) {
+          let sourceText: string | null = null;
+          if (sourceNode.type === "prompt") {
+            sourceText = (sourceNode.data as PromptNodeData).prompt;
+          } else if (sourceNode.type === "promptConstructor") {
+            const pcData = sourceNode.data as PromptConstructorNodeData;
+            sourceText = pcData.outputText ?? null;
+          } else if (sourceNode.type === "promptConcatenator") {
+            sourceText = (sourceNode.data as PromptConcatenatorNodeData).outputText;
+          } else if (sourceNode.type === "llmGenerate") {
+            sourceText = (sourceNode.data as LLMGenerateNodeData).outputText;
+          }
+
+          if (sourceText && sourceText.trim()) {
+            inputTexts.push(sourceText);
+          }
+        }
+      }
+    }
+
+    // Build variable map from connected prompt nodes via legacy 'text' handle (backward compat)
     const connectedPromptNodes = edges
       .filter((e) => e.target === node.id && e.targetHandle === "text")
       .map((e) => nodes.find((n) => n.id === e.source))
       .filter((n): n is WorkflowNode => n !== undefined && n.type === "prompt");
 
-    // Build variable map from connected prompt nodes
     const variableMap: Record<string, string> = {};
     connectedPromptNodes.forEach((promptNode) => {
       const promptData = promptNode.data as PromptNodeData;
@@ -88,17 +117,16 @@ export async function executePromptConstructor(ctx: NodeExecutionContext): Promi
       }
     });
 
-    // Find all @variable patterns in template
+    // Process @variable patterns in template
     const varPattern = /@(\w+)/g;
     const unresolvedVars: string[] = [];
-    let resolvedText = template;
+    let resolvedTemplate = template;
 
-    // Replace @variables with values or track unresolved
     const matches = template.matchAll(varPattern);
     for (const match of matches) {
       const varName = match[1];
       if (variableMap[varName] !== undefined) {
-        resolvedText = resolvedText.replaceAll(`@${varName}`, variableMap[varName]);
+        resolvedTemplate = resolvedTemplate.replaceAll(`@${varName}`, variableMap[varName]);
       } else {
         if (!unresolvedVars.includes(varName)) {
           unresolvedVars.push(varName);
@@ -106,8 +134,29 @@ export async function executePromptConstructor(ctx: NodeExecutionContext): Promi
       }
     }
 
+    // Build final output: input texts (concatenated with newlines) + template + static text
+    const parts: string[] = [];
+    
+    // Add connected input texts first (in order, top to bottom)
+    if (inputTexts.length > 0) {
+      parts.push(inputTexts.join("\n"));
+    }
+    
+    // Add resolved template (if not empty)
+    if (resolvedTemplate.trim()) {
+      parts.push(resolvedTemplate);
+    }
+    
+    // Add static text last (if not empty)
+    if (staticText.trim()) {
+      parts.push(staticText);
+    }
+
+    // Join all parts with newlines
+    const outputText = parts.join("\n");
+
     updateNodeData(node.id, {
-      outputText: resolvedText,
+      outputText: outputText || null,
       unresolvedVars,
     });
   } catch (err) {
