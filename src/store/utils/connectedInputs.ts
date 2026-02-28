@@ -78,7 +78,8 @@ function getSourceOutput(sourceNode: WorkflowNode): { type: "image" | "text" | "
     return { type: "text", value: (sourceNode.data as PromptNodeData).prompt };
   } else if (sourceNode.type === "promptConstructor") {
     const pcData = sourceNode.data as PromptConstructorNodeData;
-    return { type: "text", value: pcData.outputText ?? pcData.template ?? null };
+    // outputText is set after execution; template is legacy fallback; staticText is always available
+    return { type: "text", value: pcData.outputText ?? (pcData.staticText?.trim() || null) ?? null };
   } else if (sourceNode.type === "promptConcatenator") {
     return { type: "text", value: (sourceNode.data as PromptConcatenatorNodeData).outputText };
   } else if (sourceNode.type === "llmGenerate") {

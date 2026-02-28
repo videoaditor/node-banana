@@ -187,26 +187,23 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
         })}
 
         <div className="relative flex flex-col gap-2 flex-1 min-h-0">
-          {/* Static text section — appended after all connected inputs */}
-          <div className="flex flex-col gap-1 flex-shrink-0">
-            <label className="text-[10px] text-neutral-400">Static Text (appended to output)</label>
-            <textarea
-              ref={staticTextareaRef}
-              value={localStaticText}
-              onChange={handleStaticChange}
-              onFocus={handleStaticFocus}
-              onBlur={handleStaticBlur}
-              placeholder="Additional text appended after all inputs..."
-              className="nodrag nopan nowheel w-full h-[50px] p-2 text-xs leading-relaxed text-neutral-100 border border-neutral-700 rounded bg-neutral-900/50 resize-none focus:outline-none focus:ring-1 focus:ring-neutral-600 focus:border-neutral-600 placeholder:text-neutral-500"
-            />
-          </div>
+          {/* Append text — optional suffix added after all inputs */}
+          <textarea
+            ref={staticTextareaRef}
+            value={localStaticText}
+            onChange={handleStaticChange}
+            onFocus={handleStaticFocus}
+            onBlur={handleStaticBlur}
+            placeholder="Append text (optional)..."
+            className="nodrag nopan nowheel w-full h-[52px] p-2 text-xs leading-relaxed text-neutral-100 border border-neutral-700 rounded bg-neutral-900/50 resize-none focus:outline-none focus:ring-1 focus:ring-neutral-600 placeholder:text-neutral-500"
+          />
 
-          {/* Add/Remove input buttons */}
+          {/* Add/Remove buttons — minimal, same style */}
           <div className="flex gap-1.5 shrink-0">
             <button
               onClick={handleAddInput}
               disabled={inputCount >= MAX_INPUTS}
-              className="flex-1 text-[10px] py-1.5 px-2 bg-neutral-700 hover:bg-neutral-600 disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed border border-neutral-600 rounded text-neutral-300 transition-colors flex items-center justify-center gap-1"
+              className="flex-1 text-[10px] py-1 px-2 bg-neutral-800 hover:bg-neutral-700 disabled:opacity-30 disabled:cursor-not-allowed border border-neutral-600 rounded text-neutral-400 transition-colors flex items-center justify-center gap-1"
             >
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -216,23 +213,21 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
             <button
               onClick={handleRemoveInput}
               disabled={inputCount <= MIN_INPUTS}
-              className="flex-1 text-[10px] py-1.5 px-2 bg-red-700 hover:bg-red-600 disabled:bg-red-900/50 disabled:text-red-400/50 disabled:cursor-not-allowed border border-red-600 rounded text-neutral-300 transition-colors flex items-center justify-center gap-1"
+              className="flex-1 text-[10px] py-1 px-2 bg-neutral-800 hover:bg-neutral-700 disabled:opacity-30 disabled:cursor-not-allowed border border-neutral-600 rounded text-neutral-400 transition-colors flex items-center justify-center gap-1"
             >
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
               </svg>
               Remove Input
             </button>
           </div>
 
-          {/* Footer showing connected inputs */}
-          <div className="flex flex-col gap-0.5 mt-1">
-            {connectedInputLabels.length > 0 && (
-              <div className="text-[10px] text-neutral-500">
-                Connected: {connectedInputLabels.join(", ")}
-              </div>
-            )}
-          </div>
+          {/* Connected summary */}
+          {connectedInputLabels.length > 0 && (
+            <div className="text-[10px] text-neutral-500 leading-tight">
+              {connectedInputLabels.join(" · ")}
+            </div>
+          )}
         </div>
 
         {/* Text output handle */}
