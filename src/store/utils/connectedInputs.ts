@@ -78,8 +78,10 @@ function getSourceOutput(sourceNode: WorkflowNode): { type: "image" | "text" | "
     return { type: "text", value: (sourceNode.data as PromptNodeData).prompt };
   } else if (sourceNode.type === "promptConstructor") {
     const pcData = sourceNode.data as PromptConstructorNodeData;
-    // outputText is set after execution; template is legacy fallback; staticText is always available
-    return { type: "text", value: pcData.outputText ?? (pcData.staticText?.trim() || null) ?? null };
+    // outputText is set after execution. Fall back to staticText directly so NanaBanana
+    // gets the prompt even if the constructor hasn't explicitly been run yet.
+    const value = pcData.outputText?.trim() || pcData.staticText?.trim() || null;
+    return { type: "text", value };
   } else if (sourceNode.type === "promptConcatenator") {
     return { type: "text", value: (sourceNode.data as PromptConcatenatorNodeData).outputText };
   } else if (sourceNode.type === "llmGenerate") {

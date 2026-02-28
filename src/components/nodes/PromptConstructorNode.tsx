@@ -102,7 +102,12 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
   const handleStaticBlur = useCallback(() => {
     setIsEditing(false);
     if (localStaticText !== nodeData.staticText) {
-      updateNodeData(id, { staticText: localStaticText });
+      // Sync staticText AND outputText so downstream nodes always have a live value
+      // even before the workflow has been explicitly run
+      updateNodeData(id, {
+        staticText: localStaticText,
+        outputText: localStaticText.trim() || null,
+      });
     }
   }, [id, localStaticText, nodeData.staticText, updateNodeData]);
 
