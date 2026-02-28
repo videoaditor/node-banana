@@ -5,12 +5,15 @@ import { createPortal } from "react-dom";
 import { Handle, Position, NodeProps, Node } from "@xyflow/react";
 import { BaseNode } from "./BaseNode";
 import { useCommentNavigation } from "@/hooks/useCommentNavigation";
-import { usePromptAutocomplete } from "@/hooks/usePromptAutocomplete";
 import { useWorkflowStore } from "@/store/workflowStore";
-import { PromptConstructorNodeData, PromptNodeData, AvailableVariable } from "@/types";
+import { PromptConstructorNodeData, PromptNodeData } from "@/types";
 import { PromptConstructorEditorModal } from "@/components/modals/PromptConstructorEditorModal";
 
 type PromptConstructorNodeType = Node<PromptConstructorNodeData, "promptConstructor">;
+
+// Maximum number of input handles allowed
+const MAX_INPUTS = 6;
+const MIN_INPUTS = 2;
 
 export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptConstructorNodeType>) {
   const nodeData = data;
@@ -21,111 +24,97 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
   const incrementModalCount = useWorkflowStore((state) => state.incrementModalCount);
   const decrementModalCount = useWorkflowStore((state) => state.decrementModalCount);
 
-  // Local state for template to prevent cursor jumping
+  // Local state for template and static text to prevent cursor jumping
   const [localTemplate, setLocalTemplate] = useState(nodeData.template);
+  const [localStaticText, setLocalStaticText] = useState(nodeData.staticText);
   const [isEditing, setIsEditing] = useState(false);
   const [isModalOpenLocal, setIsModalOpenLocal] = useState(false);
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const templateTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const staticTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const inputCount = nodeData.inputCount || MIN_INPUTS;
 
   // Sync from props when not actively editing
   useEffect(() => {
     if (!isEditing) {
       setLocalTemplate(nodeData.template);
+      setLocalStaticText(nodeData.staticText);
     }
-  }, [nodeData.template, isEditing]);
+  }, [nodeData.template, nodeData.staticText, isEditing]);
 
-  // Get available variables from connected prompt nodes
-  const availableVariables = useMemo((): AvailableVariable[] => {
+  // Get connected input labels for display in footer
+  const connectedInputLabels = useMemo(() => {
+    const labels: string[] = [];
+    for (let i = 1; i <= inputCount; i++) {
+      const handleId = `text_input_${i}`;
+      const isConnected = edges.some(
+        (e) => e.target === id && e.targetHandle === handleId
+      );
+      if (isConnected) {
+        labels.push(`Input ${i}`);
+      }
+    }
+    return labels;
+  }, [edges, id, inputCount]);
+
+  // Compute available @variables from connected prompt nodes (backward compat)
+  const availableVariables = useMemo(() => {
     const connectedPromptNodes = edges
       .filter((e) => e.target === id && e.targetHandle === "text")
       .map((e) => nodes.find((n) => n.id === e.source))
       .filter((n): n is typeof nodes[0] => n !== undefined && n.type === "prompt");
 
-    const vars: AvailableVariable[] = [];
-    connectedPromptNodes.forEach((promptNode) => {
-      const promptData = promptNode.data as PromptNodeData;
-      if (promptData.variableName) {
-        vars.push({
-          name: promptData.variableName,
-          value: promptData.prompt || "",
-          nodeId: promptNode.id,
-        });
-      }
-    });
-
-    return vars;
+    return connectedPromptNodes
+      .map((promptNode) => {
+        const promptData = promptNode.data as PromptNodeData;
+        return promptData.variableName
+          ? { name: promptData.variableName, value: promptData.prompt || "", nodeId: promptNode.id }
+          : null;
+      })
+      .filter((v): v is { name: string; value: string; nodeId: string } => v !== null);
   }, [edges, nodes, id]);
 
-  // Autocomplete via shared hook
-  const {
-    showAutocomplete,
-    autocompletePosition,
-    filteredAutocompleteVars,
-    selectedAutocompleteIndex,
-    handleChange,
-    handleKeyDown,
-    handleAutocompleteSelect,
-    closeAutocomplete,
-  } = usePromptAutocomplete({
-    availableVariables,
-    textareaRef,
-    localTemplate,
-    setLocalTemplate,
-    onTemplateCommit: (newTemplate) => updateNodeData(id, { template: newTemplate }),
-  });
-
-  // Compute unresolved variables client-side
-  const unresolvedVars = useMemo(() => {
-    const varPattern = /@(\w+)/g;
-    const unresolved: string[] = [];
-    const matches = localTemplate.matchAll(varPattern);
-    const availableNames = new Set(availableVariables.map(v => v.name));
-
-    for (const match of matches) {
-      const varName = match[1];
-      if (!availableNames.has(varName) && !unresolved.includes(varName)) {
-        unresolved.push(varName);
-      }
+  // Handle input count changes
+  const handleAddInput = useCallback(() => {
+    if (inputCount < MAX_INPUTS) {
+      updateNodeData(id, { inputCount: inputCount + 1 });
     }
+  }, [id, inputCount, updateNodeData]);
 
-    return unresolved;
-  }, [localTemplate, availableVariables]);
-
-  // Compute resolved text client-side for preview
-  const resolvedPreview = useMemo(() => {
-    let resolved = localTemplate;
-    availableVariables.forEach((v) => {
-      resolved = resolved.replace(new RegExp(`@${v.name}`, 'g'), v.value);
-    });
-    return resolved;
-  }, [localTemplate, availableVariables]);
-
-  // Sync resolved text to outputText so downstream nodes can read it before execution
-  useEffect(() => {
-    let resolved = nodeData.template;
-    availableVariables.forEach((v) => {
-      resolved = resolved.replace(new RegExp(`@${v.name}`, 'g'), v.value);
-    });
-    const outputValue = resolved || null;
-    if (outputValue !== nodeData.outputText) {
-      updateNodeData(id, { outputText: outputValue });
+  const handleRemoveInput = useCallback(() => {
+    if (inputCount > MIN_INPUTS) {
+      updateNodeData(id, { inputCount: inputCount - 1 });
     }
-  }, [nodeData.template, availableVariables, id, updateNodeData, nodeData.outputText]);
+  }, [id, inputCount, updateNodeData]);
 
-  const handleFocus = useCallback(() => {
-    setIsEditing(true);
-  }, []);
-
-  const handleBlur = useCallback(() => {
+  // Template textarea handlers
+  const handleTemplateFocus = useCallback(() => setIsEditing(true), []);
+  const handleTemplateBlur = useCallback(() => {
     setIsEditing(false);
     if (localTemplate !== nodeData.template) {
       updateNodeData(id, { template: localTemplate });
     }
-    // Close autocomplete on blur
-    setTimeout(() => closeAutocomplete(), 200);
-  }, [id, localTemplate, nodeData.template, updateNodeData, closeAutocomplete]);
+  }, [id, localTemplate, nodeData.template, updateNodeData]);
 
+  // Static text textarea handlers
+  const handleStaticFocus = useCallback(() => setIsEditing(true), []);
+  const handleStaticBlur = useCallback(() => {
+    setIsEditing(false);
+    if (localStaticText !== nodeData.staticText) {
+      updateNodeData(id, { staticText: localStaticText });
+    }
+  }, [id, localStaticText, nodeData.staticText, updateNodeData]);
+
+  const handleTemplateChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setLocalTemplate(e.target.value);
+  }, []);
+
+  const handleStaticChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setLocalStaticText(e.target.value);
+  }, []);
+
+  // Modal handlers
   const handleOpenModal = useCallback(() => {
     setIsModalOpenLocal(true);
     incrementModalCount();
@@ -143,6 +132,16 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
     [id, updateNodeData]
   );
 
+  // Build handle style positions (evenly distributed vertically)
+  const getHandleStyle = (index: number, total: number): React.CSSProperties => {
+    // Leave padding at top and bottom, distribute evenly
+    const padding = 40; // px from top/bottom
+    const availableHeight = 100 - (padding * 2 / 280 * 100); // approximate percentage
+    const step = availableHeight / (total + 1);
+    const top = padding / 280 * 100 + step * (index + 1);
+    return { top: `${top}%` };
+  };
+
   return (
     <>
       <BaseNode
@@ -156,74 +155,103 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
         selected={selected}
         commentNavigation={commentNavigation ?? undefined}
       >
-        {/* Text input handle */}
-        <Handle
-          type="target"
-          position={Position.Left}
-          id="text"
-          data-handletype="text"
-        />
+        {/* Dynamic labeled text input handles */}
+        {Array.from({ length: inputCount }, (_, i) => {
+          const inputNum = i + 1;
+          const handleId = `text_input_${inputNum}`;
+          const handleStyle = getHandleStyle(i, inputCount);
 
-        <div className="relative flex flex-col gap-2 flex-1">
-          {/* Warning badge for unresolved variables */}
-          {unresolvedVars.length > 0 && (
-            <div className="px-2 py-1 bg-amber-900/30 border border-amber-700/50 rounded text-[10px] text-amber-400">
-              <span className="font-semibold">Unresolved:</span> {unresolvedVars.map(v => `@${v}`).join(', ')}
-            </div>
-          )}
-
-          {/* Template textarea with autocomplete */}
-          <div className="relative flex-1 flex flex-col">
-            <textarea
-              ref={textareaRef}
-              value={localTemplate}
-              onChange={handleChange}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyDown}
-              placeholder="Type @ to insert variables..."
-              className="nodrag nopan nowheel w-full flex-1 min-h-[70px] p-2 text-xs leading-relaxed text-neutral-100 border border-neutral-700 rounded bg-neutral-900/50 resize-none focus:outline-none focus:ring-1 focus:ring-neutral-600 focus:border-neutral-600 placeholder:text-neutral-500"
-              title={resolvedPreview ? `Preview: ${resolvedPreview}` : undefined}
-            />
-
-            {/* Autocomplete dropdown */}
-            {showAutocomplete && filteredAutocompleteVars.length > 0 && (
+          return (
+            <div key={handleId}>
+              <Handle
+                type="target"
+                position={Position.Left}
+                id={handleId}
+                style={handleStyle}
+                data-handletype="text"
+                isConnectable={true}
+              />
+              {/* Input label */}
               <div
-                className="absolute z-10 bg-neutral-800 border border-neutral-600 rounded shadow-xl max-h-40 overflow-y-auto"
+                className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none text-right"
                 style={{
-                  top: autocompletePosition.top,
-                  left: autocompletePosition.left,
+                  right: `calc(100% + 8px)`,
+                  top: `calc(${handleStyle.top} - 8px)`,
+                  color: "var(--handle-color-text)",
                 }}
               >
-                {filteredAutocompleteVars.map((variable, index) => (
-                  <button
-                    key={variable.nodeId}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleAutocompleteSelect(variable.name);
-                    }}
-                    className={`w-full px-3 py-2 text-left text-[11px] flex flex-col gap-0.5 transition-colors ${
-                      index === selectedAutocompleteIndex
-                        ? "bg-neutral-700 text-neutral-100"
-                        : "text-neutral-300 hover:bg-neutral-700"
-                    }`}
-                  >
-                    <div className="font-medium text-blue-400">@{variable.name}</div>
-                    <div className="text-neutral-500 truncate max-w-[200px]">
-                      {variable.value || "(empty)"}
-                    </div>
-                  </button>
-                ))}
+                Input {inputNum}
+              </div>
+            </div>
+          );
+        })}
+
+        <div className="relative flex flex-col gap-2 flex-1 min-h-0">
+          {/* Template section with @variable support */}
+          <div className="flex flex-col gap-1 flex-shrink-0">
+            <label className="text-[10px] text-neutral-400">Template (use @ for variables)</label>
+            <textarea
+              ref={templateTextareaRef}
+              value={localTemplate}
+              onChange={handleTemplateChange}
+              onFocus={handleTemplateFocus}
+              onBlur={handleTemplateBlur}
+              placeholder="Type @ to insert variables..."
+              className="nodrag nopan nowheel w-full h-[60px] p-2 text-xs leading-relaxed text-neutral-100 border border-neutral-700 rounded bg-neutral-900/50 resize-none focus:outline-none focus:ring-1 focus:ring-neutral-600 focus:border-neutral-600 placeholder:text-neutral-500"
+            />
+          </div>
+
+          {/* Static text section */}
+          <div className="flex flex-col gap-1 flex-shrink-0">
+            <label className="text-[10px] text-neutral-400">Static Text (appended to output)</label>
+            <textarea
+              ref={staticTextareaRef}
+              value={localStaticText}
+              onChange={handleStaticChange}
+              onFocus={handleStaticFocus}
+              onBlur={handleStaticBlur}
+              placeholder="Additional text appended after all inputs..."
+              className="nodrag nopan nowheel w-full h-[50px] p-2 text-xs leading-relaxed text-neutral-100 border border-neutral-700 rounded bg-neutral-900/50 resize-none focus:outline-none focus:ring-1 focus:ring-neutral-600 focus:border-neutral-600 placeholder:text-neutral-500"
+            />
+          </div>
+
+          {/* Add/Remove input buttons */}
+          <div className="flex gap-1.5 shrink-0">
+            <button
+              onClick={handleAddInput}
+              disabled={inputCount >= MAX_INPUTS}
+              className="flex-1 text-[10px] py-1.5 px-2 bg-neutral-700 hover:bg-neutral-600 disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed border border-neutral-600 rounded text-neutral-300 transition-colors flex items-center justify-center gap-1"
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Add Input
+            </button>
+            <button
+              onClick={handleRemoveInput}
+              disabled={inputCount <= MIN_INPUTS}
+              className="flex-1 text-[10px] py-1.5 px-2 bg-red-700 hover:bg-red-600 disabled:bg-red-900/50 disabled:text-red-400/50 disabled:cursor-not-allowed border border-red-600 rounded text-neutral-300 transition-colors flex items-center justify-center gap-1"
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Remove Input
+            </button>
+          </div>
+
+          {/* Footer showing connected inputs and available @variables */}
+          <div className="flex flex-col gap-0.5 mt-1">
+            {connectedInputLabels.length > 0 && (
+              <div className="text-[10px] text-neutral-500">
+                Connected: {connectedInputLabels.join(", ")}
+              </div>
+            )}
+            {availableVariables.length > 0 && (
+              <div className="text-[10px] text-neutral-500">
+                Available: {availableVariables.map(v => `@${v.name}`).join(", ")}
               </div>
             )}
           </div>
-
-          {/* Available variables info */}
-          {availableVariables.length > 0 && (
-            <div className="text-[10px] text-neutral-500 px-2">
-              Available: {availableVariables.map(v => `@${v.name}`).join(', ')}
-            </div>
-          )}
         </div>
 
         {/* Text output handle */}
@@ -231,11 +259,23 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
           type="source"
           position={Position.Right}
           id="text"
+          style={{ top: "50%" }}
           data-handletype="text"
         />
+        {/* Output label */}
+        <div
+          className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none"
+          style={{
+            left: `calc(100% + 8px)`,
+            top: "calc(50% - 8px)",
+            color: "var(--handle-color-text)",
+          }}
+        >
+          Output
+        </div>
       </BaseNode>
 
-      {/* Prompt Constructor Editor Modal - rendered via portal to escape React Flow stacking context */}
+      {/* Prompt Constructor Editor Modal */}
       {isModalOpenLocal && createPortal(
         <PromptConstructorEditorModal
           isOpen={isModalOpenLocal}

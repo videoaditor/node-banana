@@ -81,11 +81,14 @@ export interface PromptNodeData extends BaseNodeData {
 
 /**
  * Prompt Constructor node - template-based prompt builder with @variable interpolation
+ * and multiple labeled text input handles
  */
 export interface PromptConstructorNodeData extends BaseNodeData {
   template: string;
   outputText: string | null;
   unresolvedVars: string[];
+  inputCount: number; // Number of text input handles (default: 2, max: 6)
+  staticText: string; // Static text appended after all inputs
 }
 
 /**
