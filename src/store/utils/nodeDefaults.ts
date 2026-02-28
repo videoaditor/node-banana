@@ -106,8 +106,6 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         unresolvedVars: [],
         inputCount: 2,
         staticText: "",
-        inputCount: 2,
-        staticText: "",
       } as unknown as PromptConstructorNodeData;
     case "promptConcatenator":
       return {
