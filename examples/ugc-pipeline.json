@@ -1,0 +1,439 @@
+{
+  "nodes": [
+    {
+      "id": "avatar-input",
+      "type": "imageInput",
+      "position": { "x": 60, "y": 60 },
+      "data": {
+        "label": "👤 Avatar Image",
+        "image": null,
+        "filename": null,
+        "dimensions": null
+      },
+      "width": 300,
+      "height": 280
+    },
+    {
+      "id": "product-input",
+      "type": "imageInput",
+      "position": { "x": 60, "y": 380 },
+      "data": {
+        "label": "📦 Product Image",
+        "image": null,
+        "filename": null,
+        "dimensions": null
+      },
+      "width": 300,
+      "height": 280
+    },
+    {
+      "id": "blueprint-gen",
+      "type": "nanoBanana",
+      "position": { "x": 440, "y": 60 },
+      "data": {
+        "label": "🖼️ Blueprint Generator",
+        "inputImages": [],
+        "inputPrompt": "A clean character reference portrait sheet for a UGC video director. Pure white background.\n\nLEFT PANEL: The person from the FIRST reference image. Full body or waist-up, neutral standing pose, soft studio lighting. Show their face, hair, clothing, and accessories clearly.\n\nRIGHT PANEL: The product from the SECOND reference image. Multiple angles if helpful. Show the complete product — all sides visible, any texture or branding clear.\n\nTwo equal panels separated by a thin light grey vertical line. 9:16 vertical format. Accurate reference — no decorations, no text overlays.",
+        "outputImage": null,
+        "aspectRatio": "9:16",
+        "resolution": "1K",
+        "model": "nano-banana-pro",
+        "selectedModel": {
+          "provider": "gemini",
+          "modelId": "nano-banana-pro",
+          "displayName": "Nano Banana Pro"
+        },
+        "useGoogleSearch": false,
+        "status": "idle",
+        "error": null,
+        "imageHistory": [],
+        "selectedHistoryIndex": 0,
+        "imageInputHandles": 2
+      },
+      "width": 300,
+      "height": 300
+    },
+    {
+      "id": "char-desc",
+      "type": "llmGenerate",
+      "position": { "x": 440, "y": 400 },
+      "data": {
+        "label": "👤 Character Description",
+        "inputPrompt": "Describe this person's physical appearance in precise detail for use in AI video generation prompts. Focus on: hair color, style, and length; skin tone; face shape and prominent features; eye color; approximate age; body build; clothing (describe every visible garment, color, and style). Write one dense paragraph, no bullet points. Be specific enough that a video AI could reproduce this person accurately.",
+        "inputImages": [],
+        "outputText": null,
+        "outputHistory": [],
+        "selectedHistoryIndex": -1,
+        "provider": "google",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.3,
+        "maxTokens": 512,
+        "status": "idle",
+        "error": null
+      },
+      "width": 320,
+      "height": 360
+    },
+    {
+      "id": "product-desc",
+      "type": "llmGenerate",
+      "position": { "x": 440, "y": 800 },
+      "data": {
+        "label": "📦 Product Description",
+        "inputPrompt": "Describe this product's physical appearance in precise detail for use in AI video generation prompts. Focus on: shape, color, material/texture, size (relative), any branding/text/logos visible, distinguishing design features, what it looks like when worn or held. Explicitly state what it does NOT have (e.g. no screen, no display). Write one dense paragraph, no bullet points. Be specific enough that a video AI could reproduce this exact product.",
+        "inputImages": [],
+        "outputText": null,
+        "outputHistory": [],
+        "selectedHistoryIndex": -1,
+        "provider": "google",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.3,
+        "maxTokens": 512,
+        "status": "idle",
+        "error": null
+      },
+      "width": 320,
+      "height": 360
+    },
+    {
+      "id": "script-input",
+      "type": "prompt",
+      "position": { "x": 840, "y": 60 },
+      "data": {
+        "label": "📝 Ad Script",
+        "prompt": "Paste your ad script here...",
+        "prompts": ["Paste your ad script here..."],
+        "activePromptIndex": 0
+      },
+      "width": 320,
+      "height": 220
+    },
+    {
+      "id": "briefing-gen",
+      "type": "llmGenerate",
+      "position": { "x": 840, "y": 320 },
+      "data": {
+        "label": "🎯 Briefing Generator",
+        "inputPrompt": null,
+        "inputImages": [],
+        "outputText": null,
+        "outputHistory": [],
+        "selectedHistoryIndex": -1,
+        "provider": "google",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.7,
+        "maxTokens": 4096,
+        "status": "idle",
+        "error": null,
+        "systemPrompt": "You are a UGC video director. Given an ad script, output a JSON array of B-roll shot briefings that visually tell the story of the script.\n\nEach briefing must have:\n- phase: 'pain' | 'product' | 'usage' | 'result'\n- groupDescription: the overarching story beat for this group of 4 shots\n- description: precise visual description of this shot\n- action: what the person or camera does\n- emotion: the feeling this shot should convey\n- duration: always 2\n\nGroup briefings into sets of 4 (each group = one 8-second video). Output ONLY a JSON array, no other text.\n\nRules:\n- pain shots: show the problem, the struggle, the before state\n- product shots: hero the product itself, show it clearly\n- usage shots: show the person actively using the product\n- result shots: show transformation, relief, improvement\n- Never include dialogue or text in shots\n- Every 4th shot should have emotional payoff"
+      },
+      "width": 320,
+      "height": 360
+    },
+    {
+      "id": "pass1-prompt-builder",
+      "type": "llmGenerate",
+      "position": { "x": 1240, "y": 60 },
+      "data": {
+        "label": "✨ Pass 1 — Shot Expansion",
+        "inputPrompt": null,
+        "inputImages": [],
+        "outputText": null,
+        "outputHistory": [],
+        "selectedHistoryIndex": -1,
+        "provider": "google",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.7,
+        "maxTokens": 8192,
+        "status": "idle",
+        "error": null,
+        "systemPrompt": "You are a Sora 2 director creating multi-shot UGC video prompts.\n\nYou will receive:\n1. CHARACTER: a physical description of the person\n2. PRODUCT: a physical description of the product\n3. BRIEFINGS: a JSON array of 4 consecutive shot briefings\n\nCreate a single Sora prompt describing ALL 4 SHOTS as one 8-second video. Use this exact format:\n\n[Shot 1 — 0-2s]: STARTS INSTANTLY mid-action. [description, framing, action, lighting, background, camera movement]\n\n[Shot 2 — 2-4s]: HARD CUT. [description...]\n\n[Shot 3 — 4-6s]: HARD CUT. [description...]\n\n[Shot 4 — 6-8s]: HARD CUT. [description...]\n\nRules:\n- ALWAYS begin with 'STARTS INSTANTLY mid-action' for Shot 1\n- ALWAYS write 'HARD CUT.' at the start of shots 2-4\n- No slow pans, no rotations, no dissolves\n- iPhone handheld quality — slight shake, authentic UGC\n- Character face must be clearly visible and in focus in at least 2 shots\n- Product must be clearly visible and identifiable in at least 2 shots\n- Describe lighting, background, and framing for every shot\n- DO NOT say 'the character from the reference' — describe them using the CHARACTER description provided\n- DO NOT say 'the product from the reference' — describe the product using the PRODUCT description provided"
+      },
+      "width": 320,
+      "height": 360
+    },
+    {
+      "id": "char-product-concat",
+      "type": "promptConcatenator",
+      "position": { "x": 840, "y": 720 },
+      "data": {
+        "label": "🔗 Char + Product + Briefings",
+        "separator": "\n\n",
+        "outputText": null,
+        "textInputHandles": 3
+      },
+      "width": 320,
+      "height": 240
+    },
+    {
+      "id": "pass2-refiner",
+      "type": "llmGenerate",
+      "position": { "x": 1240, "y": 460 },
+      "data": {
+        "label": "✨✨ Pass 2 — Micro-Detail Refiner",
+        "inputPrompt": null,
+        "inputImages": [],
+        "outputText": null,
+        "outputHistory": [],
+        "selectedHistoryIndex": -1,
+        "provider": "google",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.8,
+        "maxTokens": 8192,
+        "status": "idle",
+        "error": null,
+        "systemPrompt": "Refine this multi-shot Sora prompt for maximum UGC authenticity and realism.\n\nFor each of the 4 shots, add:\n1. One specific micro-detail (involuntary muscle movement, breathing pattern, weight shift, eye movement, hair movement, fabric texture catching light)\n2. Ambient sound detail (specific room tone, distant environmental sounds, fabric rustle, object sounds)\n3. One environmental imperfection (slight dust particle, natural shadow variation, background object that adds authenticity)\n\nRules:\n- Preserve all existing shot descriptions exactly — only ADD micro-details\n- Do NOT change framing, action, character, product, or scene\n- Keep each shot addition to 1-2 sentences maximum\n- Micro-details must be physically plausible and subtle\n- Preserve the [Shot X — Xs-Xs]: format exactly\n- Output the complete refined prompt only, no preamble"
+      },
+      "width": 320,
+      "height": 360
+    },
+    {
+      "id": "sora-output",
+      "type": "generateVideo",
+      "position": { "x": 1660, "y": 60 },
+      "data": {
+        "label": "🚀 Sora 2 — Generate Broll",
+        "inputImages": [],
+        "inputPrompt": null,
+        "outputVideo": null,
+        "selectedModel": {
+          "provider": "kie",
+          "modelId": "sora-2",
+          "displayName": "Sora 2"
+        },
+        "parameters": {
+          "size": "720x1280",
+          "seconds": 8
+        },
+        "status": "idle",
+        "error": null,
+        "videoHistory": [],
+        "selectedVideoHistoryIndex": 0
+      },
+      "width": 300,
+      "height": 300
+    },
+    {
+      "id": "custom-shot-input",
+      "type": "prompt",
+      "position": { "x": 840, "y": 1000 },
+      "data": {
+        "label": "🎤 Custom Shot (Optional)",
+        "prompt": "Describe your custom talking-head shot here. Example: 'Guy wakes up, looks at his wrist, grins at camera. Bedroom, morning light.'",
+        "prompts": ["Describe your custom talking-head shot here. Example: 'Guy wakes up, looks at his wrist, grins at camera. Bedroom, morning light.'"],
+        "activePromptIndex": 0
+      },
+      "width": 320,
+      "height": 220
+    },
+    {
+      "id": "pass1-custom",
+      "type": "llmGenerate",
+      "position": { "x": 1240, "y": 860 },
+      "data": {
+        "label": "✨ Pass 1 — Custom Shot Expansion",
+        "inputPrompt": null,
+        "inputImages": [],
+        "outputText": null,
+        "outputHistory": [],
+        "selectedHistoryIndex": -1,
+        "provider": "google",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.6,
+        "maxTokens": 4096,
+        "status": "idle",
+        "error": null,
+        "systemPrompt": "You are a Sora 2 prompt architect expanding a user's custom shot description into a full video prompt.\n\nCRITICAL RULES:\n1. The user's shot description is the LAW. Do NOT change the scene, action, framing, or intent.\n2. Only ADD detail — never rewrite or redirect\n3. Expand with: precise framing (MCU/CU/WS), lighting description, background detail, camera movement style, character appearance (use CHARACTER description provided), product appearance if relevant\n4. The video must start INSTANTLY mid-action — no fade-in, no static hold\n5. Output a single Sora-ready prompt, no preamble\n6. iPhone handheld quality. Authentic UGC. Not cinematic."
+      },
+      "width": 320,
+      "height": 360
+    },
+    {
+      "id": "pass2-custom",
+      "type": "llmGenerate",
+      "position": { "x": 1240, "y": 1260 },
+      "data": {
+        "label": "✨✨ Pass 2 — Custom Shot Micro-Detail",
+        "inputPrompt": null,
+        "inputImages": [],
+        "outputText": null,
+        "outputHistory": [],
+        "selectedHistoryIndex": -1,
+        "provider": "google",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.8,
+        "maxTokens": 4096,
+        "status": "idle",
+        "error": null,
+        "systemPrompt": "Refine this Sora talking-head prompt for maximum UGC realism.\n\nThe original user intent must be fully preserved.\n\nAdd:\n- Involuntary micro-movements (blink rate, subtle swallow, hair shift, nostril flare)\n- Room tone and ambient audio (specific environmental sounds, fabric rustle, breathing)\n- One authentic environmental imperfection (shadow variation, background texture, light flicker)\n\nRules:\n- Do NOT change framing, scene, action, or intent\n- Additions must be subtle — 1-2 sentences total\n- Output the complete refined prompt only, no preamble"
+      },
+      "width": 320,
+      "height": 360
+    },
+    {
+      "id": "sora-custom-output",
+      "type": "generateVideo",
+      "position": { "x": 1660, "y": 860 },
+      "data": {
+        "label": "🚀 Sora 2 — Custom Shot",
+        "inputImages": [],
+        "inputPrompt": null,
+        "outputVideo": null,
+        "selectedModel": {
+          "provider": "kie",
+          "modelId": "sora-2",
+          "displayName": "Sora 2"
+        },
+        "parameters": {
+          "size": "720x1280",
+          "seconds": 4
+        },
+        "status": "idle",
+        "error": null,
+        "videoHistory": [],
+        "selectedVideoHistoryIndex": 0
+      },
+      "width": 300,
+      "height": 300
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-avatar-blueprint",
+      "source": "avatar-input",
+      "sourceHandle": "image",
+      "target": "blueprint-gen",
+      "targetHandle": "image_input_1",
+      "type": "default"
+    },
+    {
+      "id": "e-product-blueprint",
+      "source": "product-input",
+      "sourceHandle": "image",
+      "target": "blueprint-gen",
+      "targetHandle": "image_input_2",
+      "type": "default"
+    },
+    {
+      "id": "e-avatar-chardesc",
+      "source": "avatar-input",
+      "sourceHandle": "image",
+      "target": "char-desc",
+      "targetHandle": "image",
+      "type": "default"
+    },
+    {
+      "id": "e-product-proddesc",
+      "source": "product-input",
+      "sourceHandle": "image",
+      "target": "product-desc",
+      "targetHandle": "image",
+      "type": "default"
+    },
+    {
+      "id": "e-script-briefings",
+      "source": "script-input",
+      "sourceHandle": "text",
+      "target": "briefing-gen",
+      "targetHandle": "prompt",
+      "type": "default"
+    },
+    {
+      "id": "e-chardesc-concat",
+      "source": "char-desc",
+      "sourceHandle": "text",
+      "target": "char-product-concat",
+      "targetHandle": "text_input_1",
+      "type": "default"
+    },
+    {
+      "id": "e-proddesc-concat",
+      "source": "product-desc",
+      "sourceHandle": "text",
+      "target": "char-product-concat",
+      "targetHandle": "text_input_2",
+      "type": "default"
+    },
+    {
+      "id": "e-briefings-concat",
+      "source": "briefing-gen",
+      "sourceHandle": "text",
+      "target": "char-product-concat",
+      "targetHandle": "text_input_3",
+      "type": "default"
+    },
+    {
+      "id": "e-concat-pass1",
+      "source": "char-product-concat",
+      "sourceHandle": "text",
+      "target": "pass1-prompt-builder",
+      "targetHandle": "prompt",
+      "type": "default"
+    },
+    {
+      "id": "e-pass1-pass2",
+      "source": "pass1-prompt-builder",
+      "sourceHandle": "text",
+      "target": "pass2-refiner",
+      "targetHandle": "prompt",
+      "type": "default"
+    },
+    {
+      "id": "e-pass2-sora",
+      "source": "pass2-refiner",
+      "sourceHandle": "text",
+      "target": "sora-output",
+      "targetHandle": "prompt",
+      "type": "default"
+    },
+    {
+      "id": "e-blueprint-sora",
+      "source": "blueprint-gen",
+      "sourceHandle": "image",
+      "target": "sora-output",
+      "targetHandle": "image_input_1",
+      "type": "default"
+    },
+    {
+      "id": "e-chardesc-pass1custom",
+      "source": "char-desc",
+      "sourceHandle": "text",
+      "target": "pass1-custom",
+      "targetHandle": "prompt",
+      "type": "default"
+    },
+    {
+      "id": "e-customshot-pass1custom",
+      "source": "custom-shot-input",
+      "sourceHandle": "text",
+      "target": "pass1-custom",
+      "targetHandle": "text_input_2",
+      "type": "default"
+    },
+    {
+      "id": "e-pass1custom-pass2custom",
+      "source": "pass1-custom",
+      "sourceHandle": "text",
+      "target": "pass2-custom",
+      "targetHandle": "prompt",
+      "type": "default"
+    },
+    {
+      "id": "e-pass2custom-soracustom",
+      "source": "pass2-custom",
+      "sourceHandle": "text",
+      "target": "sora-custom-output",
+      "targetHandle": "prompt",
+      "type": "default"
+    },
+    {
+      "id": "e-blueprint-soracustom",
+      "source": "blueprint-gen",
+      "sourceHandle": "image",
+      "target": "sora-custom-output",
+      "targetHandle": "image_input_1",
+      "type": "default"
+    }
+  ],
+  "viewport": { "x": 0, "y": 0, "zoom": 0.65 }
+}
