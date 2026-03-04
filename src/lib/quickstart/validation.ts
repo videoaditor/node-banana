@@ -48,6 +48,9 @@ const DEFAULT_DIMENSIONS: Record<NodeType, { width: number; height: number }> = 
   textIterator: { width: 340, height: 280 },
   webScraper: { width: 340, height: 320 },
   stickyNote: { width: 200, height: 160 },
+  soraBlueprint: { width: 320, height: 360 },
+  brollBatch: { width: 380, height: 420 },
+
 };
 
 /**
@@ -380,6 +383,29 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
       return {
         text: "",
         color: "yellow",
+      };
+    case "soraBlueprint":
+      return {
+        charImage: null,
+        productImage: null,
+        stylePrompt: null,
+        outputBlueprint: null,
+        aspectRatio: "9:16",
+        resolution: "1K",
+        status: "idle",
+        error: null,
+      };
+    case "brollBatch":
+      return {
+        blueprintImage: null,
+        shotTemplate: null,
+        shotCount: 4,
+        duration: "4",
+        runMode: "parallel",
+        shots: [],
+        status: "idle",
+        error: null,
+
       };
   }
 }

@@ -150,54 +150,67 @@ export async function executePromptConstructor(ctx: NodeExecutionContext): Promi
  * PromptConcatenator node: concatenates multiple text inputs with separator.
  */
 export async function executePromptConcatenator(ctx: NodeExecutionContext): Promise<void> {
-  const { node, updateNodeData, getFreshNode, getEdges, getNodes } = ctx;
+  const { node, updateNodeData, getFreshNode, getEdges, getNodes, getConnectedInputs } = ctx;
   try {
     const freshNode = getFreshNode(node.id);
     const nodeData = (freshNode?.data || node.data) as PromptConcatenatorNodeData;
-    const separator = nodeData.separator || "\n";
+    const separator = nodeData.separator ?? "\n";
+    const handleCount = nodeData.textInputHandles || 2;
 
     const edges = getEdges();
     const nodes = getNodes();
 
-    // Collect all connected text inputs in order (text, text-1, text-2, etc.)
-    const textInputs: string[] = [];
-    const textHandles = Array.from({ length: nodeData.textInputHandles || 2 }, (_, i) =>
+    // Build ordered list of handle IDs: "text", "text-1", "text-2", ...
+    const textHandleIds = Array.from({ length: handleCount }, (_, i) =>
       i === 0 ? "text" : `text-${i}`
     );
 
-    textHandles.forEach((handleId) => {
-      const edge = edges.find((e) => e.target === node.id && e.targetHandle === handleId);
-      if (edge) {
-        const sourceNode = nodes.find((n) => n.id === edge.source);
-        if (sourceNode) {
-          // Extract text from source node
-          let sourceText: string | null = null;
-          if (sourceNode.type === "prompt") {
-            sourceText = (sourceNode.data as PromptNodeData).prompt;
-          } else if (sourceNode.type === "promptConstructor") {
-            const pcData = sourceNode.data as PromptConstructorNodeData;
-            sourceText = pcData.outputText ?? pcData.template ?? null;
-          } else if (sourceNode.type === "llmGenerate") {
-            sourceText = (sourceNode.data as any).outputText;
-          } else if (sourceNode.type === "promptConcatenator") {
-            sourceText = (sourceNode.data as PromptConcatenatorNodeData).outputText;
-          }
-
-          if (sourceText) {
-            textInputs.push(sourceText);
-          }
-        }
+    // Helper: extract text output from any node type
+    const extractText = (n: ReturnType<typeof getNodes>[0]): string | null => {
+      const d = n.data as Record<string, unknown>;
+      // Most nodes expose outputText or prompt
+      if (typeof d.outputText === "string" && d.outputText) return d.outputText;
+      if (typeof d.prompt === "string" && d.prompt) return d.prompt;
+      // webScraper page-text mode
+      if (n.type === "webScraper" && typeof d.outputText === "string") return d.outputText;
+      // llmGenerate
+      if (n.type === "llmGenerate" && typeof d.outputText === "string") return d.outputText;
+      // promptConstructor
+      if (n.type === "promptConstructor") {
+        const pc = d as PromptConstructorNodeData;
+        return pc.outputText ?? pc.template ?? null;
       }
-    });
+      return null;
+    };
 
-    // Concatenate with separator
+    const textInputs: string[] = [];
+
+    for (const handleId of textHandleIds) {
+      // Find edge targeting this specific handle
+      const edge = edges.find(
+        (e) => e.target === node.id && (e.targetHandle === handleId || (!e.targetHandle && handleId === "text"))
+      );
+      if (!edge) continue;
+
+      const sourceNode = nodes.find((n) => n.id === edge.source);
+      if (!sourceNode) continue;
+
+      const text = extractText(sourceNode);
+      if (text) textInputs.push(text);
+    }
+
+    // Also try getConnectedInputs as fallback (gets all text inputs at once)
+    if (textInputs.length === 0) {
+      const { text } = getConnectedInputs(node.id);
+      if (text) textInputs.push(text);
+    }
+
     const outputText = textInputs.join(separator);
-
     updateNodeData(node.id, { outputText });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`[Workflow] PromptConcatenator node ${node.id} failed:`, message);
-    updateNodeData(node.id, { error: message });
+    updateNodeData(node.id, { outputText: null });
   }
 }
 

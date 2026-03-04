@@ -157,6 +157,59 @@ export function QuickstartInitialView({
     return date.toLocaleDateString();
   };
 
+  const genWorkflows = [
+    {
+      id: "ugc-pipeline",
+      name: "UGC Pipeline",
+      description: "AI actor + product → full ad video",
+      icon: "M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z",
+      color: "#e85d04",
+      url: "https://gen.aditor.ai/#ugc",
+      tag: "VIDEO",
+      tagColor: "bg-orange-500/20 text-orange-400",
+    },
+    {
+      id: "image-gen",
+      name: "Image Gen",
+      description: "Nano Banana Pro — product & ad images",
+      icon: "M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z",
+      color: "#7c3aed",
+      url: "https://gen.aditor.ai/#image",
+      tag: "IMAGE",
+      tagColor: "bg-violet-500/20 text-violet-400",
+    },
+    {
+      id: "bulk-i2v",
+      name: "Bulk I2V",
+      description: "Batch image-to-video with Kling / Wan",
+      icon: "M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 19.5m9.75-9.75c0 .621-.504 1.125-1.125 1.125H12.75a1.125 1.125 0 01-1.125-1.125v-4.5c0-.621.504-1.125 1.125-1.125h9.75c.621 0 1.125.504 1.125 1.125v4.5z",
+      color: "#0891b2",
+      url: "https://gen.aditor.ai/#bulk",
+      tag: "VIDEO",
+      tagColor: "bg-cyan-500/20 text-cyan-400",
+    },
+    {
+      id: "brand-dna",
+      name: "Brand DNA",
+      description: "Store product refs, characters, brand voice",
+      icon: "M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L9.568 3z M6 6h.008v.008H6V6z",
+      color: "#059669",
+      url: "https://gen.aditor.ai/#brands",
+      tag: "CONFIG",
+      tagColor: "bg-emerald-500/20 text-emerald-400",
+    },
+    {
+      id: "scorecard",
+      name: "Brand Scorecard",
+      description: "Pipeline health, editor dispatch, brand status",
+      icon: "M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z",
+      color: "#d97706",
+      url: "https://scorecard.aditor.ai",
+      tag: "ADMIN",
+      tagColor: "bg-yellow-500/20 text-yellow-400",
+    },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col p-8 md:p-12 lg:p-16" style={{ background: 'radial-gradient(ellipse at top left, rgba(74,144,217,0.06) 0%, transparent 50%)' }}>
       {/* Section 1 — Hero Row */}
@@ -316,7 +369,57 @@ export function QuickstartInitialView({
         </div>
       </div>
 
-      {/* Section 2 — Browse All Workflows (Expandable) */}
+      {/* Section 2 — Gen Workflows Row */}
+      <div className="mb-10">
+        <h3 className="text-sm font-medium text-neutral-400 uppercase tracking-wider mb-4">
+          Gen Workflows
+        </h3>
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent">
+          {genWorkflows.map((wf) => (
+            <a
+              key={wf.id}
+              href={wf.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex-shrink-0 w-48 bg-neutral-800/50 hover:bg-neutral-800 border border-neutral-700 hover:border-neutral-600 rounded-lg overflow-hidden transition-all"
+            >
+              {/* Color strip + icon */}
+              <div
+                className="w-full h-24 flex items-center justify-center"
+                style={{ background: `linear-gradient(135deg, ${wf.color}22, ${wf.color}44)` }}
+              >
+                <svg
+                  className="w-10 h-10 transition-transform group-hover:scale-110"
+                  style={{ color: wf.color }}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d={wf.icon} />
+                </svg>
+              </div>
+
+              {/* Info */}
+              <div className="p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <h4 className="text-sm font-medium text-neutral-200 truncate group-hover:text-white transition-colors">
+                    {wf.name}
+                  </h4>
+                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0 ml-1 ${wf.tagColor}`}>
+                    {wf.tag}
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-500 line-clamp-2 group-hover:text-neutral-400 transition-colors">
+                  {wf.description}
+                </p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* Section 3 — Browse All Workflows (Expandable) */}
       {isExpanded && (
         <div className="border-t border-[var(--border-subtle)] pt-8">
           <div className="flex items-center justify-between mb-6">

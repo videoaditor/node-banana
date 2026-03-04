@@ -20,6 +20,9 @@ import {
   TextIteratorNodeData,
   WebScraperNodeData,
   StickyNoteNodeData,
+  SoraBlueprintNodeData,
+  BrollBatchNodeData,
+
   WorkflowNodeData,
   GroupColor,
   SelectedModel,
@@ -52,6 +55,9 @@ export const defaultNodeDimensions: Record<NodeType, { width: number; height: nu
   textIterator: { width: 340, height: 280 },
   webScraper: { width: 340, height: 320 },
   stickyNote: { width: 200, height: 160 },
+  soraBlueprint: { width: 320, height: 360 },
+  brollBatch: { width: 380, height: 420 },
+
 };
 
 /**
@@ -289,5 +295,28 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         text: "",
         color: "yellow",
       } as StickyNoteNodeData;
+    case "soraBlueprint":
+      return {
+        charImage: null,
+        productImage: null,
+        stylePrompt: null,
+        outputBlueprint: null,
+        aspectRatio: "9:16",
+        resolution: "1K",
+        status: "idle",
+        error: null,
+      } as SoraBlueprintNodeData;
+    case "brollBatch":
+      return {
+        blueprintImage: null,
+        shotTemplate: null,
+        shotCount: 4,
+        duration: "4",
+        runMode: "parallel",
+        shots: [],
+        status: "idle",
+        error: null,
+      } as BrollBatchNodeData;
+
   }
 };

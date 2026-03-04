@@ -19,3 +19,6 @@ export { ImageIteratorNode } from "./ImageIteratorNode";
 export { TextIteratorNode } from "./TextIteratorNode";
 export { WebScraperNode } from "./WebScraperNode";
 export { StickyNoteNode } from "./StickyNoteNode";
+export { SoraBlueprintNode } from "./SoraBlueprintNode";
+export { BrollBatchNode } from "./BrollBatchNode";
+

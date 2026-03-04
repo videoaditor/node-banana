@@ -43,7 +43,10 @@ export type NodeType =
   | "imageIterator"
   | "textIterator"
   | "webScraper"
-  | "stickyNote";
+  | "stickyNote"
+  | "soraBlueprint"
+  | "brollBatch";
+
 
 /**
  * Node execution status
@@ -377,6 +380,51 @@ export interface StickyNoteNodeData extends BaseNodeData {
 }
 
 /**
+ * Sora Blueprint node — generates a character+product composite reference image
+ * for use as Sora's input_reference
+ */
+export interface SoraBlueprintNodeData extends BaseNodeData {
+  charImage: string | null;
+  charImageRef?: string;
+  productImage: string | null;
+  productImageRef?: string;
+  stylePrompt: string | null;
+  outputBlueprint: string | null;
+  outputBlueprintRef?: string;
+  aspectRatio: "9:16" | "16:9" | "1:1";
+  resolution: "1K" | "2K";
+  status: NodeStatus;
+  error: string | null;
+}
+
+/**
+ * Single shot within a BrollBatch render
+ */
+export interface BrollShot {
+  index: number;
+  prompt: string;
+  status: NodeStatus;
+  videoUrl: string | null;
+  error: string | null;
+}
+
+/**
+ * Broll Batch node — fires N parallel Sora renders from a blueprint + prompt template
+ */
+export interface BrollBatchNodeData extends BaseNodeData {
+  blueprintImage: string | null;
+  blueprintImageRef?: string;
+  shotTemplate: string | null;
+  shotCount: number;
+  duration: "4" | "8";
+  runMode: "sequential" | "parallel";
+  shots: BrollShot[];
+  status: NodeStatus;
+  error: string | null;
+
+}
+
+/**
  * Union of all node data types
  */
 export type WorkflowNodeData =
@@ -400,7 +448,10 @@ export type WorkflowNodeData =
   | ImageIteratorNodeData
   | TextIteratorNodeData
   | WebScraperNodeData
-  | StickyNoteNodeData;
+  | StickyNoteNodeData
+  | SoraBlueprintNodeData
+  | BrollBatchNodeData;
+
 
 /**
  * Workflow node with typed data (extended with optional groupId)

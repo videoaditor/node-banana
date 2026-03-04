@@ -894,6 +894,12 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           case "generateVideo":
             await executeGenerateVideo(executionCtx);
             break;
+          case "soraBlueprint":
+            await executeSoraBlueprint(executionCtx);
+            break;
+          case "brollBatch":
+            await executeBrollBatch(executionCtx);
+            break;
           case "generate3d":
             await executeGenerate3D(executionCtx);
             break;
@@ -1050,6 +1056,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         await executeLlmGenerate(executionCtx, regenOptions);
       } else if (node.type === "generateVideo") {
         await executeGenerateVideo(executionCtx, regenOptions);
+      } else if (node.type === "soraBlueprint") {
+        await executeSoraBlueprint(executionCtx);
+      } else if (node.type === "brollBatch") {
+        await executeBrollBatch(executionCtx);
       } else if (node.type === "generate3d") {
         await executeGenerate3D(executionCtx, regenOptions);
       } else if (node.type === "splitGrid") {
@@ -1183,6 +1193,12 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           break;
         case "generateVideo":
           await executeGenerateVideo(executionCtx, regenOptions);
+          break;
+        case "soraBlueprint":
+          await executeSoraBlueprint(executionCtx);
+          break;
+        case "brollBatch":
+          await executeBrollBatch(executionCtx);
           break;
         case "generate3d":
           await executeGenerate3D(executionCtx, regenOptions);
@@ -1967,4 +1983,193 @@ export function useProviderApiKeys() {
       kieEnabled: state.providerSettings.providers.kie?.enabled ?? false,
     }))
   );
+}
+
+// ─── SoraBlueprint executor ───────────────────────────────────────────────────
+
+import type { SoraBlueprintNodeData, BrollBatchNodeData, BrollShot } from "@/types";
+
+async function executeSoraBlueprint(ctx: NodeExecutionContext): Promise<void> {
+  const { node, getConnectedInputs, updateNodeData, getFreshNode } = ctx;
+  const { images: connectedImages, text: connectedText } = getConnectedInputs(node.id);
+
+  const freshNode = getFreshNode(node.id);
+  const nodeData = (freshNode?.data || node.data) as SoraBlueprintNodeData;
+
+  // Resolve inputs: connected handles take priority over stored data
+  // Handle IDs: "char" (index 0), "product" (index 1), "style" (text)
+  const charImage = connectedImages[0] ?? nodeData.charImage ?? null;
+  const productImage = connectedImages[1] ?? nodeData.productImage ?? null;
+  const stylePrompt = connectedText ?? nodeData.stylePrompt ?? null;
+
+  updateNodeData(node.id, { status: "loading", error: null });
+
+  try {
+    const referenceImages = [charImage, productImage].filter(Boolean) as string[];
+
+    const prompt = [
+      "Two-panel composite reference sheet.",
+      "LEFT PANEL: the character shown in a neutral pose, full body, plain white background.",
+      "RIGHT PANEL: ONLY the product shown by itself in a clean product shot against plain white background. Do NOT substitute the product with a different item.",
+      stylePrompt ? stylePrompt : "",
+      "Photorealistic. High quality.",
+    ].filter(Boolean).join(" ");
+
+    const aspectRatio = nodeData.aspectRatio || "9:16";
+    const resolution = nodeData.resolution || "1K";
+
+    const body: Record<string, unknown> = {
+      prompt,
+      model: "nanoBananaPro",
+      aspectRatio,
+      resolution,
+    };
+    if (referenceImages.length > 0) {
+      body.referenceImages = referenceImages;
+    }
+
+    const res = await fetch("http://localhost:3001/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: ctx.signal,
+    });
+
+    if (!res.ok) {
+      const err = await res.text().catch(() => `HTTP ${res.status}`);
+      throw new Error(err);
+    }
+
+    const result = await res.json();
+    const outputBlueprint = result.outputImage ?? result.image ?? null;
+    if (!outputBlueprint) throw new Error("No image in response");
+
+    updateNodeData(node.id, {
+      outputBlueprint,
+      charImage,
+      productImage,
+      stylePrompt,
+      status: "complete",
+      error: null,
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    updateNodeData(node.id, { status: "error", error: msg });
+    throw err;
+  }
+}
+
+// ─── BrollBatch executor ─────────────────────────────────────────────────────
+
+async function executeBrollBatch(ctx: NodeExecutionContext): Promise<void> {
+  const { node, getConnectedInputs, updateNodeData, getFreshNode } = ctx;
+  const { images: connectedImages, text: connectedText } = getConnectedInputs(node.id);
+
+  const freshNode = getFreshNode(node.id);
+  const nodeData = (freshNode?.data || node.data) as BrollBatchNodeData;
+
+  const blueprintImage = connectedImages[0] ?? nodeData.blueprintImage ?? null;
+  const shotTemplate = connectedText ?? nodeData.shotTemplate ?? "Close-up shot {N} of the product worn on wrist, natural lighting, slow pan.";
+  const shotCount = nodeData.shotCount || 4;
+  const duration = nodeData.duration || "4";
+  const runMode = nodeData.runMode || "parallel";
+
+  // Initialise shot states
+  const initialShots: BrollShot[] = Array.from({ length: shotCount }, (_, i) => ({
+    index: i,
+    prompt: shotTemplate.replace(/\{N\}/g, String(i + 1)),
+    status: "loading",
+    videoUrl: null,
+    error: null,
+  }));
+
+  updateNodeData(node.id, {
+    blueprintImage,
+    shotTemplate,
+    shots: initialShots,
+    status: "loading",
+    error: null,
+  });
+
+  const GEN_BACKEND = "http://localhost:3001";
+
+  const renderShot = async (shot: BrollShot): Promise<BrollShot> => {
+    try {
+      const body: Record<string, unknown> = {
+        prompt: shot.prompt,
+        duration,
+        model: "sora-2",
+        resolution: "720x1280",
+      };
+      if (blueprintImage) body.referenceImage = blueprintImage;
+
+      // Try /api/ugc/sora-render first, fall back to /api/generate-video
+      let res = await fetch(`${GEN_BACKEND}/api/ugc/sora-render`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: ctx.signal,
+      });
+      if (res.status === 404) {
+        res = await fetch(`${GEN_BACKEND}/api/generate-video`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+          signal: ctx.signal,
+        });
+      }
+
+      if (!res.ok) {
+        const err = await res.text().catch(() => `HTTP ${res.status}`);
+        throw new Error(err);
+      }
+
+      const result = await res.json();
+      const videoUrl = result.videoUrl ?? result.url ?? result.outputVideo ?? null;
+      if (!videoUrl) throw new Error("No video URL in response");
+
+      return { ...shot, status: "complete", videoUrl, error: null };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return { ...shot, status: "error", videoUrl: null, error: msg };
+    }
+  };
+
+  const updateShot = (updatedShot: BrollShot) => {
+    const fresh = (getFreshNode(node.id)?.data || node.data) as BrollBatchNodeData;
+    const newShots = (fresh.shots || []).map((s) =>
+      s.index === updatedShot.index ? updatedShot : s
+    );
+    updateNodeData(node.id, { shots: newShots });
+  };
+
+  let finalShots: BrollShot[];
+
+  if (runMode === "parallel") {
+    const results = await Promise.all(
+      initialShots.map(async (shot) => {
+        const result = await renderShot(shot);
+        updateShot(result);
+        return result;
+      })
+    );
+    finalShots = results;
+  } else {
+    finalShots = [];
+    for (const shot of initialShots) {
+      if (ctx.signal?.aborted) break;
+      const result = await renderShot(shot);
+      updateShot(result);
+      finalShots.push(result);
+    }
+  }
+
+  const anyError = finalShots.some((s) => s.status === "error");
+  const allDone = finalShots.every((s) => s.status !== "loading");
+
+  updateNodeData(node.id, {
+    shots: finalShots,
+    status: allDone && !anyError ? "complete" : anyError ? "error" : "loading",
+    error: anyError ? `${finalShots.filter(s => s.status === "error").length} shot(s) failed` : null,
+  });
 }
