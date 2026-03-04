@@ -283,9 +283,9 @@ export function TemplateExplorerView({
   return (
     <div className="flex flex-col h-full min-h-0">
       {/* Header */}
-      <div className="flex-shrink-0 px-6 py-4 border-b border-neutral-700 flex items-center gap-4">
+      <div className="flex-shrink-0 px-6 py-4 border-b border-[var(--border-subtle)] flex items-center gap-4">
         <QuickstartBackButton onClick={onBack} disabled={isLoading} />
-        <h2 className="text-lg font-semibold text-neutral-100">
+        <h2 className="text-lg font-semibold text-[var(--text-primary)]">
           Template Explorer
         </h2>
       </div>
@@ -293,11 +293,11 @@ export function TemplateExplorerView({
       {/* Content - Sidebar + Main Grid */}
       <div className="flex-1 flex min-h-0 overflow-clip">
         {/* Sidebar */}
-        <div className="w-48 flex-shrink-0 bg-neutral-900/80 border-r border-neutral-700 p-4 space-y-5 overflow-y-auto">
+        <div className="w-48 flex-shrink-0 bg-[var(--bg-base)]/80 border-r border-[var(--border-subtle)] p-4 space-y-5 overflow-y-auto">
           {/* Search Input */}
           <div className="relative">
             <svg
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500"
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -314,13 +314,13 @@ export function TemplateExplorerView({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search templates..."
-              className="w-full pl-8 pr-3 py-2 text-sm bg-neutral-700/50 border border-neutral-600 rounded-lg text-neutral-200 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-8 pr-3 py-2 text-sm bg-[var(--bg-surface)]/50 border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] focus:border-[var(--accent-primary)]"
             />
           </div>
 
           {/* Category Filters */}
           <div className="space-y-2">
-            <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+            <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
               Category
             </h3>
             <div className="flex flex-col gap-1">
@@ -329,11 +329,11 @@ export function TemplateExplorerView({
                   key={option.id}
                   onClick={() => setCategoryFilter(option.id)}
                   className={`
-                    px-3 py-1.5 text-xs font-medium rounded-md text-left transition-colors
+                    px-3 py-1.5 text-xs font-medium rounded-md text-left transition-all duration-[120ms]
                     ${
                       categoryFilter === option.id
-                        ? "bg-blue-500/20 border border-blue-500/50 text-blue-300"
-                        : "bg-neutral-700/30 border border-transparent text-neutral-400 hover:bg-neutral-700/50 hover:text-neutral-300"
+                        ? "bg-[var(--accent-primary)]/20 border border-[var(--accent-primary)]/50 text-blue-300"
+                        : "bg-[var(--bg-surface)]/30 border border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]/50 hover:text-[var(--text-secondary)]"
                     }
                   `}
                 >
@@ -345,7 +345,7 @@ export function TemplateExplorerView({
 
           {/* Provider Tags */}
           <div className="space-y-2">
-            <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+            <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
               Provider
             </h3>
             <div className="flex flex-col gap-1">
@@ -354,11 +354,11 @@ export function TemplateExplorerView({
                   key={tag}
                   onClick={() => toggleTag(tag)}
                   className={`
-                    px-3 py-1.5 text-xs font-medium rounded-md text-left transition-colors
+                    px-3 py-1.5 text-xs font-medium rounded-md text-left transition-all duration-[120ms]
                     ${
                       selectedTags.has(tag)
-                        ? "bg-blue-500/20 border border-blue-500/50 text-blue-300"
-                        : "bg-neutral-700/30 border border-transparent text-neutral-400 hover:bg-neutral-700/50 hover:text-neutral-300"
+                        ? "bg-[var(--accent-primary)]/20 border border-[var(--accent-primary)]/50 text-blue-300"
+                        : "bg-[var(--bg-surface)]/30 border border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]/50 hover:text-[var(--text-secondary)]"
                     }
                   `}
                 >
@@ -372,7 +372,7 @@ export function TemplateExplorerView({
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="w-full px-3 py-1.5 text-xs font-medium text-neutral-400 hover:text-neutral-300 bg-neutral-700/30 hover:bg-neutral-700/50 rounded-md transition-colors"
+              className="w-full px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-secondary)] bg-[var(--bg-surface)]/30 hover:bg-[var(--bg-surface)]/50 rounded-md transition-all duration-[120ms]"
             >
               Clear filters
             </button>
@@ -385,7 +385,7 @@ export function TemplateExplorerView({
           {hasNoResults && hasActiveFilters && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <svg
-                className="w-12 h-12 text-neutral-600 mb-4"
+                className="w-12 h-12 text-[var(--text-muted)] mb-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -397,15 +397,15 @@ export function TemplateExplorerView({
                   d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
                 />
               </svg>
-              <h3 className="text-sm font-medium text-neutral-300 mb-1">
+              <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-1">
                 No templates match your filters
               </h3>
-              <p className="text-xs text-neutral-500 mb-4">
+              <p className="text-xs text-[var(--text-muted)] mb-4">
                 Try adjusting your search or filters
               </p>
               <button
                 onClick={clearFilters}
-                className="px-4 py-2 text-sm font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm font-medium text-[var(--accent-primary)] hover:text-blue-300 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded-lg transition-all duration-[120ms]"
               >
                 Clear all filters
               </button>
@@ -415,7 +415,7 @@ export function TemplateExplorerView({
           {/* Quick Start Templates */}
           {filteredPresets.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <h3 className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                 Quick Start
               </h3>
               <div className="grid grid-cols-2 gap-3">
@@ -437,20 +437,20 @@ export function TemplateExplorerView({
 
           {/* Divider */}
           {filteredPresets.length > 0 && (filteredCommunity.length > 0 || (isLoadingList && categoryFilter !== "community")) && (
-            <div className="border-t border-neutral-700" />
+            <div className="border-t border-[var(--border-subtle)]" />
           )}
 
           {/* Community Workflows */}
           {(filteredCommunity.length > 0 || (isLoadingList && (categoryFilter === "all" || categoryFilter === "community"))) && (
             <div className="space-y-3">
-              <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              <h3 className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                 Community Workflows
               </h3>
 
               {isLoadingList ? (
                 <div className="flex items-center justify-center py-8">
                   <svg
-                    className="w-5 h-5 text-neutral-500 animate-spin"
+                    className="w-5 h-5 text-[var(--text-muted)] animate-spin"
                     fill="none"
                     viewBox="0 0 24 24"
                   >
@@ -494,7 +494,7 @@ export function TemplateExplorerView({
               )}
 
               {/* Discord CTA */}
-              <p className="text-xs text-neutral-500 mt-3">
+              <p className="text-xs text-[var(--text-muted)] mt-3">
                 Want to share your workflow?{" "}
                 <a
                   href="https://discord.com/invite/89Nr6EKkTf"
@@ -511,9 +511,9 @@ export function TemplateExplorerView({
 
           {/* Error */}
           {error && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-[var(--node-error)]/10 border border-[var(--node-error)]/30">
               <svg
-                className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0"
+                className="w-4 h-4 text-[var(--node-error)] mt-0.5 flex-shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -526,10 +526,10 @@ export function TemplateExplorerView({
                 />
               </svg>
               <div className="flex-1">
-                <p className="text-sm text-red-400">{error}</p>
+                <p className="text-sm text-[var(--node-error)]">{error}</p>
                 <button
                   onClick={() => setError(null)}
-                  className="text-xs text-red-400/70 hover:text-red-400 mt-1"
+                  className="text-xs text-[var(--node-error)]/70 hover:text-[var(--node-error)] mt-1"
                 >
                   Dismiss
                 </button>

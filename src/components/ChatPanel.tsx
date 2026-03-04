@@ -142,15 +142,15 @@ export function ChatPanel({ isOpen, onClose, onBuildWorkflow, isBuildingWorkflow
   if (!isOpen) return null;
 
   return (
-    <div className="fixed top-16 bottom-[220px] right-5 w-[380px] bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl flex flex-col overflow-hidden z-40">
+    <div className="fixed top-16 bottom-[220px] right-5 w-[380px] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg shadow-xl flex flex-col overflow-hidden z-40">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-700">
-        <h3 className="text-sm font-medium text-neutral-200">Workflow Assistant <span className="ml-1.5 text-[10px] font-semibold uppercase tracking-wider bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 rounded px-1.5 py-0.5">Beta</span></h3>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)]">
+        <h3 className="text-sm font-medium text-[var(--text-primary)]">Workflow Assistant <span className="ml-1.5 text-[10px] font-semibold uppercase tracking-wider bg-yellow-500/20 text-[var(--node-warning)] border border-yellow-500/30 rounded px-1.5 py-0.5">Beta</span></h3>
         <div className="flex items-center gap-1">
           {messages.length > 0 && (
             <button
               onClick={() => setMessages([])}
-              className="text-neutral-400 hover:text-neutral-200 transition-colors p-1"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms] p-1"
               aria-label="Clear chat"
               title="Clear chat history"
             >
@@ -161,7 +161,7 @@ export function ChatPanel({ isOpen, onClose, onBuildWorkflow, isBuildingWorkflow
           )}
           <button
             onClick={onClose}
-            className="text-neutral-400 hover:text-neutral-200 transition-colors p-1"
+            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms] p-1"
             aria-label="Close chat"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -198,7 +198,7 @@ export function ChatPanel({ isOpen, onClose, onBuildWorkflow, isBuildingWorkflow
         )}
 
         {messages.length === 0 && !errorMessage && (
-          <div className="text-center text-neutral-500 text-sm py-8">
+          <div className="text-center text-[var(--text-muted)] text-sm py-8">
             <p>Ask me anything about creating workflows!</p>
             <p className="text-xs mt-2">e.g., &quot;How do I create product photos with different backgrounds?&quot;</p>
           </div>
@@ -227,8 +227,8 @@ export function ChatPanel({ isOpen, onClose, onBuildWorkflow, isBuildingWorkflow
               <div
                 className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
                   message.role === "user"
-                    ? "bg-blue-600 text-white"
-                    : "bg-neutral-700 text-neutral-200"
+                    ? "bg-[var(--accent-primary)] text-white"
+                    : "bg-[var(--bg-surface)] text-[var(--text-primary)]"
                 }`}
               >
                 {message.role === "user" ? (
@@ -264,13 +264,13 @@ export function ChatPanel({ isOpen, onClose, onBuildWorkflow, isBuildingWorkflow
                       <ReactMarkdown
                         components={{
                           p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                          strong: ({ children }) => <strong className="font-semibold text-neutral-100">{children}</strong>,
+                          strong: ({ children }) => <strong className="font-semibold text-[var(--text-primary)]">{children}</strong>,
                           em: ({ children }) => <em className="italic">{children}</em>,
                           ul: ({ children }) => <ul className="list-disc pl-4 mb-2 last:mb-0 space-y-1">{children}</ul>,
                           ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 last:mb-0 space-y-1">{children}</ol>,
                           li: ({ children }) => <li>{children}</li>,
-                          blockquote: ({ children }) => <blockquote className="border-l-2 border-neutral-500 pl-2 my-2 text-neutral-300 italic">{children}</blockquote>,
-                          code: ({ children }) => <code className="bg-neutral-600 px-1 rounded text-xs">{children}</code>,
+                          blockquote: ({ children }) => <blockquote className="border-l-2 border-[var(--border-subtle)] pl-2 my-2 text-[var(--text-secondary)] italic">{children}</blockquote>,
+                          code: ({ children }) => <code className="bg-[var(--border-subtle)] px-1 rounded text-xs">{children}</code>,
                         }}
                       >
                         {textContent}
@@ -286,11 +286,11 @@ export function ChatPanel({ isOpen, onClose, onBuildWorkflow, isBuildingWorkflow
         {/* Loading indicator */}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-neutral-700 rounded-lg px-3 py-2">
+            <div className="bg-[var(--bg-surface)] rounded-lg px-3 py-2">
               <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                <div className="w-2 h-2 bg-[var(--text-secondary)] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                <div className="w-2 h-2 bg-[var(--text-secondary)] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                <div className="w-2 h-2 bg-[var(--text-secondary)] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
             </div>
           </div>
@@ -300,15 +300,15 @@ export function ChatPanel({ isOpen, onClose, onBuildWorkflow, isBuildingWorkflow
       </div>
 
       {/* Input area */}
-      <div className="border-t border-neutral-700">
+      <div className="border-t border-[var(--border-subtle)]">
         {/* Selection focus chip */}
         {selectedNodeIds && selectedNodeIds.length > 0 && !chipDismissed && (
           <div className="px-3 pt-3">
-            <div className="flex items-center gap-2 bg-neutral-700/50 border border-neutral-600 rounded-lg px-3 py-1.5 text-xs text-neutral-300">
+            <div className="flex items-center gap-2 bg-[var(--bg-surface)]/50 border border-[var(--border-subtle)] rounded-lg px-3 py-1.5 text-xs text-[var(--text-secondary)]">
               <span>Focused on {selectedNodeIds.length} selected node{selectedNodeIds.length !== 1 ? 's' : ''}</span>
               <button
                 onClick={() => setChipDismissed(true)}
-                className="text-neutral-400 hover:text-neutral-200 transition-colors"
+                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
                 aria-label="Dismiss"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -334,13 +334,13 @@ export function ChatPanel({ isOpen, onClose, onBuildWorkflow, isBuildingWorkflow
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type a message..."
-              className="flex-1 bg-neutral-700 border border-neutral-600 rounded-lg px-3 py-2 text-sm text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-blue-500"
+              className="flex-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)]"
               disabled={isLoading}
             />
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-2 bg-[var(--accent-primary)] text-white rounded-lg text-sm font-medium hover:bg-[var(--accent-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-[120ms]"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -355,7 +355,7 @@ export function ChatPanel({ isOpen, onClose, onBuildWorkflow, isBuildingWorkflow
             <button
               onClick={handleBuildWorkflow}
               disabled={isBuildingWorkflow || isLoading}
-              className="w-full bg-green-600 hover:bg-green-500 text-white rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-green-600 hover:bg-[var(--node-success)] text-white rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-[120ms] flex items-center justify-center gap-2"
             >
               {isBuildingWorkflow ? (
                 <>

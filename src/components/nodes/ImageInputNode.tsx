@@ -97,20 +97,20 @@ export function ImageInputNode({ id, data, selected }: NodeProps<ImageInputNodeT
       onCommentChange={(comment) => updateNodeData(id, { comment: comment || undefined })}
       selected={selected}
       commentNavigation={commentNavigation ?? undefined}
+      nodeAccentColor="green"
       titlePrefix={
         nodeData.isAppInput ? (
-          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" title="App Input" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] shrink-0" title="App Input" />
         ) : null
       }
       headerButtons={
         <div className="relative ml-2 shrink-0 group">
           <button
             onClick={handleToggleAppInput}
-            className={`nodrag nopan p-0.5 rounded transition-all duration-200 ease-in-out flex items-center overflow-hidden group-hover:pr-2 ${
-              nodeData.isAppInput
-                ? "text-blue-400 hover:text-blue-200 border border-blue-500/50"
-                : "text-neutral-500 group-hover:text-neutral-200 border border-neutral-600"
-            }`}
+            className={`nodrag nopan p-0.5 rounded transition-all duration-200 ease-in-out flex items-center overflow-hidden group-hover:pr-2 ${nodeData.isAppInput
+                ? "text-[var(--accent-primary)] hover:text-blue-200 border border-[var(--accent-primary)]/50"
+                : "text-[var(--text-muted)] group-hover:text-[var(--text-primary)] border border-[var(--border-subtle)]"
+              }`}
             title={nodeData.isAppInput ? "Enabled as App Input" : "Enable as App Input"}
           >
             <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -156,11 +156,11 @@ export function ImageInputNode({ id, data, selected }: NodeProps<ImageInputNodeT
             </svg>
           </button>
           <div className="mt-1.5 flex items-center justify-between shrink-0">
-            <span className="text-[10px] text-neutral-400 truncate max-w-[120px]">
+            <span className="text-[10px] text-[var(--text-secondary)] truncate max-w-[120px]">
               {nodeData.filename}
             </span>
             {nodeData.dimensions && (
-              <span className="text-[10px] text-neutral-500">
+              <span className="text-[10px] text-[var(--text-muted)]">
                 {nodeData.dimensions.width}x{nodeData.dimensions.height}
               </span>
             )}
@@ -171,12 +171,12 @@ export function ImageInputNode({ id, data, selected }: NodeProps<ImageInputNodeT
           onClick={() => fileInputRef.current?.click()}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-          className="w-full flex-1 min-h-[112px] border border-dashed border-neutral-600 rounded flex flex-col items-center justify-center cursor-pointer hover:border-neutral-500 hover:bg-neutral-700/50 transition-colors"
+          className="w-full flex-1 min-h-[112px] border border-dashed border-[var(--border-subtle)] rounded flex flex-col items-center justify-center cursor-pointer hover:border-[var(--border-subtle)] hover:bg-[var(--bg-surface)]/50 transition-all duration-[120ms]"
         >
-          <svg className="w-5 h-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-5 h-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          <span className="text-[10px] text-neutral-400 mt-1">
+          <span className="text-[10px] text-[var(--text-secondary)] mt-1">
             Drop or click
           </span>
         </div>

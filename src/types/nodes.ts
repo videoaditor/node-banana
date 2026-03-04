@@ -42,7 +42,8 @@ export type NodeType =
   | "glbViewer"
   | "imageIterator"
   | "textIterator"
-  | "webScraper";
+  | "webScraper"
+  | "stickyNote";
 
 /**
  * Node execution status
@@ -368,6 +369,14 @@ export interface WebScraperNodeData extends BaseNodeData {
 }
 
 /**
+ * Sticky Note node - colored resizable note for annotations
+ */
+export interface StickyNoteNodeData extends BaseNodeData {
+  text: string;
+  color: "yellow" | "green" | "blue" | "pink" | "orange";
+}
+
+/**
  * Union of all node data types
  */
 export type WorkflowNodeData =
@@ -390,7 +399,8 @@ export type WorkflowNodeData =
   | GLBViewerNodeData
   | ImageIteratorNodeData
   | TextIteratorNodeData
-  | WebScraperNodeData;
+  | WebScraperNodeData
+  | StickyNoteNodeData;
 
 /**
  * Workflow node with typed data (extended with optional groupId)

@@ -21,11 +21,11 @@ export const useToast = create<ToastState>((set) => ({
   hide: () => set({ message: null, persistent: false, details: null }),
 }));
 
-const typeStyles = {
-  info: "bg-neutral-800 border-neutral-600 text-neutral-100",
-  success: "bg-green-900 border-green-700 text-green-100",
-  warning: "bg-orange-900 border-orange-600 text-orange-100",
-  error: "bg-red-900 border-red-700 text-red-100",
+const typeStyles: Record<string, string> = {
+  info: "bg-[var(--bg-elevated)] border-[var(--accent-primary)]/40 text-[var(--text-primary)]",
+  success: "bg-[var(--bg-elevated)] border-[var(--node-success)]/40 text-[var(--node-success)]",
+  warning: "bg-[var(--bg-elevated)] border-[var(--node-warning)]/40 text-[var(--node-warning)]",
+  error: "bg-[var(--bg-elevated)] border-[var(--node-error)]/40 text-[var(--node-error)]",
 };
 
 const typeIcons = {

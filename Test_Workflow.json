@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "id": "wf_1772641116989_0j3mbjwvv",
+  "name": "Test Workflow",
+  "nodes": [
+    {
+      "id": "imageInput-1",
+      "type": "imageInput",
+      "position": {
+        "x": 756,
+        "y": 269
+      },
+      "data": {
+        "image": null,
+        "filename": null,
+        "dimensions": null
+      },
+      "style": {
+        "width": 300,
+        "height": 280
+      },
+      "measured": {
+        "width": 300,
+        "height": 280
+      },
+      "selected": true
+    },
+    {
+      "id": "prompt-2",
+      "type": "prompt",
+      "position": {
+        "x": 654.2912332838039,
+        "y": 269.83209509658246
+      },
+      "data": {
+        "prompt": "",
+        "prompts": [
+          ""
+        ],
+        "activePromptIndex": 0
+      },
+      "style": {
+        "width": 320,
+        "height": 220
+      },
+      "measured": {
+        "width": 320,
+        "height": 220
+      }
+    },
+    {
+      "id": "nanoBanana-3",
+      "type": "nanoBanana",
+      "position": {
+        "x": 1094.88558692422,
+        "y": 302.69985141158986
+      },
+      "data": {
+        "inputImages": [],
+        "inputPrompt": null,
+        "outputImage": null,
+        "aspectRatio": "1:1",
+        "resolution": "1K",
+        "model": "nano-banana-pro",
+        "selectedModel": {
+          "provider": "gemini",
+          "modelId": "nano-banana-pro",
+          "displayName": "Nano Banana Pro"
+        },
+        "useGoogleSearch": false,
+        "status": "idle",
+        "error": null,
+        "imageHistory": [],
+        "selectedHistoryIndex": 0,
+        "imageInputHandles": 1,
+        "inputSchema": []
+      },
+      "style": {
+        "width": 300,
+        "height": 300
+      },
+      "measured": {
+        "width": 300,
+        "height": 300
+      }
+    }
+  ],
+  "edges": [],
+  "edgeStyle": "curved"
+}

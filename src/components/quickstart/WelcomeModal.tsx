@@ -88,7 +88,7 @@ export function WelcomeModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] bg-neutral-950/95 backdrop-blur-sm overflow-y-auto overscroll-contain"
+      className="fixed inset-0 z-[100] bg-[var(--bg-base)]/95 backdrop-blur-sm overflow-y-auto overscroll-contain"
       onWheelCapture={(e) => e.stopPropagation()}
       onClick={handleOverlayClick}
     >
@@ -103,7 +103,7 @@ export function WelcomeModal({
       )}
       {currentView === "templates" && (
         <div className="min-h-screen flex items-center justify-center p-8">
-          <div className="w-full max-w-6xl bg-neutral-800 rounded-xl border border-neutral-700 shadow-2xl overflow-clip max-h-[85vh] flex flex-col">
+          <div className="w-full max-w-6xl bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)] shadow-2xl overflow-clip max-h-[85vh] flex flex-col">
             <TemplateExplorerView
               onBack={handleBack}
               onWorkflowSelected={handleWorkflowSelected}
@@ -113,7 +113,7 @@ export function WelcomeModal({
       )}
       {currentView === "vibe" && (
         <div className="min-h-screen flex items-center justify-center p-8">
-          <div className="w-full max-w-2xl bg-neutral-800 rounded-xl border border-neutral-700 shadow-2xl overflow-clip max-h-[80vh] flex flex-col">
+          <div className="w-full max-w-2xl bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)] shadow-2xl overflow-clip max-h-[80vh] flex flex-col">
             <PromptWorkflowView
               onBack={handleBack}
               onWorkflowGenerated={handleWorkflowSelected}

@@ -68,6 +68,7 @@ export function PromptConcatenatorNode({ id, data, selected }: NodeProps<PromptC
       onCommentChange={(comment) => updateNodeData(id, { comment: comment || undefined })}
       selected={selected}
       commentNavigation={commentNavigation ?? undefined}
+      nodeAccentColor="blue"
     >
       {/* Dynamic text input handles */}
       {Array.from({ length: nodeData.textInputHandles || 2 }, (_, i) => {
@@ -102,11 +103,11 @@ export function PromptConcatenatorNode({ id, data, selected }: NodeProps<PromptC
       <div className="flex-1 flex flex-col gap-2">
         {/* Separator selector */}
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] text-neutral-400">Separator</label>
+          <label className="text-[10px] text-[var(--text-secondary)]">Separator</label>
           <select
             value={selectedPreset}
             onChange={handleSeparatorChange}
-            className="text-[10px] py-1 px-1.5 border border-neutral-700 rounded bg-neutral-900/50 focus:outline-none focus:ring-1 focus:ring-neutral-600 text-neutral-300"
+            className="text-[10px] py-1 px-1.5 border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-[var(--text-secondary)]"
           >
             {SEPARATOR_PRESETS.map((preset) => (
               <option key={preset.value} value={preset.value}>
@@ -123,15 +124,15 @@ export function PromptConcatenatorNode({ id, data, selected }: NodeProps<PromptC
             value={nodeData.separator}
             onChange={handleCustomSeparatorChange}
             placeholder="Custom separator..."
-            className="text-[10px] py-1 px-1.5 border border-neutral-700 rounded bg-neutral-900/50 focus:outline-none focus:ring-1 focus:ring-neutral-600 text-neutral-300 placeholder:text-neutral-500"
+            className="text-[10px] py-1 px-1.5 border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
           />
         )}
 
         {/* Output preview */}
         {nodeData.outputText && (
           <div className="flex-1 min-h-0 overflow-y-auto">
-            <div className="text-[10px] text-neutral-400 mb-1">Output:</div>
-            <div className="p-2 text-xs text-neutral-100 border border-neutral-700 rounded bg-neutral-900/50 whitespace-pre-wrap break-words">
+            <div className="text-[10px] text-[var(--text-secondary)] mb-1">Output:</div>
+            <div className="p-2 text-xs text-[var(--text-primary)] border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/50 whitespace-pre-wrap break-words">
               {nodeData.outputText}
             </div>
           </div>
@@ -141,7 +142,7 @@ export function PromptConcatenatorNode({ id, data, selected }: NodeProps<PromptC
         <div className="flex gap-1.5 shrink-0">
           <button
             onClick={handleAddTextInput}
-            className="flex-1 text-[10px] py-1.5 px-2 bg-neutral-700 hover:bg-neutral-600 border border-neutral-600 rounded text-neutral-300 transition-colors flex items-center justify-center gap-1"
+            className="flex-1 text-[10px] py-1.5 px-2 bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] border border-[var(--border-subtle)] rounded text-[var(--text-secondary)] transition-all duration-[120ms] flex items-center justify-center gap-1"
           >
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -151,7 +152,7 @@ export function PromptConcatenatorNode({ id, data, selected }: NodeProps<PromptC
           {(nodeData.textInputHandles || 2) > 2 && (
             <button
               onClick={handleRemoveTextInput}
-              className="flex-1 text-[10px] py-1.5 px-2 bg-red-700 hover:bg-red-600 border border-red-600 rounded text-neutral-300 transition-colors flex items-center justify-center gap-1"
+              className="flex-1 text-[10px] py-1.5 px-2 bg-red-700 hover:bg-[var(--node-error)] border border-red-600 rounded text-[var(--text-secondary)] transition-all duration-[120ms] flex items-center justify-center gap-1"
             >
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

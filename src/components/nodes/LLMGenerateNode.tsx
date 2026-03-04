@@ -139,6 +139,7 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
         commentNavigation={commentNavigation ?? undefined}
         onRun={handleRegenerate}
         isExecuting={isRunning}
+        nodeAccentColor="coral"
       >
         {/* Image input - optional */}
         <Handle
@@ -166,11 +167,11 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
 
         <div className="flex-1 flex flex-col min-h-0 gap-2">
           {/* Output area */}
-          <div className={`nodrag nopan nowheel relative w-full flex flex-col border border-dashed border-neutral-600 rounded p-2 ${viewMode === "full" ? "flex-1 min-h-0" : ""}`}>
+          <div className={`nodrag nopan nowheel relative w-full flex flex-col border border-dashed border-[var(--border-subtle)] rounded p-2 ${viewMode === "full" ? "flex-1 min-h-0" : ""}`}>
             {nodeData.status === "loading" ? (
               <div className="h-[80px] flex items-center justify-center">
                 <svg
-                  className="w-4 h-4 animate-spin text-neutral-400"
+                  className="w-4 h-4 animate-spin text-[var(--text-secondary)]"
                   fill="none"
                   viewBox="0 0 24 24"
                 >
@@ -191,7 +192,7 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
               </div>
             ) : nodeData.status === "error" ? (
               <div className="min-h-[80px] flex items-center justify-center">
-                <span className="text-[10px] text-red-400">
+                <span className="text-[10px] text-[var(--node-error)]">
                   {nodeData.error || "Failed"}
                 </span>
               </div>
@@ -201,7 +202,7 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
                 <div className="flex items-center gap-1 shrink-0 mb-1">
                   <button
                     onClick={() => setViewMode(m => m === "compact" ? "full" : "compact")}
-                    className="text-[10px] text-neutral-400 hover:text-neutral-200 transition-colors px-0.5"
+                    className="text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms] px-0.5"
                     title={viewMode === "compact" ? "Expand output" : "Collapse output"}
                   >
                     ⊡
@@ -209,25 +210,25 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
                   <button
                     onClick={goToPrev}
                     disabled={currentIndex === 0}
-                    className="text-[10px] text-neutral-400 hover:text-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors px-0.5"
+                    className="text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-[120ms] px-0.5"
                     title="Previous output"
                   >
                     ‹
                   </button>
-                  <span className="text-[10px] text-neutral-300 min-w-[32px] text-center">
+                  <span className="text-[10px] text-[var(--text-secondary)] min-w-[32px] text-center">
                     {currentPage}/{totalPages}
                   </span>
                   <button
                     onClick={goToNext}
                     disabled={currentIndex >= history.length - 1}
-                    className="text-[10px] text-neutral-400 hover:text-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors px-0.5"
+                    className="text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-[120ms] px-0.5"
                     title="Next output"
                   >
                     ›
                   </button>
                   <button
                     onClick={() => setIsExpanded(true)}
-                    className="text-[10px] text-neutral-400 hover:text-neutral-200 transition-colors px-0.5"
+                    className="text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms] px-0.5"
                     title="Open full text"
                   >
                     ↗
@@ -236,7 +237,7 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
                   <div className="ml-auto flex gap-1">
                     <button
                       onClick={handleCopyOutput}
-                      className={`w-5 h-5 ${copied ? "bg-green-600/80" : "bg-neutral-900/80 hover:bg-neutral-700/80"} rounded flex items-center justify-center text-neutral-400 hover:text-white transition-colors`}
+                      className={`w-5 h-5 ${copied ? "bg-green-600/80" : "bg-[var(--bg-base)]/80 hover:bg-[var(--bg-surface)]/80"} rounded flex items-center justify-center text-[var(--text-secondary)] hover:text-white transition-all duration-[120ms]`}
                       title={copied ? "Copied!" : "Copy to clipboard"}
                     >
                       {copied ? (
@@ -252,7 +253,7 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
                     <button
                       onClick={handleRegenerate}
                       disabled={isRunning}
-                      className="w-5 h-5 bg-neutral-900/80 hover:bg-blue-600/80 disabled:opacity-50 disabled:cursor-not-allowed rounded flex items-center justify-center text-neutral-400 hover:text-white transition-colors"
+                      className="w-5 h-5 bg-[var(--bg-base)]/80 hover:bg-[var(--accent-primary)]/80 disabled:opacity-50 disabled:cursor-not-allowed rounded flex items-center justify-center text-[var(--text-secondary)] hover:text-white transition-all duration-[120ms]"
                       title="Regenerate"
                     >
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -261,7 +262,7 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
                     </button>
                     <button
                       onClick={handleClearOutput}
-                      className="w-5 h-5 bg-neutral-900/80 hover:bg-red-600/80 rounded flex items-center justify-center text-neutral-400 hover:text-white transition-colors"
+                      className="w-5 h-5 bg-[var(--bg-base)]/80 hover:bg-[var(--node-error)]/80 rounded flex items-center justify-center text-[var(--text-secondary)] hover:text-white transition-all duration-[120ms]"
                       title="Clear output"
                     >
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -272,14 +273,14 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
                 </div>
                 {/* Text area */}
                 <div className={`overflow-auto ${viewMode === "full" ? "flex-1 min-h-0" : "max-h-[120px]"}`}>
-                  <p className="text-xs text-neutral-300 whitespace-pre-wrap break-words">
+                  <p className="text-xs text-[var(--text-secondary)] whitespace-pre-wrap break-words">
                     {displayText}
                   </p>
                 </div>
               </>
             ) : (
               <div className="h-[80px] flex items-center justify-center">
-                <span className="text-neutral-500 text-[10px]">
+                <span className="text-[var(--text-muted)] text-[10px]">
                   Run to generate
                 </span>
               </div>
@@ -290,7 +291,7 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
           <select
             value={provider}
             onChange={handleProviderChange}
-            className="w-full text-[10px] py-1 px-1.5 border border-neutral-700 rounded bg-neutral-900/50 focus:outline-none focus:ring-1 focus:ring-neutral-600 text-neutral-300 shrink-0"
+            className="w-full text-[10px] py-1 px-1.5 border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-[var(--text-secondary)] shrink-0"
           >
             {PROVIDERS.map((p) => (
               <option key={p.value} value={p.value}>
@@ -303,7 +304,7 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
           <select
             value={model}
             onChange={handleModelChange}
-            className="w-full text-[10px] py-1 px-1.5 border border-neutral-700 rounded bg-neutral-900/50 focus:outline-none focus:ring-1 focus:ring-neutral-600 text-neutral-300 shrink-0"
+            className="w-full text-[10px] py-1 px-1.5 border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-[var(--text-secondary)] shrink-0"
           >
             {availableModels.map((m) => (
               <option key={m.value} value={m.value}>
@@ -316,7 +317,7 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
           <div className="shrink-0">
             <button
               onClick={() => setShowParams(!showParams)}
-              className="w-full flex items-center justify-between text-[9px] text-neutral-400 hover:text-neutral-300 py-1"
+              className="w-full flex items-center justify-between text-[9px] text-[var(--text-secondary)] hover:text-[var(--text-secondary)] py-1"
             >
               <span>Parameters</span>
               <svg
@@ -330,10 +331,10 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
               </svg>
             </button>
             {showParams && (
-              <div className="flex flex-col gap-2 pt-1 border-t border-neutral-700/50">
+              <div className="flex flex-col gap-2 pt-1 border-t border-[var(--border-subtle)]/50">
                 {/* Temperature slider */}
                 <div className="flex flex-col gap-0.5">
-                  <label className="text-[9px] text-neutral-500">Temperature: {nodeData.temperature.toFixed(1)}</label>
+                  <label className="text-[9px] text-[var(--text-muted)]">Temperature: {nodeData.temperature.toFixed(1)}</label>
                   <input
                     type="range"
                     min="0"
@@ -341,12 +342,12 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
                     step="0.1"
                     value={nodeData.temperature}
                     onChange={handleTemperatureChange}
-                    className="nodrag w-full h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-neutral-400"
+                    className="nodrag w-full h-1 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
                   />
                 </div>
                 {/* Max tokens slider */}
                 <div className="flex flex-col gap-0.5">
-                  <label className="text-[9px] text-neutral-500">Max Tokens: {nodeData.maxTokens.toLocaleString()}</label>
+                  <label className="text-[9px] text-[var(--text-muted)]">Max Tokens: {nodeData.maxTokens.toLocaleString()}</label>
                   <input
                     type="range"
                     min="256"
@@ -354,7 +355,7 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
                     step="256"
                     value={nodeData.maxTokens}
                     onChange={handleMaxTokensChange}
-                    className="nodrag w-full h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-neutral-400"
+                    className="nodrag w-full h-1 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
                   />
                 </div>
               </div>
@@ -370,20 +371,20 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
           onClick={() => setIsExpanded(false)}
         >
           <div
-            className="bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl flex flex-col w-[640px] max-w-[90vw] max-h-[80vh]"
+            className="bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-lg shadow-xl flex flex-col w-[640px] max-w-[90vw] max-h-[80vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-700 shrink-0">
-              <span className="text-sm font-medium text-neutral-200">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)] shrink-0">
+              <span className="text-sm font-medium text-[var(--text-primary)]">
                 LLM Output
                 {totalPages > 1 && (
-                  <span className="ml-2 text-xs text-neutral-500">{currentPage} / {totalPages}</span>
+                  <span className="ml-2 text-xs text-[var(--text-muted)]">{currentPage} / {totalPages}</span>
                 )}
               </span>
               <button
                 onClick={() => setIsExpanded(false)}
-                className="text-neutral-400 hover:text-neutral-200 transition-colors"
+                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -394,7 +395,7 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
             <textarea
               readOnly
               value={displayText ?? ""}
-              className="flex-1 min-h-0 p-4 text-sm text-neutral-100 bg-transparent resize-none focus:outline-none leading-relaxed"
+              className="flex-1 min-h-0 p-4 text-sm text-[var(--text-primary)] bg-transparent resize-none focus:outline-none leading-relaxed"
             />
           </div>
         </div>,

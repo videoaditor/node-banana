@@ -182,7 +182,7 @@ export function ModelParameters({
           setIsExpanded(newExpanded);
           onExpandChange?.(newExpanded, schema.length);
         }}
-        className="w-full flex items-center justify-between text-[10px] text-neutral-400 hover:text-neutral-300 transition-colors py-0.5"
+        className="w-full flex items-center justify-between text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-secondary)] transition-all duration-[120ms] py-0.5"
       >
         <span className="flex items-center gap-1">
           <svg
@@ -196,7 +196,7 @@ export function ModelParameters({
           </svg>
           Parameters
           {Object.keys(parameters).length > 0 && (
-            <span className="text-neutral-500">({Object.keys(parameters).length})</span>
+            <span className="text-[var(--text-muted)]">({Object.keys(parameters).length})</span>
           )}
         </span>
         {isLoading && (
@@ -222,11 +222,11 @@ export function ModelParameters({
       {isExpanded && (
         <div className="mt-1 space-y-1.5">
           {error ? (
-            <span className="text-[9px] text-red-400">{error}</span>
+            <span className="text-[9px] text-[var(--node-error)]">{error}</span>
           ) : isLoading ? (
-            <span className="text-[9px] text-neutral-500">Loading parameters...</span>
+            <span className="text-[9px] text-[var(--text-muted)]">Loading parameters...</span>
           ) : schema.length === 0 ? (
-            <span className="text-[9px] text-neutral-500">No parameters available</span>
+            <span className="text-[9px] text-[var(--text-muted)]">No parameters available</span>
           ) : (
             schema.map((param) => (
               <ParameterInput
@@ -263,7 +263,7 @@ function ParameterInput({ param, value, onChange }: ParameterInputProps) {
     return (
       <div className="flex flex-col gap-0.5">
         <label
-          className="text-[9px] text-neutral-400"
+          className="text-[9px] text-[var(--text-secondary)]"
           title={param.description || undefined}
         >
           {displayName}
@@ -284,7 +284,7 @@ function ParameterInput({ param, value, onChange }: ParameterInputProps) {
               onChange(val);
             }
           }}
-          className="nodrag nopan w-full text-[9px] py-0.5 px-1 border border-neutral-700 rounded bg-neutral-900/50 focus:outline-none focus:ring-1 focus:ring-neutral-600 text-neutral-300"
+          className="nodrag nopan w-full text-[9px] py-0.5 px-1 border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-[var(--text-secondary)]"
         >
           <option value="">Default</option>
           {param.enum.map((opt) => (
@@ -304,14 +304,14 @@ function ParameterInput({ param, value, onChange }: ParameterInputProps) {
     // Boolean: render as checkbox
     return (
       <label
-        className="flex items-center gap-1.5 text-[9px] text-neutral-400 cursor-pointer"
+        className="flex items-center gap-1.5 text-[9px] text-[var(--text-secondary)] cursor-pointer"
         title={param.description || undefined}
       >
         <input
           type="checkbox"
           checked={effectiveValue}
           onChange={(e) => onChange(e.target.checked)}
-          className="nodrag nopan w-2.5 h-2.5 rounded border-neutral-700 bg-neutral-900/50 text-neutral-600 focus:ring-1 focus:ring-neutral-600 focus:ring-offset-0"
+          className="nodrag nopan w-2.5 h-2.5 rounded border-[var(--border-subtle)] bg-[var(--bg-base)]/50 text-[var(--text-muted)] focus:ring-1 focus:ring-[var(--accent-primary)] focus:ring-offset-0"
         />
         <span>{displayName}</span>
       </label>
@@ -340,12 +340,12 @@ function ParameterInput({ param, value, onChange }: ParameterInputProps) {
     return (
       <div className="flex flex-col gap-0.5">
         <label
-          className="text-[9px] text-neutral-400 flex items-center gap-1"
+          className="text-[9px] text-[var(--text-secondary)] flex items-center gap-1"
           title={param.description || undefined}
         >
           {displayName}
           {hasMin && hasMax && (
-            <span className="text-neutral-500">
+            <span className="text-[var(--text-muted)]">
               ({param.minimum}-{param.maximum})
             </span>
           )}
@@ -366,14 +366,14 @@ function ParameterInput({ param, value, onChange }: ParameterInputProps) {
             }
           }}
           placeholder={param.default !== undefined ? `Default: ${param.default}` : undefined}
-          className={`nodrag nopan w-full text-[9px] py-0.5 px-1 border rounded bg-neutral-900/50 focus:outline-none focus:ring-1 text-neutral-300 placeholder:text-neutral-600 ${
+          className={`nodrag nopan w-full text-[9px] py-0.5 px-1 border rounded bg-[var(--bg-base)]/50 focus:outline-none focus:ring-1 text-[var(--text-secondary)] placeholder:text-[var(--text-muted)] ${
             validationError
-              ? "border-red-500 focus:ring-red-500"
-              : "border-neutral-700 focus:ring-neutral-600"
+              ? "border-[var(--node-error)] focus:ring-red-500"
+              : "border-[var(--border-subtle)] focus:ring-[var(--accent-primary)]"
           }`}
         />
         {validationError && (
-          <span className="text-[8px] text-red-400">{validationError}</span>
+          <span className="text-[8px] text-[var(--node-error)]">{validationError}</span>
         )}
       </div>
     );
@@ -388,7 +388,7 @@ function ParameterInput({ param, value, onChange }: ParameterInputProps) {
   return (
     <div className="flex flex-col gap-0.5">
       <label
-        className="text-[9px] text-neutral-400"
+        className="text-[9px] text-[var(--text-secondary)]"
         title={param.description || undefined}
       >
         {displayName}
@@ -398,7 +398,7 @@ function ParameterInput({ param, value, onChange }: ParameterInputProps) {
         value={(value as string) ?? ""}
         onChange={(e) => onChange(e.target.value || undefined)}
         placeholder={param.default !== undefined ? `Default: ${param.default}` : undefined}
-        className="nodrag nopan w-full text-[9px] py-0.5 px-1 border border-neutral-700 rounded bg-neutral-900/50 focus:outline-none focus:ring-1 focus:ring-neutral-600 text-neutral-300 placeholder:text-neutral-600"
+        className="nodrag nopan w-full text-[9px] py-0.5 px-1 border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
       />
     </div>
   );

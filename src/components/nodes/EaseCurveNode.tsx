@@ -310,17 +310,17 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
       >
         {renderHandles()}
         <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center px-4">
-          <svg className="w-8 h-8 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-8 h-8 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
           </svg>
-          <span className="text-xs text-neutral-400">
+          <span className="text-xs text-[var(--text-secondary)]">
             Your browser doesn&apos;t support video encoding.
           </span>
           <a
             href="https://discord.gg/placeholder"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[10px] text-blue-400 hover:text-blue-300 underline"
+            className="text-[10px] text-[var(--accent-primary)] hover:text-blue-300 underline"
           >
             Doesn&apos;t seem right? Message Willie on Discord.
           </a>
@@ -346,7 +346,7 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
       >
         {renderHandles()}
         <div className="flex-1 flex items-center justify-center">
-          <div className="flex items-center gap-2 text-neutral-400">
+          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -378,22 +378,22 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
 
       <div className="flex-1 flex flex-col min-h-0 gap-2">
         {/* Tab bar */}
-        <div className="flex border-b border-neutral-700">
+        <div className="flex border-b border-[var(--border-subtle)]">
           <button
-            className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+            className={`px-3 py-1.5 text-xs font-medium transition-all duration-[120ms] ${
               activeTab === "editor"
                 ? "text-lime-300 border-b-2 border-lime-300"
-                : "text-neutral-400 hover:text-neutral-300"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-secondary)]"
             }`}
             onClick={() => switchTab("editor")}
           >
             Editor
           </button>
           <button
-            className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+            className={`px-3 py-1.5 text-xs font-medium transition-all duration-[120ms] ${
               activeTab === "video"
                 ? "text-lime-300 border-b-2 border-lime-300"
-                : "text-neutral-400 hover:text-neutral-300"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-secondary)]"
             }`}
             onClick={() => switchTab("video")}
           >
@@ -430,7 +430,7 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
 
               {/* Controls row: Duration + Presets button */}
               <div className="flex items-center gap-2 px-2">
-                <label className="text-[10px] text-neutral-400 whitespace-nowrap">Duration</label>
+                <label className="text-[10px] text-[var(--text-secondary)] whitespace-nowrap">Duration</label>
                 <input
                   type="number"
                   min="0.1"
@@ -438,15 +438,15 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
                   step="0.1"
                   value={nodeData.outputDuration}
                   onChange={handleDurationChange}
-                  className="nodrag w-16 px-1.5 py-1 bg-neutral-800 border border-neutral-600 rounded text-xs text-neutral-200 text-center"
+                  className="nodrag w-16 px-1.5 py-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded text-xs text-[var(--text-primary)] text-center"
                 />
-                <span className="text-[10px] text-neutral-500">sec</span>
+                <span className="text-[10px] text-[var(--text-muted)]">sec</span>
 
                 {/* Presets button */}
                 <div className="ml-auto">
                   <button
                     ref={presetsButtonRef}
-                    className="nodrag nopan px-2 py-1 bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 rounded text-xs text-neutral-300 transition-colors flex items-center gap-1 disabled:opacity-40 disabled:pointer-events-none"
+                    className="nodrag nopan px-2 py-1 bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-xs text-[var(--text-secondary)] transition-all duration-[120ms] flex items-center gap-1 disabled:opacity-40 disabled:pointer-events-none"
                     onClick={() => setShowPresets(!showPresets)}
                     disabled={isInherited}
                   >
@@ -463,7 +463,7 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
               {/* Apply button */}
               <div className="flex justify-end px-2">
                 <button
-                  className="nodrag nopan px-3 py-1.5 bg-lime-300/15 hover:bg-lime-300/25 border border-lime-300/30 rounded text-xs text-lime-300 font-medium transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                  className="nodrag nopan px-3 py-1.5 bg-lime-300/15 hover:bg-lime-300/25 border border-lime-300/30 rounded text-xs text-lime-300 font-medium transition-all duration-[120ms] disabled:opacity-40 disabled:pointer-events-none"
                   onClick={handleRun}
                   disabled={isRunning || nodeData.status === "loading" || isInherited}
                 >
@@ -474,11 +474,11 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
 
             {/* Inheritance overlay */}
             {isInherited && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-neutral-900/80 backdrop-blur-sm rounded z-10">
-                <p className="text-sm text-neutral-200 font-medium">Settings inherited from parent node</p>
-                <p className="text-[11px] text-neutral-400 mt-1">Break connection to edit manually</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--bg-base)]/80 backdrop-blur-sm rounded z-10">
+                <p className="text-sm text-[var(--text-primary)] font-medium">Settings inherited from parent node</p>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Break connection to edit manually</p>
                 <button
-                  className="mt-3 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded text-xs text-neutral-200 transition-colors"
+                  className="mt-3 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded text-xs text-[var(--text-primary)] transition-all duration-[120ms]"
                   onClick={handleBreakInheritance}
                 >
                   Control manually
@@ -503,7 +503,7 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
                 />
                 <button
                   onClick={() => updateNodeData(id, { outputVideo: null, status: "idle" })}
-                  className="absolute top-1 right-1 w-5 h-5 bg-neutral-900/80 hover:bg-red-600/80 rounded flex items-center justify-center text-neutral-400 hover:text-white transition-colors"
+                  className="absolute top-1 right-1 w-5 h-5 bg-[var(--bg-base)]/80 hover:bg-[var(--node-error)]/80 rounded flex items-center justify-center text-[var(--text-secondary)] hover:text-white transition-all duration-[120ms]"
                   title="Clear video"
                 >
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -512,8 +512,8 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
                 </button>
               </div>
             ) : (
-              <div className="flex-1 flex items-center justify-center border border-dashed border-neutral-600 rounded">
-                <span className="text-[10px] text-neutral-500">Run workflow to apply ease curve</span>
+              <div className="flex-1 flex items-center justify-center border border-dashed border-[var(--border-subtle)] rounded">
+                <span className="text-[10px] text-[var(--text-muted)]">Run workflow to apply ease curve</span>
               </div>
             )}
           </div>
@@ -521,7 +521,7 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
 
         {/* Processing overlay */}
         {nodeData.status === "loading" && (
-          <div className="absolute inset-0 bg-neutral-900/70 rounded flex flex-col items-center justify-center gap-2">
+          <div className="absolute inset-0 bg-[var(--bg-base)]/70 rounded flex flex-col items-center justify-center gap-2">
             <svg className="w-6 h-6 animate-spin text-white" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -533,7 +533,7 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
         {/* Error display */}
         {nodeData.status === "error" && nodeData.error && (
           <div className="px-2 py-1.5 bg-red-900/30 border border-red-700/50 rounded">
-            <p className="text-[10px] text-red-400 break-words">{nodeData.error}</p>
+            <p className="text-[10px] text-[var(--node-error)] break-words">{nodeData.error}</p>
           </div>
         )}
       </div>
@@ -542,7 +542,7 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
       {showPresets && presetsPosition && createPortal(
         <div
           ref={presetsPopoverRef}
-          className="fixed z-[9999] w-[280px] bg-neutral-800 border border-neutral-600 rounded-lg shadow-xl p-2 nowheel"
+          className="fixed z-[9999] w-[280px] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg shadow-xl p-2 nowheel"
           style={{
             top: presetsPosition.top,
             left: presetsPosition.left,
@@ -551,7 +551,7 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
         >
           {/* Preset Bezier thumbnails (top section) */}
           <div className="mb-2">
-            <div className="text-[9px] text-neutral-500 uppercase tracking-wider mb-1 px-1">
+            <div className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider mb-1 px-1">
               Bezier Presets
             </div>
             <div className="grid grid-cols-5 gap-1">
@@ -561,10 +561,10 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
                 return (
                   <button
                     key={name}
-                    className={`flex flex-col items-center gap-0.5 p-1 rounded transition-colors ${
+                    className={`flex flex-col items-center gap-0.5 p-1 rounded transition-all duration-[120ms] ${
                       isActive
                         ? "bg-lime-300/20 border border-lime-300/40"
-                        : "hover:bg-neutral-700 border border-transparent"
+                        : "hover:bg-[var(--bg-surface)] border border-transparent"
                     }`}
                     onClick={() => handleSelectPreset(name)}
                     title={name}
@@ -583,7 +583,7 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
                         />
                       )}
                     </svg>
-                    <span className="text-[7px] text-neutral-400 truncate w-full text-center leading-none">
+                    <span className="text-[7px] text-[var(--text-secondary)] truncate w-full text-center leading-none">
                       {name.replace(/^ease/, "")}
                     </span>
                   </button>
@@ -593,8 +593,8 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
           </div>
 
           {/* All easing functions (scrollable grid) */}
-          <div className="border-t border-neutral-700 pt-2">
-            <div className="text-[9px] text-neutral-500 uppercase tracking-wider mb-1 px-1">
+          <div className="border-t border-[var(--border-subtle)] pt-2">
+            <div className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider mb-1 px-1">
               All Easing Functions
             </div>
             <div className="grid grid-cols-5 gap-1 max-h-[200px] overflow-y-auto nowheel">
@@ -603,10 +603,10 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
                 return (
                   <button
                     key={name}
-                    className={`flex flex-col items-center gap-0.5 p-1 rounded transition-colors ${
+                    className={`flex flex-col items-center gap-0.5 p-1 rounded transition-all duration-[120ms] ${
                       isActive
                         ? "bg-lime-300/20 border border-lime-300/40"
-                        : "hover:bg-neutral-700 border border-transparent"
+                        : "hover:bg-[var(--bg-surface)] border border-transparent"
                     }`}
                     onClick={() => handleSelectEasing(name)}
                     title={name}
@@ -623,7 +623,7 @@ export function EaseCurveNode({ id, data, selected }: NodeProps<EaseCurveNodeTyp
                         strokeLinejoin="round"
                       />
                     </svg>
-                    <span className="text-[7px] text-neutral-400 truncate w-full text-center leading-none">
+                    <span className="text-[7px] text-[var(--text-secondary)] truncate w-full text-center leading-none">
                       {name.replace(/^ease/, "")}
                     </span>
                   </button>

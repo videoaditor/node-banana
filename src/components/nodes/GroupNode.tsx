@@ -156,7 +156,7 @@ export function GroupNode({ id, data, selected }: NodeProps<GroupNodeType>) {
         minWidth={200}
         minHeight={100}
         lineClassName="!border-transparent"
-        handleClassName="!w-3 !h-3 !bg-neutral-500/50 !border-neutral-400 hover:!bg-neutral-400"
+        handleClassName="!w-3 !h-3 !bg-[var(--text-muted)]/50 !border-[var(--text-secondary)] hover:!bg-[var(--text-secondary)]"
       />
       <div
         className="w-full h-full rounded-xl overflow-hidden"
@@ -196,12 +196,12 @@ export function GroupNode({ id, data, selected }: NodeProps<GroupNodeType>) {
           <div className="relative" ref={colorPickerRef}>
             <button
               onClick={() => setShowColorPicker(!showColorPicker)}
-              className="w-5 h-5 rounded border border-white/30 hover:border-white/60 transition-colors"
+              className="w-5 h-5 rounded border border-white/30 hover:border-white/60 transition-all duration-[120ms]"
               style={{ backgroundColor: bgColor }}
               title="Change color"
             />
             {showColorPicker && (
-              <div className="absolute top-full right-0 mt-1 p-2 bg-neutral-800 rounded-lg shadow-xl border border-neutral-600 grid grid-cols-4 gap-1.5 z-50">
+              <div className="absolute top-full right-0 mt-1 p-2 bg-[var(--bg-elevated)] rounded-lg shadow-xl border border-[var(--border-subtle)] grid grid-cols-4 gap-1.5 z-50">
                 {COLOR_OPTIONS.map(({ color, label }) => (
                   <button
                     key={color}
@@ -222,7 +222,7 @@ export function GroupNode({ id, data, selected }: NodeProps<GroupNodeType>) {
           {/* Delete Button */}
           <button
             onClick={handleDelete}
-            className="p-0.5 rounded hover:bg-white/20 text-white/70 hover:text-white transition-colors"
+            className="p-0.5 rounded hover:bg-white/20 text-white/70 hover:text-white transition-all duration-[120ms]"
             title="Delete group"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

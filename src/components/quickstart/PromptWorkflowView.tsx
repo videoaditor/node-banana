@@ -60,9 +60,9 @@ export function PromptWorkflowView({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-neutral-700 flex items-center gap-4">
+      <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex items-center gap-4">
         <QuickstartBackButton onClick={onBack} disabled={isGenerating} />
-        <h2 className="text-lg font-semibold text-neutral-100">
+        <h2 className="text-lg font-semibold text-[var(--text-primary)]">
           Prompt a Workflow
         </h2>
       </div>
@@ -71,7 +71,7 @@ export function PromptWorkflowView({
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* Description Input */}
         <div className="space-y-2">
-          <label className="text-xs font-medium text-neutral-400">
+          <label className="text-xs font-medium text-[var(--text-secondary)]">
             Describe your workflow
           </label>
           <textarea
@@ -84,27 +84,27 @@ export function PromptWorkflowView({
             disabled={isGenerating}
             rows={5}
             className={`
-              w-full px-4 py-3 rounded-lg border bg-neutral-900/50 text-sm text-neutral-100
-              placeholder:text-neutral-500 resize-none
-              focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
+              w-full px-4 py-3 rounded-lg border bg-[var(--bg-base)]/50 text-sm text-[var(--text-primary)]
+              placeholder:text-[var(--text-muted)] resize-none
+              focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/50 focus:border-[var(--accent-primary)]/50
               ${isGenerating ? "opacity-50 cursor-not-allowed" : ""}
-              border-neutral-700 hover:border-neutral-600
+              border-[var(--border-subtle)] hover:border-[var(--border-subtle)]
             `}
           />
-          <p className="text-xs text-neutral-400">
+          <p className="text-xs text-[var(--text-secondary)]">
             Describe what you want your workflow to accomplish. Be specific
             about inputs, outputs, and any transformations.
           </p>
-          <p className="text-xs text-neutral-400">
+          <p className="text-xs text-[var(--text-secondary)]">
             Note: This feature currently only works with Gemini models.
           </p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-[var(--node-error)]/10 border border-[var(--node-error)]/30">
             <svg
-              className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0"
+              className="w-4 h-4 text-[var(--node-error)] mt-0.5 flex-shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -117,10 +117,10 @@ export function PromptWorkflowView({
               />
             </svg>
             <div className="flex-1">
-              <p className="text-sm text-red-400">{error}</p>
+              <p className="text-sm text-[var(--node-error)]">{error}</p>
               <button
                 onClick={() => setError(null)}
-                className="text-xs text-red-400/70 hover:text-red-400 mt-1"
+                className="text-xs text-[var(--node-error)]/70 hover:text-[var(--node-error)] mt-1"
               >
                 Dismiss
               </button>
@@ -130,7 +130,7 @@ export function PromptWorkflowView({
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-neutral-700 flex justify-end bg-neutral-800/50">
+      <div className="px-6 py-4 border-t border-[var(--border-subtle)] flex justify-end bg-[var(--bg-elevated)]/50">
         <button
           onClick={handleGenerate}
           disabled={!canGenerate}
@@ -138,8 +138,8 @@ export function PromptWorkflowView({
             flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all
             ${
               canGenerate
-                ? "bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/20"
-                : "bg-neutral-700 text-neutral-400 cursor-not-allowed"
+                ? "bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-primary)] shadow-lg shadow-blue-500/20"
+                : "bg-[var(--bg-surface)] text-[var(--text-secondary)] cursor-not-allowed"
             }
           `}
         >

@@ -18,3 +18,4 @@ export { GroupNode } from "./GroupNode";
 export { ImageIteratorNode } from "./ImageIteratorNode";
 export { TextIteratorNode } from "./TextIteratorNode";
 export { WebScraperNode } from "./WebScraperNode";
+export { StickyNoteNode } from "./StickyNoteNode";

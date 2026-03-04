@@ -102,6 +102,7 @@ export function AnnotationNode({ id, data, selected }: NodeProps<AnnotationNodeT
       onCommentChange={(comment) => updateNodeData(id, { comment: comment || undefined })}
       selected={selected}
       commentNavigation={commentNavigation ?? undefined}
+      nodeAccentColor="green"
     >
       <input
         ref={fileInputRef}
@@ -145,7 +146,7 @@ export function AnnotationNode({ id, data, selected }: NodeProps<AnnotationNodeT
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-[120ms] rounded flex items-center justify-center pointer-events-none">
             <span className="text-[10px] font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-2 py-1 rounded">
               {nodeData.annotations.length > 0 ? `Edit (${nodeData.annotations.length})` : "Add annotations"}
             </span>
@@ -156,12 +157,12 @@ export function AnnotationNode({ id, data, selected }: NodeProps<AnnotationNodeT
           onClick={() => fileInputRef.current?.click()}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-          className="w-full flex-1 min-h-[112px] border border-dashed border-neutral-600 rounded flex flex-col items-center justify-center cursor-pointer hover:border-neutral-500 hover:bg-neutral-700/50 transition-colors"
+          className="w-full flex-1 min-h-[112px] border border-dashed border-[var(--border-subtle)] rounded flex flex-col items-center justify-center cursor-pointer hover:border-[var(--border-subtle)] hover:bg-[var(--bg-surface)]/50 transition-all duration-[120ms]"
         >
-          <svg className="w-5 h-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-5 h-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          <span className="text-[10px] text-neutral-400 mt-1">
+          <span className="text-[10px] text-[var(--text-secondary)] mt-1">
             Drop, click, or connect
           </span>
         </div>

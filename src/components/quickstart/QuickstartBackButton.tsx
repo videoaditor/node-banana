@@ -14,8 +14,8 @@ export function QuickstartBackButton({
       onClick={onClick}
       disabled={disabled}
       className={`
-        flex items-center gap-1.5 text-sm font-medium text-neutral-400
-        hover:text-neutral-200 transition-colors
+        flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)]
+        hover:text-[var(--text-primary)] transition-all duration-[120ms]
         ${disabled ? "opacity-50 cursor-not-allowed" : ""}
       `}
     >

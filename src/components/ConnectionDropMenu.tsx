@@ -425,15 +425,15 @@ export function ConnectionDropMenu({
     <div
       ref={menuRef}
       tabIndex={-1}
-      className="fixed z-100 bg-neutral-800 border border-neutral-600 rounded-lg shadow-xl overflow-hidden min-w-[160px] outline-none"
+      className="fixed z-100 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg shadow-xl overflow-hidden min-w-[160px] outline-none"
       style={{
         left: position.x,
         top: position.y,
         transform: "translate(-50%, -50%)",
       }}
     >
-      <div className="px-2 py-1.5 border-b border-neutral-700">
-        <span className="text-[10px] text-neutral-400 uppercase tracking-wide">
+      <div className="px-2 py-1.5 border-b border-[var(--border-subtle)]">
+        <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
           Add {handleType} node
         </span>
       </div>
@@ -443,10 +443,10 @@ export function ConnectionDropMenu({
             key={option.type}
             onClick={() => onSelect({ type: option.type, isAction: option.isAction || false })}
             onMouseEnter={() => setSelectedIndex(index)}
-            className={`w-full px-3 py-2 text-left text-[11px] font-medium flex items-center gap-2 transition-colors ${
+            className={`w-full px-3 py-2 text-left text-[11px] font-medium flex items-center gap-2 transition-all duration-[120ms] ${
               index === selectedIndex
-                ? "bg-neutral-700 text-neutral-100"
-                : "text-neutral-300 hover:bg-neutral-700 hover:text-neutral-100"
+                ? "bg-[var(--bg-surface)] text-[var(--text-primary)]"
+                : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
             }`}
           >
             {option.icon}
@@ -454,12 +454,12 @@ export function ConnectionDropMenu({
           </button>
         ))}
       </div>
-      <div className="px-2 py-1.5 border-t border-neutral-700 flex items-center justify-between">
-        <span className="text-[9px] text-neutral-500">
-          <kbd className="px-1 py-0.5 bg-neutral-700 rounded text-[8px]">↑↓</kbd> navigate
+      <div className="px-2 py-1.5 border-t border-[var(--border-subtle)] flex items-center justify-between">
+        <span className="text-[9px] text-[var(--text-muted)]">
+          <kbd className="px-1 py-0.5 bg-[var(--bg-surface)] rounded text-[8px]">↑↓</kbd> navigate
         </span>
-        <span className="text-[9px] text-neutral-500">
-          <kbd className="px-1 py-0.5 bg-neutral-700 rounded text-[8px]">↵</kbd> select
+        <span className="text-[9px] text-[var(--text-muted)]">
+          <kbd className="px-1 py-0.5 bg-[var(--bg-surface)] rounded text-[8px]">↵</kbd> select
         </span>
       </div>
     </div>

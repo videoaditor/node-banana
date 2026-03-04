@@ -47,6 +47,7 @@ const DEFAULT_DIMENSIONS: Record<NodeType, { width: number; height: number }> = 
   imageIterator: { width: 340, height: 300 },
   textIterator: { width: 340, height: 280 },
   webScraper: { width: 340, height: 320 },
+  stickyNote: { width: 200, height: 160 },
 };
 
 /**
@@ -375,6 +376,11 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
         status: "idle",
         error: null,
       };
+    case "stickyNote":
+      return {
+        text: "",
+        color: "yellow",
+      };
   }
 }
 
@@ -411,15 +417,15 @@ export function repairWorkflowJSON(workflow: unknown): WorkflowFile {
         const position =
           node.position && typeof node.position === "object"
             ? {
-                x:
-                  typeof (node.position as Record<string, unknown>).x === "number"
-                    ? ((node.position as Record<string, unknown>).x as number)
-                    : 50 + index * 400,
-                y:
-                  typeof (node.position as Record<string, unknown>).y === "number"
-                    ? ((node.position as Record<string, unknown>).y as number)
-                    : 100,
-              }
+              x:
+                typeof (node.position as Record<string, unknown>).x === "number"
+                  ? ((node.position as Record<string, unknown>).x as number)
+                  : 50 + index * 400,
+              y:
+                typeof (node.position as Record<string, unknown>).y === "number"
+                  ? ((node.position as Record<string, unknown>).y as number)
+                  : 100,
+            }
             : { x: 50 + index * 400, y: 100 };
 
         // Merge existing data with defaults

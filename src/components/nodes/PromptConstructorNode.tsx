@@ -159,6 +159,7 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
         onExpand={handleOpenModal}
         selected={selected}
         commentNavigation={commentNavigation ?? undefined}
+        nodeAccentColor="blue"
       >
         {/* Dynamic labeled text input handles */}
         {Array.from({ length: inputCount }, (_, i) => {
@@ -192,23 +193,80 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
         })}
 
         <div className="relative flex flex-col gap-2 flex-1 min-h-0">
-          {/* Append text — optional suffix added after all inputs */}
-          <textarea
-            ref={staticTextareaRef}
-            value={localStaticText}
-            onChange={handleStaticChange}
-            onFocus={handleStaticFocus}
-            onBlur={handleStaticBlur}
-            placeholder="Append text (optional)..."
-            className="nodrag nopan nowheel w-full h-[52px] p-2 text-xs leading-relaxed text-neutral-100 border border-neutral-700 rounded bg-neutral-900/50 resize-none focus:outline-none focus:ring-1 focus:ring-neutral-600 placeholder:text-neutral-500"
-          />
+          {/* Live assembly preview — shows connected input values */}
+          <div className="flex flex-col gap-0.5">
+            <div className="text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">Assembly</div>
+            {Array.from({ length: inputCount }, (_, i) => {
+              const inputNum = i + 1;
+              const handleId = `text_input_${inputNum}`;
+              const edge = edges.find(e => e.target === id && e.targetHandle === handleId);
+              const sourceNode = edge ? nodes.find(n => n.id === edge.source) : null;
+              const sourceText = sourceNode
+                ? ((sourceNode.data as Record<string, unknown>).outputText as string)
+                ?? ((sourceNode.data as Record<string, unknown>).prompt as string)
+                ?? null
+                : null;
+              const isConnected = !!edge;
+
+              return (
+                <div
+                  key={handleId}
+                  className={`flex items-start gap-1.5 px-1.5 py-1 rounded text-[10px] border ${isConnected
+                      ? 'border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/5'
+                      : 'border-[var(--border-subtle)]/50 bg-transparent'
+                    }`}
+                >
+                  <span className={`shrink-0 font-medium ${isConnected ? 'text-[var(--accent-primary)]' : 'text-[var(--text-muted)]'}`}>
+                    {inputNum}.
+                  </span>
+                  <span className={`truncate ${isConnected ? 'text-[var(--text-secondary)]' : 'text-[var(--text-muted)] italic'}`}>
+                    {sourceText ? (sourceText.length > 60 ? sourceText.slice(0, 60) + '…' : sourceText) : 'not connected'}
+                  </span>
+                </div>
+              );
+            })}
+
+            {/* Append text indicator */}
+            {localStaticText.trim() && (
+              <div className="flex items-start gap-1.5 px-1.5 py-1 rounded text-[10px] border border-[var(--node-warning)]/30 bg-[var(--node-warning)]/5">
+                <span className="shrink-0 font-medium text-[var(--node-warning)]">+</span>
+                <span className="truncate text-[var(--text-secondary)]">
+                  {localStaticText.length > 60 ? localStaticText.slice(0, 60) + '…' : localStaticText}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Suffix text — optional, always appended after all inputs */}
+          <div className="flex flex-col gap-0.5">
+            <label className="text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">Suffix (always added)</label>
+            <textarea
+              ref={staticTextareaRef}
+              value={localStaticText}
+              onChange={handleStaticChange}
+              onFocus={handleStaticFocus}
+              onBlur={handleStaticBlur}
+              placeholder="e.g. 4k, cinematic lighting, detailed..."
+              className="nodrag nopan nowheel w-full h-[42px] p-2 text-xs leading-relaxed text-[var(--text-primary)] border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/50 resize-none focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] placeholder:text-[var(--text-muted)]"
+            />
+          </div>
+
+          {/* Output preview — shows assembled result */}
+          {nodeData.outputText && (
+            <div className="flex flex-col gap-0.5">
+              <div className="text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--node-success)]">→ Output</div>
+              <div className="p-1.5 text-[10px] text-[var(--text-secondary)] border border-[var(--node-success)]/20 rounded bg-[var(--node-success)]/5 whitespace-pre-wrap break-words max-h-[60px] overflow-y-auto leading-relaxed">
+                {nodeData.outputText}
+              </div>
+            </div>
+          )}
 
           {/* Add/Remove buttons — minimal, same style */}
           <div className="flex gap-1.5 shrink-0">
             <button
               onClick={handleAddInput}
               disabled={inputCount >= MAX_INPUTS}
-              className="flex-1 text-[10px] py-1 px-2 bg-neutral-800 hover:bg-neutral-700 disabled:opacity-30 disabled:cursor-not-allowed border border-neutral-600 rounded text-neutral-400 transition-colors flex items-center justify-center gap-1"
+              className="flex-1 text-[10px] py-1 px-2 bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)] disabled:opacity-30 disabled:cursor-not-allowed border border-[var(--border-subtle)] rounded text-[var(--text-secondary)] transition-all duration-[120ms] flex items-center justify-center gap-1"
             >
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -218,7 +276,7 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
             <button
               onClick={handleRemoveInput}
               disabled={inputCount <= MIN_INPUTS}
-              className="flex-1 text-[10px] py-1 px-2 bg-neutral-800 hover:bg-neutral-700 disabled:opacity-30 disabled:cursor-not-allowed border border-neutral-600 rounded text-neutral-400 transition-colors flex items-center justify-center gap-1"
+              className="flex-1 text-[10px] py-1 px-2 bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)] disabled:opacity-30 disabled:cursor-not-allowed border border-[var(--border-subtle)] rounded text-[var(--text-secondary)] transition-all duration-[120ms] flex items-center justify-center gap-1"
             >
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
@@ -226,13 +284,6 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
               Remove Input
             </button>
           </div>
-
-          {/* Connected summary */}
-          {connectedInputLabels.length > 0 && (
-            <div className="text-[10px] text-neutral-500 leading-tight">
-              {connectedInputLabels.join(" · ")}
-            </div>
-          )}
         </div>
 
         {/* Text output handle */}

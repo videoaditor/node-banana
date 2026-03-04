@@ -117,13 +117,13 @@ export function AppModeModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-      <div className="bg-neutral-900 rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-[var(--bg-base)] rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-neutral-800">
-          <h2 className="text-2xl font-semibold text-neutral-100">App Mode</h2>
+        <div className="flex items-center justify-between p-6 border-b border-[var(--border-subtle)]">
+          <h2 className="text-2xl font-semibold text-[var(--text-primary)]">App Mode</h2>
           <button
             onClick={onClose}
-            className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 rounded-lg transition-colors"
+            className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-lg transition-all duration-[120ms]"
             title="Close"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -137,9 +137,9 @@ export function AppModeModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
           <div className="grid grid-cols-2 gap-6">
             {/* Left: Inputs */}
             <div>
-              <h3 className="text-lg font-medium text-neutral-200 mb-4">Inputs</h3>
+              <h3 className="text-lg font-medium text-[var(--text-primary)] mb-4">Inputs</h3>
               {appInputNodes.length === 0 ? (
-                <p className="text-sm text-neutral-500">
+                <p className="text-sm text-[var(--text-muted)]">
                   No app inputs configured. Enable "App Input" toggle on Prompt or ImageInput nodes.
                 </p>
               ) : (
@@ -152,7 +152,7 @@ export function AppModeModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
 
                     return (
                       <div key={node.id} className="space-y-2">
-                        <label className="block text-sm font-medium text-neutral-300">
+                        <label className="block text-sm font-medium text-[var(--text-secondary)]">
                           {label}
                         </label>
                         {isPrompt ? (
@@ -160,7 +160,7 @@ export function AppModeModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                             value={(inputValues[node.id] as string) || ""}
                             onChange={(e) => handleInputChange(node.id, e.target.value)}
                             placeholder="Enter text..."
-                            className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:border-orange-500 resize-none"
+                            className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-orange-500 resize-none"
                             rows={3}
                           />
                         ) : (
@@ -174,13 +174,13 @@ export function AppModeModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                                   handleFileUpload(node.id, file);
                                 }
                               }}
-                              className="w-full text-sm text-neutral-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-600 file:text-white hover:file:bg-orange-700 file:cursor-pointer"
+                              className="w-full text-sm text-[var(--text-secondary)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-600 file:text-white hover:file:bg-orange-700 file:cursor-pointer"
                             />
                             {inputValues[node.id] && (
                               <img
                                 src={inputValues[node.id] as string}
                                 alt="Preview"
-                                className="w-full rounded-lg border border-neutral-700"
+                                className="w-full rounded-lg border border-[var(--border-subtle)]"
                               />
                             )}
                           </div>
@@ -194,12 +194,12 @@ export function AppModeModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
 
             {/* Right: Output */}
             <div>
-              <h3 className="text-lg font-medium text-neutral-200 mb-4">Output</h3>
+              <h3 className="text-lg font-medium text-[var(--text-primary)] mb-4">Output</h3>
               {isRunning ? (
                 <div className="flex items-center justify-center h-64">
                   <div className="text-center">
                     <div className="w-12 h-12 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-sm text-neutral-400">Running workflow...</p>
+                    <p className="text-sm text-[var(--text-secondary)]">Running workflow...</p>
                   </div>
                 </div>
               ) : outputImages.length > 0 ? (
@@ -209,13 +209,13 @@ export function AppModeModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                       key={idx}
                       src={img}
                       alt={`Output ${idx + 1}`}
-                      className="w-full rounded-lg border border-neutral-700"
+                      className="w-full rounded-lg border border-[var(--border-subtle)]"
                     />
                   ))}
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-64 border-2 border-dashed border-neutral-700 rounded-lg">
-                  <p className="text-sm text-neutral-500">
+                <div className="flex items-center justify-center h-64 border-2 border-dashed border-[var(--border-subtle)] rounded-lg">
+                  <p className="text-sm text-[var(--text-muted)]">
                     Results will appear here after running
                   </p>
                 </div>
@@ -225,17 +225,17 @@ export function AppModeModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-neutral-800 flex items-center justify-between">
+        <div className="p-6 border-t border-[var(--border-subtle)] flex items-center justify-between">
           <button
             onClick={() => setShowPreviousRuns(!showPreviousRuns)}
-            className="text-sm text-neutral-400 hover:text-neutral-200 transition-colors"
+            className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
           >
             {showPreviousRuns ? "Hide" : "View"} previous runs
           </button>
           <button
             onClick={handleRun}
             disabled={isRunning || appInputNodes.length === 0}
-            className="px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-neutral-700 disabled:text-neutral-500 text-white font-semibold rounded-lg transition-colors"
+            className="px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-[var(--bg-surface)] disabled:text-[var(--text-muted)] text-white font-semibold rounded-lg transition-all duration-[120ms]"
           >
             {isRunning ? "Running..." : "Run Workflow"}
           </button>
@@ -243,13 +243,13 @@ export function AppModeModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
 
         {/* Previous runs panel */}
         {showPreviousRuns && previousRuns.length > 0 && (
-          <div className="border-t border-neutral-800 p-6 bg-neutral-950 max-h-60 overflow-y-auto">
-            <h4 className="text-sm font-medium text-neutral-300 mb-3">Previous Runs</h4>
+          <div className="border-t border-[var(--border-subtle)] p-6 bg-[var(--bg-base)] max-h-60 overflow-y-auto">
+            <h4 className="text-sm font-medium text-[var(--text-secondary)] mb-3">Previous Runs</h4>
             <div className="space-y-3">
               {previousRuns.map((run, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center gap-3 p-2 bg-neutral-900 rounded-lg hover:bg-neutral-800 cursor-pointer"
+                  className="flex items-center gap-3 p-2 bg-[var(--bg-base)] rounded-lg hover:bg-[var(--bg-elevated)] cursor-pointer"
                   onClick={() => setOutputImages(run.images)}
                 >
                   <div className="flex gap-2">
@@ -258,11 +258,11 @@ export function AppModeModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                         key={imgIdx}
                         src={img}
                         alt=""
-                        className="w-12 h-12 object-cover rounded border border-neutral-700"
+                        className="w-12 h-12 object-cover rounded border border-[var(--border-subtle)]"
                       />
                     ))}
                   </div>
-                  <span className="text-xs text-neutral-500">
+                  <span className="text-xs text-[var(--text-muted)]">
                     {new Date(run.timestamp).toLocaleString()}
                   </span>
                 </div>

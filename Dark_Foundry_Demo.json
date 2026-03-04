@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "id": "wf_1772635205896_tj6lec74n",
+  "name": "Dark Foundry Demo",
+  "nodes": [
+    {
+      "id": "imageInput-1",
+      "type": "imageInput",
+      "position": {
+        "x": 283.97161576892427,
+        "y": 257.2918710118296
+      },
+      "data": {
+        "image": null,
+        "filename": null,
+        "dimensions": null
+      },
+      "style": {
+        "width": 300,
+        "height": 280
+      },
+      "measured": {
+        "width": 300,
+        "height": 280
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "annotation-2",
+      "type": "annotation",
+      "position": {
+        "x": -237.04383250149203,
+        "y": 452.7817702819944
+      },
+      "data": {
+        "sourceImage": null,
+        "annotations": [],
+        "outputImage": null
+      },
+      "style": {
+        "width": 300,
+        "height": 280
+      },
+      "measured": {
+        "width": 300,
+        "height": 280
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "nanoBanana-3",
+      "type": "nanoBanana",
+      "position": {
+        "x": 831.6117660968029,
+        "y": 472.9589028038212
+      },
+      "data": {
+        "inputImages": [],
+        "inputPrompt": null,
+        "outputImage": null,
+        "aspectRatio": "1:1",
+        "resolution": "1K",
+        "model": "nano-banana-pro",
+        "selectedModel": {
+          "provider": "gemini",
+          "modelId": "nano-banana-pro",
+          "displayName": "Nano Banana Pro"
+        },
+        "useGoogleSearch": false,
+        "status": "idle",
+        "error": null,
+        "imageHistory": [],
+        "selectedHistoryIndex": 0,
+        "imageInputHandles": 1,
+        "inputSchema": []
+      },
+      "style": {
+        "width": 300,
+        "height": 300
+      },
+      "measured": {
+        "width": 300,
+        "height": 300
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "llmGenerate-4",
+      "type": "llmGenerate",
+      "position": {
+        "x": 742.1253917644133,
+        "y": 55.72033670337029
+      },
+      "data": {
+        "inputPrompt": null,
+        "inputImages": [],
+        "outputText": null,
+        "outputHistory": [],
+        "selectedHistoryIndex": -1,
+        "provider": "google",
+        "model": "gemini-3-flash-preview",
+        "temperature": 0.7,
+        "maxTokens": 8192,
+        "status": "idle",
+        "error": null
+      },
+      "style": {
+        "width": 320,
+        "height": 360
+      },
+      "measured": {
+        "width": 320,
+        "height": 360
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "prompt-5",
+      "type": "prompt",
+      "position": {
+        "x": -192.5301952756818,
+        "y": 103.39191350511526
+      },
+      "data": {
+        "prompt": "",
+        "prompts": [
+          ""
+        ],
+        "activePromptIndex": 0
+      },
+      "style": {
+        "width": 320,
+        "height": 220
+      },
+      "measured": {
+        "width": 320,
+        "height": 220
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "type": "editable",
+      "animated": false,
+      "source": "annotation-2",
+      "sourceHandle": "image",
+      "target": "imageInput-1",
+      "targetHandle": "reference",
+      "id": "edge-annotation-2-imageInput-1-image-reference",
+      "data": {
+        "createdAt": 1772635779720
+      },
+      "selected": false
+    },
+    {
+      "source": "imageInput-1",
+      "sourceHandle": "image",
+      "target": "llmGenerate-4",
+      "targetHandle": "image",
+      "id": "edge-imageInput-1-llmGenerate-4-image-image",
+      "data": {
+        "createdAt": 1772638236302
+      },
+      "selected": false
+    }
+  ],
+  "edgeStyle": "curved"
+}

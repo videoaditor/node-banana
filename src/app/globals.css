@@ -1,46 +1,80 @@
 @import "tailwindcss";
 
+/* ── Dark Foundry Design System ───────────────────────────────────── */
+
 @theme {
-  --color-canvas-bg: #171717;
+  --color-canvas-bg: #0d0e11;
+
+  /* Surface aliases for Tailwind utility classes */
+  --color-df-base: #0d0e11;
+  --color-df-surface: #141519;
+  --color-df-elevated: #1c1e24;
+  --color-df-border: #2a2d38;
+  --color-df-border-active: #4a90d9;
+  --color-df-accent: #4a90d9;
+  --color-df-accent-glow: rgba(74, 144, 217, 0.15);
+  --color-df-text: #e8eaf0;
+  --color-df-text-secondary: #8b90a0;
+  --color-df-text-muted: #4a4f60;
+  --color-df-success: #3ecf8e;
+  --color-df-warning: #f5a623;
+  --color-df-error: #e85d75;
+  --color-df-neutral: #6c7280;
 }
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #fafafa;
-  /* Handle colors (used by labels) */
-  --handle-color-image: #10b981;
-  --handle-color-text: #3b82f6;
-  --handle-color-3d: #f97316;
+  /* ── Core palette ── */
+  --bg-base: #0d0e11;
+  --bg-surface: #141519;
+  --bg-elevated: #1c1e24;
+  --border-subtle: #2a2d38;
+  --border-active: #4a90d9;
+  --accent-primary: #4a90d9;
+  --accent-glow: rgba(74, 144, 217, 0.15);
+  --text-primary: #e8eaf0;
+  --text-secondary: #8b90a0;
+  --text-muted: #4a4f60;
+  --node-success: #3ecf8e;
+  --node-warning: #f5a623;
+  --node-error: #e85d75;
+  --node-neutral: #6c7280;
+
+  /* ── Handle / port colors ── */
+  --handle-color-image: #3ecf8e;
+  --handle-color-text: #4a90d9;
+  --handle-color-3d: #f5a623;
+
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
 }
 
+/* ── Base typography ─────────────────────────────────────────────── */
+
 html {
-  /* Required for overscroll-behavior to work in Chrome on macOS */
   overflow-x: hidden;
   overscroll-behavior-x: none;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  /* Prevent browser back/forward swipe navigation on macOS */
+  color: var(--text-primary);
+  background: var(--bg-base);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overscroll-behavior-x: none;
-  /* Prevent touch gestures from triggering navigation */
   touch-action: pan-y pinch-zoom;
 }
 
-/* React Flow customizations */
+/* ── React Flow core ─────────────────────────────────────────────── */
+
 .react-flow {
-  /* Prevent browser back/forward swipe navigation when panning */
   overscroll-behavior-x: none;
   touch-action: none;
 }
 
 .react-flow__node {
-  font-family: inherit;
+  font-family: 'DM Mono', 'IBM Plex Mono', monospace;
 }
 
-/* Remove default React Flow styling for output nodes to match custom nodes */
+/* Remove default React Flow styling for output nodes */
 .react-flow__node-output {
   border: none !important;
   border-radius: 0 !important;
@@ -49,16 +83,32 @@ body {
   box-shadow: none !important;
 }
 
-/* Base handle styles */
+/* ── Handles / port connectors ───────────────────────────────────── */
+
 .react-flow__handle {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  border: 1.5px solid var(--border-subtle);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 2.5px var(--bg-base), 0 0 0 3.5px rgba(255, 255, 255, 0.04);
+  transition: all 150ms ease;
 }
 
-/* Larger invisible hit area for easier clicking, especially when zoomed out */
+.react-flow__handle:hover {
+  transform: scale(1.35);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 10px var(--accent-glow), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(74, 144, 217, 0.2);
+}
+
+/* Glow ring when connecting */
+.react-flow__handle.connectingto,
+.react-flow__handle.connectingfrom {
+  animation: handlePulse 1.2s ease-in-out infinite;
+  border-color: var(--accent-primary);
+}
+
+/* Larger invisible hit area for easier clicking */
 .react-flow__handle::before {
   content: "";
   position: absolute;
@@ -71,41 +121,77 @@ body {
 }
 
 .react-flow__handle-left {
-  left: -5px;
+  left: -4px;
 }
 
 .react-flow__handle-right {
-  right: -5px;
+  right: -4px;
 }
 
-/* Image handles - soft green */
+/* Input handles: slightly lower opacity fill */
+.react-flow__handle-left[data-handletype="image"],
+.react-flow__handle-left[data-handletype="text"],
+.react-flow__handle-left[data-handletype="3d"] {
+  opacity: 0.85;
+}
+
+/* Image handles — success green */
 .react-flow__handle[data-handletype="image"] {
-  background: #10b981;
+  background: var(--handle-color-image);
+  border-color: var(--handle-color-image);
 }
 
-/* Text handles - soft blue */
+.react-flow__handle[data-handletype="image"]:hover {
+  box-shadow: 0 0 10px rgba(62, 207, 142, 0.35), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(62, 207, 142, 0.2);
+}
+
+/* Text handles — accent blue */
 .react-flow__handle[data-handletype="text"] {
-  background: #3b82f6;
+  background: var(--handle-color-text);
+  border-color: var(--handle-color-text);
 }
 
-/* 3D handles - orange */
-.react-flow__handle[data-handletype="3d"] {
-  background: #f97316;
+.react-flow__handle[data-handletype="text"]:hover {
+  box-shadow: 0 0 10px rgba(74, 144, 217, 0.35), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(74, 144, 217, 0.2);
 }
+
+/* 3D handles — warning amber */
+.react-flow__handle[data-handletype="3d"] {
+  background: var(--handle-color-3d);
+  border-color: var(--handle-color-3d);
+}
+
+.react-flow__handle[data-handletype="3d"]:hover {
+  box-shadow: 0 0 10px rgba(245, 166, 35, 0.35), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(245, 166, 35, 0.2);
+}
+
+/* Video handles — purple */
+.react-flow__handle[data-handletype="video"] {
+  background: #c084fc;
+  border-color: #c084fc;
+}
+
+.react-flow__handle[data-handletype="video"]:hover {
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.35), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(192, 132, 252, 0.2);
+}
+
+/* ── Edges ────────────────────────────────────────────────────────── */
 
 .react-flow__edge-path {
-  stroke: #94a3b8;
-  stroke-width: 3;
+  stroke: var(--border-subtle);
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .react-flow__edge.selected .react-flow__edge-path,
 .react-flow__edge:hover .react-flow__edge-path {
-  stroke: #3b82f6;
+  stroke: var(--accent-primary);
+  filter: drop-shadow(0 0 4px var(--accent-glow));
 }
 
-/* Hide resize handles but show resize cursor on edges */
+/* ── Resize controls ──────────────────────────────────────────────── */
+
 .react-flow__resize-control {
   opacity: 0 !important;
   pointer-events: auto !important;
@@ -133,73 +219,130 @@ body {
   cursor: nesw-resize !important;
 }
 
-/* React Flow Controls dark theme */
+/* ── Controls panel ───────────────────────────────────────────────── */
+
 .react-flow__controls {
-  background: #262626 !important;
-  border: 1px solid #404040 !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
 }
 
 .react-flow__controls-button {
-  background: #262626 !important;
-  border-bottom: 1px solid #404040 !important;
+  background: var(--bg-elevated) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
 }
 
 .react-flow__controls-button svg {
-  fill: #d4d4d4 !important;
+  fill: var(--text-secondary) !important;
 }
 
 .react-flow__controls-button svg path {
-  fill: #d4d4d4 !important;
+  fill: var(--text-secondary) !important;
 }
 
 .react-flow__controls-button:hover {
-  background: #404040 !important;
+  background: var(--bg-surface) !important;
 }
 
 .react-flow__controls-button:hover svg,
 .react-flow__controls-button:hover svg path {
-  fill: #fafafa !important;
+  fill: var(--text-primary) !important;
 }
 
 .react-flow__controls-button:last-child {
   border-bottom: none !important;
 }
 
-/* Custom scrollbar */
+/* ── Scrollbar ────────────────────────────────────────────────────── */
+
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #262626;
-  border-radius: 4px;
+  background: var(--bg-base);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #525252;
-  border-radius: 4px;
+  background: var(--border-subtle);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #737373;
+  background: var(--text-muted);
 }
 
-/* Make the multi-selection box pass through pointer events so we can still
-   interact with handles, resize controls, and other node elements */
+/* ── Selection box ────────────────────────────────────────────────── */
+
 .react-flow__nodesselection-rect {
   pointer-events: none !important;
 }
 
-/* Edge pulse animation for loading connectors */
+/* ── Animations ───────────────────────────────────────────────────── */
+
+/* Edge loading pulse — flowing dashes */
 @keyframes flowPulse {
   0% {
     stroke-dashoffset: 50;
   }
+
   100% {
     stroke-dashoffset: 0;
+  }
+}
+
+/* Edge data flow — animated dashes for active connections */
+@keyframes edgeDataFlow {
+  0% {
+    stroke-dashoffset: 20;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Port pulse on hover */
+@keyframes portPulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.3);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Node mount — fade in + slide up */
+@keyframes nodeMount {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Node delete — fade out + shrink */
+@keyframes nodeDelete {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
   }
 }
 
@@ -209,6 +352,7 @@ body {
     opacity: 0;
     transform: scale(0.3) translate(0, 0);
   }
+
   100% {
     opacity: 1;
     transform: scale(1) translate(var(--fan-x), var(--fan-y));
@@ -220,6 +364,7 @@ body {
     opacity: 1;
     transform: scale(1) translate(var(--fan-x), var(--fan-y));
   }
+
   100% {
     opacity: 0;
     transform: scale(0.3) translate(0, 0);
@@ -232,4 +377,45 @@ body {
 
 .animate-fan-exit {
   animation: fanExit 0.15s ease-in forwards;
+}
+
+/* Node mount animation class */
+.animate-node-mount {
+  animation: nodeMount 200ms ease-out forwards;
+}
+
+/* Node delete animation class */
+.animate-node-delete {
+  animation: nodeDelete 100ms ease-in forwards;
+}
+
+/* ── Context menu entrance animation ─────────────────────────────── */
+@keyframes contextMenuIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ── Handle pulse animation ──────────────────────────────────────── */
+@keyframes handlePulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 2.5px var(--bg-base), 0 0 0 3.5px rgba(74, 144, 217, 0.15);
+  }
+
+  50% {
+    box-shadow: 0 0 8px var(--accent-glow), 0 0 0 2.5px var(--bg-base), 0 0 0 5px rgba(74, 144, 217, 0.3);
+  }
+}
+
+/* ── Canvas background / dot grid enhancement ────────────────────── */
+.react-flow__background pattern circle {
+  fill: rgba(255, 255, 255, 0.08) !important;
 }

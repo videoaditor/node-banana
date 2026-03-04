@@ -51,7 +51,7 @@ function FanItem({
     <button
       draggable
       onDragStart={(e) => onDragStart(e, item)}
-      className="absolute w-14 h-14 rounded-lg overflow-hidden border-2 border-neutral-600 hover:border-blue-500 shadow-lg cursor-grab active:cursor-grabbing transition-colors duration-150 animate-fan-enter group"
+      className="absolute w-14 h-14 rounded-lg overflow-hidden border-2 border-[var(--border-subtle)] hover:border-[var(--accent-primary)] shadow-lg cursor-grab active:cursor-grabbing transition-all duration-[120ms] duration-150 animate-fan-enter group"
       style={
         {
           "--fan-x": `${x}px`,
@@ -132,25 +132,25 @@ function HistorySidebar({
   return createPortal(
     <div
       ref={sidebarRef}
-      className="w-80 max-h-[420px] bg-neutral-800 border border-neutral-600 rounded-lg shadow-xl flex flex-col"
+      className="w-80 max-h-[420px] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg shadow-xl flex flex-col"
       style={sidebarStyle}
     >
       {/* Header */}
-      <div className="px-4 py-3 border-b border-neutral-700 flex items-center justify-between shrink-0">
-        <span className="text-sm text-neutral-200 font-medium">
+      <div className="px-4 py-3 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0">
+        <span className="text-sm text-[var(--text-primary)] font-medium">
           All History ({history.length})
         </span>
         <div className="flex items-center gap-2">
           <button
             onClick={onClear}
-            className="text-[10px] text-neutral-500 hover:text-red-400 transition-colors"
+            className="text-[10px] text-[var(--text-muted)] hover:text-[var(--node-error)] transition-all duration-[120ms]"
             title="Clear all history"
           >
             Clear All
           </button>
           <button
             onClick={onClose}
-            className="w-5 h-5 rounded hover:bg-neutral-700 flex items-center justify-center text-neutral-400 hover:text-white transition-colors"
+            className="w-5 h-5 rounded hover:bg-[var(--bg-surface)] flex items-center justify-center text-[var(--text-secondary)] hover:text-white transition-all duration-[120ms]"
             title="Close"
           >
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -167,10 +167,10 @@ function HistorySidebar({
             key={item.id}
             draggable
             onDragStart={(e) => onDragStart(e, item)}
-            className="flex gap-3 p-2 rounded-lg hover:bg-neutral-700/50 cursor-grab active:cursor-grabbing group transition-colors"
+            className="flex gap-3 p-2 rounded-lg hover:bg-[var(--bg-surface)]/50 cursor-grab active:cursor-grabbing group transition-all duration-[120ms]"
           >
             {/* Thumbnail */}
-            <div className="w-14 h-14 rounded overflow-hidden shrink-0 border border-neutral-600 group-hover:border-blue-500 transition-colors">
+            <div className="w-14 h-14 rounded overflow-hidden shrink-0 border border-[var(--border-subtle)] group-hover:border-[var(--accent-primary)] transition-all duration-[120ms]">
               <img
                 src={item.image}
                 alt={`History ${index + 1}`}
@@ -181,10 +181,10 @@ function HistorySidebar({
 
             {/* Info */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <p className="text-[11px] text-neutral-300 truncate">
+              <p className="text-[11px] text-[var(--text-secondary)] truncate">
                 {item.prompt?.substring(0, 60) || "No prompt"}
               </p>
-              <p className="text-[10px] text-neutral-500 mt-0.5">
+              <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
                 {formatRelativeTime(item.timestamp)} · {item.model === "nano-banana-pro" ? "Pro" : "Standard"}
               </p>
             </div>
@@ -193,8 +193,8 @@ function HistorySidebar({
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-2 border-t border-neutral-700 bg-neutral-900/50 shrink-0">
-        <span className="text-[10px] text-neutral-500">Drag images to canvas to create nodes</span>
+      <div className="px-4 py-2 border-t border-[var(--border-subtle)] bg-[var(--bg-base)]/50 shrink-0">
+        <span className="text-[10px] text-[var(--text-muted)]">Drag images to canvas to create nodes</span>
       </div>
     </div>,
     document.body
@@ -296,9 +296,9 @@ export function GlobalImageHistory() {
         onClick={() => setIsOpen(!isOpen)}
         className={`
           relative w-8 h-8 rounded-lg flex items-center justify-center
-          bg-neutral-800 hover:bg-neutral-700 border border-neutral-600
-          text-neutral-400 hover:text-white
-          shadow-lg transition-colors
+          bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)]
+          text-[var(--text-secondary)] hover:text-white
+          shadow-lg transition-all duration-[120ms]
         `}
         title={`${history.length} image${history.length > 1 ? "s" : ""} in history`}
       >
@@ -317,7 +317,7 @@ export function GlobalImageHistory() {
           />
         </svg>
         {/* Badge showing count */}
-        <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-blue-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold">
+        <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-[var(--accent-primary)] rounded-full text-[10px] text-white flex items-center justify-center font-bold">
           {history.length > 99 ? "99+" : history.length}
         </span>
       </button>
@@ -344,7 +344,7 @@ export function GlobalImageHistory() {
             return (
               <button
                 onClick={handleShowAll}
-                className="absolute animate-fan-enter bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 rounded-lg px-2 py-1 text-[10px] text-neutral-300 hover:text-white shadow-lg transition-colors whitespace-nowrap"
+                className="absolute animate-fan-enter bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-2 py-1 text-[10px] text-[var(--text-secondary)] hover:text-white shadow-lg transition-all duration-[120ms] whitespace-nowrap"
                 style={
                   {
                     "--fan-x": `${topItemPos.x}px`,

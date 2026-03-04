@@ -19,6 +19,7 @@ import {
   ImageIteratorNodeData,
   TextIteratorNodeData,
   WebScraperNodeData,
+  StickyNoteNodeData,
   WorkflowNodeData,
   GroupColor,
   SelectedModel,
@@ -50,6 +51,7 @@ export const defaultNodeDimensions: Record<NodeType, { width: number; height: nu
   imageIterator: { width: 340, height: 300 },
   textIterator: { width: 340, height: 280 },
   webScraper: { width: 340, height: 320 },
+  stickyNote: { width: 200, height: 160 },
 };
 
 /**
@@ -282,5 +284,10 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         status: "idle",
         error: null,
       };
+    case "stickyNote":
+      return {
+        text: "",
+        color: "yellow",
+      } as StickyNoteNodeData;
   }
 };

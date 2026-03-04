@@ -344,22 +344,23 @@ export function VideoStitchNode({ id, data, selected }: NodeProps<VideoStitchNod
         onCommentChange={(comment) => updateNodeData(id, { comment: comment || undefined })}
         selected={selected}
         commentNavigation={commentNavigation ?? undefined}
+        nodeAccentColor="cyan"
         minWidth={500}
         minHeight={280}
       >
         {renderHandles()}
         <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center px-4">
-          <svg className="w-8 h-8 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-8 h-8 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
           </svg>
-          <span className="text-xs text-neutral-400">
+          <span className="text-xs text-[var(--text-secondary)]">
             Your browser doesn't support video encoding.
           </span>
           <a
             href="https://discord.gg/placeholder"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[10px] text-blue-400 hover:text-blue-300 underline"
+            className="text-[10px] text-[var(--accent-primary)] hover:text-blue-300 underline"
           >
             Doesn't seem right? Message Willie on Discord.
           </a>
@@ -380,12 +381,13 @@ export function VideoStitchNode({ id, data, selected }: NodeProps<VideoStitchNod
         onCommentChange={(comment) => updateNodeData(id, { comment: comment || undefined })}
         selected={selected}
         commentNavigation={commentNavigation ?? undefined}
+        nodeAccentColor="cyan"
         minWidth={500}
         minHeight={280}
       >
         {renderHandles()}
         <div className="flex-1 flex items-center justify-center">
-          <div className="flex items-center gap-2 text-neutral-400">
+          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
             <svg
               className="w-4 h-4 animate-spin"
               fill="none"
@@ -425,6 +427,7 @@ export function VideoStitchNode({ id, data, selected }: NodeProps<VideoStitchNod
       isExecuting={isRunning}
       hasError={nodeData.status === "error"}
       commentNavigation={commentNavigation ?? undefined}
+      nodeAccentColor="cyan"
       minWidth={500}
       minHeight={280}
     >
@@ -434,13 +437,13 @@ export function VideoStitchNode({ id, data, selected }: NodeProps<VideoStitchNod
         {/* Filmstrip + controls area (shrink-0: only takes space it needs) */}
         <div className="shrink-0 flex flex-col gap-2">
           {orderedClips.length === 0 ? (
-            <div className="h-16 flex items-center justify-center border border-dashed border-neutral-600 rounded">
-              <span className="text-[10px] text-neutral-500">Connect videos to stitch</span>
+            <div className="h-16 flex items-center justify-center border border-dashed border-[var(--border-subtle)] rounded">
+              <span className="text-[10px] text-[var(--text-muted)]">Connect videos to stitch</span>
             </div>
           ) : (
             <>
               {/* Filmstrip */}
-              <div className="overflow-y-auto nowheel grid grid-cols-4 content-start gap-2 p-2 bg-neutral-900/50 rounded">
+              <div className="overflow-y-auto nowheel grid grid-cols-4 content-start gap-2 p-2 bg-[var(--bg-base)]/50 rounded">
                 {orderedClips.map((clip) => {
                   const thumbnail = thumbnails.get(clip.edgeId);
                   return (
@@ -450,13 +453,12 @@ export function VideoStitchNode({ id, data, selected }: NodeProps<VideoStitchNod
                       onPointerDown={(e) => handlePointerDown(e, clip.edgeId)}
                       onPointerMove={handlePointerMove}
                       onPointerUp={handlePointerUp}
-                      className={`nodrag relative w-full aspect-video bg-neutral-800 border rounded cursor-move transition-colors group ${
-                        draggedClipId === clip.edgeId
-                          ? "opacity-50 border-blue-500"
+                      className={`nodrag relative w-full aspect-video bg-[var(--bg-elevated)] border rounded cursor-move transition-all duration-[120ms] group ${draggedClipId === clip.edgeId
+                          ? "opacity-50 border-[var(--accent-primary)]"
                           : hoverClipId === clip.edgeId && draggedClipId
                             ? "border-blue-400 ring-1 ring-blue-400/50"
-                            : "border-neutral-600 hover:border-neutral-500"
-                      }`}
+                            : "border-[var(--border-subtle)] hover:border-[var(--border-subtle)]"
+                        }`}
                     >
                       {thumbnail ? (
                         <img
@@ -467,7 +469,7 @@ export function VideoStitchNode({ id, data, selected }: NodeProps<VideoStitchNod
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <svg
-                            className="w-4 h-4 text-neutral-500"
+                            className="w-4 h-4 text-[var(--text-muted)]"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -499,7 +501,7 @@ export function VideoStitchNode({ id, data, selected }: NodeProps<VideoStitchNod
                       {/* Remove button */}
                       <button
                         onClick={() => handleRemoveClip(clip.edgeId)}
-                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-600/80 hover:bg-red-500 rounded text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-[var(--node-error)]/80 hover:bg-[var(--node-error)] rounded text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                         title="Disconnect"
                       >
                         <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -517,7 +519,7 @@ export function VideoStitchNode({ id, data, selected }: NodeProps<VideoStitchNod
 
         {/* Processing overlay */}
         {nodeData.status === "loading" && (
-          <div className="absolute inset-0 bg-neutral-900/70 rounded flex flex-col items-center justify-center gap-2">
+          <div className="absolute inset-0 bg-[var(--bg-base)]/70 rounded flex flex-col items-center justify-center gap-2">
             <svg
               className="w-6 h-6 animate-spin text-white"
               fill="none"
@@ -555,7 +557,7 @@ export function VideoStitchNode({ id, data, selected }: NodeProps<VideoStitchNod
             />
             <button
               onClick={() => updateNodeData(id, { outputVideo: null, status: "idle" })}
-              className="absolute top-1 right-1 w-5 h-5 bg-neutral-900/80 hover:bg-red-600/80 rounded flex items-center justify-center text-neutral-400 hover:text-white transition-colors"
+              className="absolute top-1 right-1 w-5 h-5 bg-[var(--bg-base)]/80 hover:bg-[var(--node-error)]/80 rounded flex items-center justify-center text-[var(--text-secondary)] hover:text-white transition-all duration-[120ms]"
               title="Clear video"
             >
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -569,16 +571,15 @@ export function VideoStitchNode({ id, data, selected }: NodeProps<VideoStitchNod
         {orderedClips.length > 0 && (
           <div className="shrink-0 flex items-center justify-end gap-2">
             <div className="flex items-center gap-1">
-              <span className="text-[10px] text-neutral-400">Loop</span>
+              <span className="text-[10px] text-[var(--text-secondary)]">Loop</span>
               {([1, 2, 3] as const).map((count) => (
                 <button
                   key={count}
                   onClick={() => updateNodeData(id, { loopCount: count })}
-                  className={`nodrag px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors ${
-                    (nodeData.loopCount || 1) === count
-                      ? "bg-blue-600 text-white"
-                      : "bg-neutral-700 text-neutral-400 hover:bg-neutral-600 hover:text-neutral-300"
-                  }`}
+                  className={`nodrag px-1.5 py-0.5 rounded text-[10px] font-medium transition-all duration-[120ms] ${(nodeData.loopCount || 1) === count
+                      ? "bg-[var(--accent-primary)] text-white"
+                      : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--border-subtle)] hover:text-[var(--text-secondary)]"
+                    }`}
                 >
                   {count}x
                 </button>
@@ -588,7 +589,7 @@ export function VideoStitchNode({ id, data, selected }: NodeProps<VideoStitchNod
             <button
               onClick={handleStitch}
               disabled={orderedClips.length < 2 || nodeData.status === "loading" || isRunning}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-neutral-700 disabled:text-neutral-500 disabled:cursor-not-allowed rounded text-white text-xs font-medium transition-colors"
+              className="px-3 py-1.5 bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)] disabled:bg-[var(--bg-surface)] disabled:text-[var(--text-muted)] disabled:cursor-not-allowed rounded text-white text-xs font-medium transition-all duration-[120ms]"
             >
               {nodeData.status === "loading" ? "Processing..." : "Stitch"}
             </button>

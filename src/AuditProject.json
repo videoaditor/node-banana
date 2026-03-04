@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "id": "wf_1772638641972_oxprhb1an",
+  "name": "AuditProject",
+  "nodes": [
+    {
+      "id": "promptConstructor-1",
+      "type": "promptConstructor",
+      "position": {
+        "x": 1210,
+        "y": 1269
+      },
+      "data": {
+        "template": "",
+        "outputText": null,
+        "unresolvedVars": [],
+        "inputCount": 2,
+        "staticText": ""
+      },
+      "style": {
+        "width": 300,
+        "height": 220
+      },
+      "measured": {
+        "width": 300,
+        "height": 220
+      }
+    },
+    {
+      "id": "output-2",
+      "type": "output",
+      "position": {
+        "x": 1145.55720653789,
+        "y": 1276.191679049034
+      },
+      "data": {
+        "image": null,
+        "outputFilename": "",
+        "video": null
+      },
+      "style": {
+        "width": 320,
+        "height": 320
+      },
+      "measured": {
+        "width": 320,
+        "height": 320
+      }
+    }
+  ],
+  "edges": [],
+  "edgeStyle": "curved"
+}

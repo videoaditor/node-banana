@@ -409,46 +409,46 @@ export function AnnotationModal() {
   ];
 
   return (
-    <div className="fixed inset-0 z-[100] bg-neutral-950 flex flex-col">
+    <div className="fixed inset-0 z-[100] bg-[var(--bg-base)] flex flex-col">
       {/* Top Bar */}
-      <div className="h-14 bg-neutral-900 flex items-center justify-between px-4 border-b border-neutral-800">
+      <div className="h-14 bg-[var(--bg-base)] flex items-center justify-between px-4 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-1.5">
           {tools.map((tool) => (
             <button
               key={tool.type}
               onClick={() => setCurrentTool(tool.type)}
-              className={`px-3.5 py-1.5 text-xs font-medium rounded transition-colors ${
+              className={`px-3.5 py-1.5 text-xs font-medium rounded transition-all duration-[120ms] ${
                 currentTool === tool.type
-                  ? "bg-white text-neutral-900"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-white text-[var(--bg-base)]"
+                  : "text-[var(--text-secondary)] hover:text-white"
               }`}
             >
               {tool.label}
             </button>
           ))}
 
-          <div className="w-px h-6 bg-neutral-700 mx-3" />
+          <div className="w-px h-6 bg-[var(--bg-surface)] mx-3" />
 
-          <button onClick={undo} className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white">Undo</button>
-          <button onClick={redo} className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white">Redo</button>
+          <button onClick={undo} className="px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:text-white">Undo</button>
+          <button onClick={redo} className="px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:text-white">Redo</button>
 
-          <div className="w-px h-6 bg-neutral-700 mx-3" />
+          <div className="w-px h-6 bg-[var(--bg-surface)] mx-3" />
 
-          <button onClick={clearAnnotations} className="px-3 py-1.5 text-xs text-neutral-400 hover:text-red-400">Clear</button>
+          <button onClick={clearAnnotations} className="px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--node-error)]">Clear</button>
         </div>
 
         <div className="flex items-center gap-3">
-          <button onClick={closeModal} className="px-4 py-1.5 text-xs font-medium text-neutral-400 hover:text-white">
+          <button onClick={closeModal} className="px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:text-white">
             Cancel
           </button>
-          <button onClick={handleDone} className="px-4 py-1.5 text-xs font-medium bg-white text-neutral-900 rounded hover:bg-neutral-200">
+          <button onClick={handleDone} className="px-4 py-1.5 text-xs font-medium bg-white text-[var(--bg-base)] rounded hover:bg-white/90">
             Done
           </button>
         </div>
       </div>
 
       {/* Canvas Container */}
-      <div ref={containerRef} className="flex-1 overflow-hidden bg-neutral-900">
+      <div ref={containerRef} className="flex-1 overflow-hidden bg-[var(--bg-base)]">
         <Stage
           ref={stageRef}
           width={containerRef.current?.clientWidth || 800}
@@ -475,33 +475,33 @@ export function AnnotationModal() {
       </div>
 
       {/* Bottom Options Bar */}
-      <div className="h-14 bg-neutral-900 flex items-center justify-center gap-6 px-4 border-t border-neutral-800">
+      <div className="h-14 bg-[var(--bg-base)] flex items-center justify-center gap-6 px-4 border-t border-[var(--border-subtle)]">
         {/* Colors */}
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-neutral-500 uppercase tracking-wide mr-1">Color</span>
+          <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wide mr-1">Color</span>
           {COLORS.map((color) => (
             <button
               key={color}
               onClick={() => setToolOptions({ strokeColor: color })}
               className={`w-6 h-6 rounded-full transition-transform ${
-                toolOptions.strokeColor === color ? "ring-2 ring-white ring-offset-2 ring-offset-neutral-900 scale-110" : "hover:scale-105"
+                toolOptions.strokeColor === color ? "ring-2 ring-white ring-offset-2 ring-offset-[var(--bg-base)] scale-110" : "hover:scale-105"
               }`}
               style={{ backgroundColor: color }}
             />
           ))}
         </div>
 
-        <div className="w-px h-6 bg-neutral-700" />
+        <div className="w-px h-6 bg-[var(--bg-surface)]" />
 
         {/* Stroke Width */}
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-neutral-500 uppercase tracking-wide mr-1">Size</span>
+          <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wide mr-1">Size</span>
           {STROKE_WIDTHS.map((width) => (
             <button
               key={width}
               onClick={() => setToolOptions({ strokeWidth: width })}
-              className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
-                toolOptions.strokeWidth === width ? "bg-neutral-700" : "hover:bg-neutral-800"
+              className={`w-8 h-8 rounded flex items-center justify-center transition-all duration-[120ms] ${
+                toolOptions.strokeWidth === width ? "bg-[var(--bg-surface)]" : "hover:bg-[var(--bg-elevated)]"
               }`}
             >
               <div className="bg-white rounded-full" style={{ width: width * 1.5, height: width * 1.5 }} />
@@ -509,13 +509,13 @@ export function AnnotationModal() {
           ))}
         </div>
 
-        <div className="w-px h-6 bg-neutral-700" />
+        <div className="w-px h-6 bg-[var(--bg-surface)]" />
 
         {/* Fill Toggle */}
         <button
           onClick={() => setToolOptions({ fillColor: toolOptions.fillColor ? null : toolOptions.strokeColor })}
-          className={`px-3 py-1.5 text-[10px] uppercase tracking-wide rounded transition-colors ${
-            toolOptions.fillColor ? "bg-neutral-700 text-white" : "text-neutral-500 hover:text-white"
+          className={`px-3 py-1.5 text-[10px] uppercase tracking-wide rounded transition-all duration-[120ms] ${
+            toolOptions.fillColor ? "bg-[var(--bg-surface)] text-white" : "text-[var(--text-muted)] hover:text-white"
           }`}
         >
           Fill
@@ -523,9 +523,9 @@ export function AnnotationModal() {
 
         {/* Zoom */}
         <div className="flex items-center gap-2 ml-auto">
-          <button onClick={() => setScale(Math.max(scale - 0.1, 0.1))} className="w-7 h-7 rounded text-neutral-400 hover:text-white text-sm">-</button>
-          <span className="text-[10px] text-neutral-400 w-10 text-center">{Math.round(scale * 100)}%</span>
-          <button onClick={() => setScale(Math.min(scale + 0.1, 5))} className="w-7 h-7 rounded text-neutral-400 hover:text-white text-sm">+</button>
+          <button onClick={() => setScale(Math.max(scale - 0.1, 0.1))} className="w-7 h-7 rounded text-[var(--text-secondary)] hover:text-white text-sm">-</button>
+          <span className="text-[10px] text-[var(--text-secondary)] w-10 text-center">{Math.round(scale * 100)}%</span>
+          <button onClick={() => setScale(Math.min(scale + 0.1, 5))} className="w-7 h-7 rounded text-[var(--text-secondary)] hover:text-white text-sm">+</button>
         </div>
       </div>
 

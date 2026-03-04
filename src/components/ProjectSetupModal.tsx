@@ -340,37 +340,37 @@ export function ProjectSetupModal({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
       <div
-        className="bg-neutral-800 rounded-lg w-[480px] border border-neutral-700 shadow-xl flex flex-col max-h-[80vh]"
+        className="bg-[var(--bg-elevated)] rounded-lg w-[480px] border border-[var(--border-subtle)] shadow-xl flex flex-col max-h-[80vh]"
         onKeyDown={handleKeyDown}
       >
         <div className="px-6 pt-6 pb-0 shrink-0">
-          <h2 className="text-lg font-semibold text-neutral-100 mb-4">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
             {mode === "new" ? "New Project" : "Project Settings"}
           </h2>
 
           {/* Tab Bar */}
-          <div className="flex gap-4 border-b border-neutral-700">
+          <div className="flex gap-4 border-b border-[var(--border-subtle)]">
           <button
             onClick={() => setActiveTab("project")}
-            className={`pb-2 text-sm ${activeTab === "project" ? "text-neutral-100 border-b-2 border-white" : "text-neutral-400"}`}
+            className={`pb-2 text-sm ${activeTab === "project" ? "text-[var(--text-primary)] border-b-2 border-white" : "text-[var(--text-secondary)]"}`}
           >
             Project
           </button>
           <button
             onClick={() => setActiveTab("providers")}
-            className={`pb-2 text-sm ${activeTab === "providers" ? "text-neutral-100 border-b-2 border-white" : "text-neutral-400"}`}
+            className={`pb-2 text-sm ${activeTab === "providers" ? "text-[var(--text-primary)] border-b-2 border-white" : "text-[var(--text-secondary)]"}`}
           >
             Providers
           </button>
           <button
             onClick={() => setActiveTab("nodeDefaults")}
-            className={`pb-2 text-sm ${activeTab === "nodeDefaults" ? "text-neutral-100 border-b-2 border-white" : "text-neutral-400"}`}
+            className={`pb-2 text-sm ${activeTab === "nodeDefaults" ? "text-[var(--text-primary)] border-b-2 border-white" : "text-[var(--text-secondary)]"}`}
           >
             Node Defaults
           </button>
           <button
             onClick={() => setActiveTab("canvas")}
-            className={`pb-2 text-sm ${activeTab === "canvas" ? "text-neutral-100 border-b-2 border-white" : "text-neutral-400"}`}
+            className={`pb-2 text-sm ${activeTab === "canvas" ? "text-[var(--text-primary)] border-b-2 border-white" : "text-[var(--text-secondary)]"}`}
           >
             Canvas
           </button>
@@ -384,7 +384,7 @@ export function ProjectSetupModal({
         {activeTab === "project" && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-neutral-400 mb-1">
+              <label className="block text-sm text-[var(--text-secondary)] mb-1">
                 Project Name
               </label>
               <input
@@ -393,12 +393,12 @@ export function ProjectSetupModal({
                 onChange={(e) => setName(e.target.value)}
                 placeholder="my-project"
                 autoFocus
-                className="w-full px-3 py-2 bg-neutral-900 border border-neutral-600 rounded text-neutral-100 text-sm focus:outline-none focus:border-neutral-500"
+                className="w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:border-[var(--border-subtle)]"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-neutral-400 mb-1">
+              <label className="block text-sm text-[var(--text-secondary)] mb-1">
                 Project Directory
               </label>
               <div className="flex gap-2">
@@ -407,40 +407,40 @@ export function ProjectSetupModal({
                   value={directoryPath}
                   onChange={(e) => setDirectoryPath(e.target.value)}
                   placeholder="/Users/username/projects/my-project"
-                  className="flex-1 px-3 py-2 bg-neutral-900 border border-neutral-600 rounded text-neutral-100 text-sm focus:outline-none focus:border-neutral-500"
+                  className="flex-1 px-3 py-2 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-sm focus:outline-none focus:border-[var(--border-subtle)]"
                 />
                 <button
                   type="button"
                   onClick={handleBrowse}
                   disabled={isBrowsing}
-                  className="px-3 py-2 bg-neutral-700 hover:bg-neutral-600 disabled:bg-neutral-700 disabled:opacity-50 text-neutral-200 text-sm rounded transition-colors"
+                  className="px-3 py-2 bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] disabled:bg-[var(--bg-surface)] disabled:opacity-50 text-[var(--text-primary)] text-sm rounded transition-all duration-[120ms]"
                 >
                   {isBrowsing ? "..." : "Browse"}
                 </button>
               </div>
-              <p className="text-xs text-neutral-500 mt-1">
+              <p className="text-xs text-[var(--text-muted)] mt-1">
                 Workflow files and images will be saved here. Subfolders for inputs and generations will be auto-created.
               </p>
             </div>
 
-            <div className="pt-2 border-t border-neutral-700">
+            <div className="pt-2 border-t border-[var(--border-subtle)]">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={!externalStorage}
                   onChange={(e) => setExternalStorage(!e.target.checked)}
-                  className="w-4 h-4 rounded border-neutral-600 bg-neutral-900 text-blue-500 focus:ring-blue-500 focus:ring-offset-neutral-800"
+                  className="w-4 h-4 rounded border-[var(--border-subtle)] bg-[var(--bg-base)] text-[var(--accent-primary)] focus:ring-[var(--accent-primary)] focus:ring-offset-[var(--bg-elevated)]"
                 />
                 <div>
-                  <span className="text-sm text-neutral-200">Embed images as base64</span>
-                  <p className="text-xs text-neutral-500">
+                  <span className="text-sm text-[var(--text-primary)]">Embed images as base64</span>
+                  <p className="text-xs text-[var(--text-muted)]">
                     Embeds all images in workflow, larger workflow files. Can hit memory limits on very large workflows.
                   </p>
                 </div>
               </label>
             </div>
 
-            {error && <p className="text-sm text-red-400">{error}</p>}
+            {error && <p className="text-sm text-[var(--node-error)]">{error}</p>}
           </div>
         )}
 
@@ -448,16 +448,16 @@ export function ProjectSetupModal({
         {activeTab === "providers" && (
           <div className="space-y-3">
             {/* Gemini Provider */}
-            <div className="p-3 bg-neutral-900 rounded-lg border border-neutral-700">
+            <div className="p-3 bg-[var(--bg-base)] rounded-lg border border-[var(--border-subtle)]">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-neutral-100">Google Gemini</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">Google Gemini</span>
                 {envStatus?.gemini && !overrideActive.gemini ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-green-400">Configured via .env</span>
+                    <span className="text-xs text-[var(--node-success)]">Configured via .env</span>
                     <button
                       type="button"
                       onClick={() => setOverrideActive((prev) => ({ ...prev, gemini: true }))}
-                      className="px-2 py-1 text-xs text-neutral-400 hover:text-neutral-200 transition-colors"
+                      className="px-2 py-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
                     >
                       Override
                     </button>
@@ -469,12 +469,12 @@ export function ProjectSetupModal({
                       value={localProviders.providers.gemini?.apiKey || ""}
                       onChange={(e) => updateLocalProvider("gemini", { apiKey: e.target.value || null })}
                       placeholder="AIza..."
-                      className="w-48 px-2 py-1 bg-neutral-800 border border-neutral-600 rounded text-neutral-100 text-xs focus:outline-none focus:border-neutral-500"
+                      className="w-48 px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-xs focus:outline-none focus:border-[var(--border-subtle)]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowApiKey((prev) => ({ ...prev, gemini: !prev.gemini }))}
-                      className="text-xs text-neutral-400 hover:text-neutral-200"
+                      className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                     >
                       {showApiKey.gemini ? "Hide" : "Show"}
                     </button>
@@ -485,7 +485,7 @@ export function ProjectSetupModal({
                           setOverrideActive((prev) => ({ ...prev, gemini: false }));
                           updateLocalProvider("gemini", { apiKey: null });
                         }}
-                        className="text-xs text-neutral-500 hover:text-neutral-300"
+                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                       >
                         Cancel
                       </button>
@@ -496,16 +496,16 @@ export function ProjectSetupModal({
             </div>
 
             {/* OpenAI Provider */}
-            <div className="p-3 bg-neutral-900 rounded-lg border border-neutral-700">
+            <div className="p-3 bg-[var(--bg-base)] rounded-lg border border-[var(--border-subtle)]">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-neutral-100">OpenAI</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">OpenAI</span>
                 {envStatus?.openai && !overrideActive.openai ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-green-400">Configured via .env</span>
+                    <span className="text-xs text-[var(--node-success)]">Configured via .env</span>
                     <button
                       type="button"
                       onClick={() => setOverrideActive((prev) => ({ ...prev, openai: true }))}
-                      className="px-2 py-1 text-xs text-neutral-400 hover:text-neutral-200 transition-colors"
+                      className="px-2 py-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
                     >
                       Override
                     </button>
@@ -517,12 +517,12 @@ export function ProjectSetupModal({
                       value={localProviders.providers.openai?.apiKey || ""}
                       onChange={(e) => updateLocalProvider("openai", { apiKey: e.target.value || null })}
                       placeholder="sk-..."
-                      className="w-48 px-2 py-1 bg-neutral-800 border border-neutral-600 rounded text-neutral-100 text-xs focus:outline-none focus:border-neutral-500"
+                      className="w-48 px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-xs focus:outline-none focus:border-[var(--border-subtle)]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowApiKey((prev) => ({ ...prev, openai: !prev.openai }))}
-                      className="text-xs text-neutral-400 hover:text-neutral-200"
+                      className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                     >
                       {showApiKey.openai ? "Hide" : "Show"}
                     </button>
@@ -533,7 +533,7 @@ export function ProjectSetupModal({
                           setOverrideActive((prev) => ({ ...prev, openai: false }));
                           updateLocalProvider("openai", { apiKey: null });
                         }}
-                        className="text-xs text-neutral-500 hover:text-neutral-300"
+                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                       >
                         Cancel
                       </button>
@@ -544,16 +544,16 @@ export function ProjectSetupModal({
             </div>
 
             {/* Replicate Provider */}
-            <div className="p-3 bg-neutral-900 rounded-lg border border-neutral-700">
+            <div className="p-3 bg-[var(--bg-base)] rounded-lg border border-[var(--border-subtle)]">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-neutral-100">Replicate</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">Replicate</span>
                 {envStatus?.replicate && !overrideActive.replicate ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-green-400">Configured via .env</span>
+                    <span className="text-xs text-[var(--node-success)]">Configured via .env</span>
                     <button
                       type="button"
                       onClick={() => setOverrideActive((prev) => ({ ...prev, replicate: true }))}
-                      className="px-2 py-1 text-xs text-neutral-400 hover:text-neutral-200 transition-colors"
+                      className="px-2 py-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
                     >
                       Override
                     </button>
@@ -565,12 +565,12 @@ export function ProjectSetupModal({
                       value={localProviders.providers.replicate?.apiKey || ""}
                       onChange={(e) => updateLocalProvider("replicate", { apiKey: e.target.value || null })}
                       placeholder="r8_..."
-                      className="w-48 px-2 py-1 bg-neutral-800 border border-neutral-600 rounded text-neutral-100 text-xs focus:outline-none focus:border-neutral-500"
+                      className="w-48 px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-xs focus:outline-none focus:border-[var(--border-subtle)]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowApiKey((prev) => ({ ...prev, replicate: !prev.replicate }))}
-                      className="text-xs text-neutral-400 hover:text-neutral-200"
+                      className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                     >
                       {showApiKey.replicate ? "Hide" : "Show"}
                     </button>
@@ -581,7 +581,7 @@ export function ProjectSetupModal({
                           setOverrideActive((prev) => ({ ...prev, replicate: false }));
                           updateLocalProvider("replicate", { apiKey: null });
                         }}
-                        className="text-xs text-neutral-500 hover:text-neutral-300"
+                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                       >
                         Cancel
                       </button>
@@ -592,16 +592,16 @@ export function ProjectSetupModal({
             </div>
 
             {/* fal.ai Provider */}
-            <div className="p-3 bg-neutral-900 rounded-lg border border-neutral-700">
+            <div className="p-3 bg-[var(--bg-base)] rounded-lg border border-[var(--border-subtle)]">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-neutral-100">fal.ai</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">fal.ai</span>
                 {envStatus?.fal && !overrideActive.fal ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-green-400">Configured via .env</span>
+                    <span className="text-xs text-[var(--node-success)]">Configured via .env</span>
                     <button
                       type="button"
                       onClick={() => setOverrideActive((prev) => ({ ...prev, fal: true }))}
-                      className="px-2 py-1 text-xs text-neutral-400 hover:text-neutral-200 transition-colors"
+                      className="px-2 py-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
                     >
                       Override
                     </button>
@@ -613,12 +613,12 @@ export function ProjectSetupModal({
                       value={localProviders.providers.fal?.apiKey || ""}
                       onChange={(e) => updateLocalProvider("fal", { apiKey: e.target.value || null })}
                       placeholder="..."
-                      className="w-48 px-2 py-1 bg-neutral-800 border border-neutral-600 rounded text-neutral-100 text-xs focus:outline-none focus:border-neutral-500"
+                      className="w-48 px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-xs focus:outline-none focus:border-[var(--border-subtle)]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowApiKey((prev) => ({ ...prev, fal: !prev.fal }))}
-                      className="text-xs text-neutral-400 hover:text-neutral-200"
+                      className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                     >
                       {showApiKey.fal ? "Hide" : "Show"}
                     </button>
@@ -629,7 +629,7 @@ export function ProjectSetupModal({
                           setOverrideActive((prev) => ({ ...prev, fal: false }));
                           updateLocalProvider("fal", { apiKey: null });
                         }}
-                        className="text-xs text-neutral-500 hover:text-neutral-300"
+                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                       >
                         Cancel
                       </button>
@@ -640,22 +640,22 @@ export function ProjectSetupModal({
             </div>
 
             {/* Kie.ai Provider */}
-            <div className="p-3 bg-neutral-900 rounded-lg border border-neutral-700">
+            <div className="p-3 bg-[var(--bg-base)] rounded-lg border border-[var(--border-subtle)]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-orange-400" viewBox="0 0 24 24" fill="currentColor">
+                  <svg className="w-4 h-4 text-[var(--node-warning)]" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
                   </svg>
-                  <span className="text-sm font-medium text-neutral-100">Kie.ai</span>
-                  <span className="text-xs text-neutral-500">(Sora, Veo, Kling, etc.)</span>
+                  <span className="text-sm font-medium text-[var(--text-primary)]">Kie.ai</span>
+                  <span className="text-xs text-[var(--text-muted)]">(Sora, Veo, Kling, etc.)</span>
                 </div>
                 {envStatus?.kie && !overrideActive.kie ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-green-400">✓ From .env</span>
+                    <span className="text-xs text-[var(--node-success)]">✓ From .env</span>
                     <button
                       type="button"
                       onClick={() => setOverrideActive((prev) => ({ ...prev, kie: true }))}
-                      className="px-2 py-1 text-xs text-neutral-400 hover:text-neutral-200 transition-colors"
+                      className="px-2 py-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
                     >
                       Override
                     </button>
@@ -667,12 +667,12 @@ export function ProjectSetupModal({
                       value={localProviders.providers.kie?.apiKey || ""}
                       onChange={(e) => updateLocalProvider("kie", { apiKey: e.target.value || null })}
                       placeholder="..."
-                      className="w-48 px-2 py-1 bg-neutral-800 border border-neutral-600 rounded text-neutral-100 text-xs focus:outline-none focus:border-neutral-500"
+                      className="w-48 px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-xs focus:outline-none focus:border-[var(--border-subtle)]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowApiKey((prev) => ({ ...prev, kie: !prev.kie }))}
-                      className="text-xs text-neutral-400 hover:text-neutral-200"
+                      className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                     >
                       {showApiKey.kie ? "Hide" : "Show"}
                     </button>
@@ -683,7 +683,7 @@ export function ProjectSetupModal({
                           setOverrideActive((prev) => ({ ...prev, kie: false }));
                           updateLocalProvider("kie", { apiKey: null });
                         }}
-                        className="text-xs text-neutral-500 hover:text-neutral-300"
+                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                       >
                         Cancel
                       </button>
@@ -694,16 +694,16 @@ export function ProjectSetupModal({
             </div>
 
             {/* WaveSpeed Provider */}
-            <div className="p-3 bg-neutral-900 rounded-lg border border-neutral-700">
+            <div className="p-3 bg-[var(--bg-base)] rounded-lg border border-[var(--border-subtle)]">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-neutral-100">WaveSpeed</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">WaveSpeed</span>
                 {envStatus?.wavespeed && !overrideActive.wavespeed ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-green-400">Configured via .env</span>
+                    <span className="text-xs text-[var(--node-success)]">Configured via .env</span>
                     <button
                       type="button"
                       onClick={() => setOverrideActive((prev) => ({ ...prev, wavespeed: true }))}
-                      className="px-2 py-1 text-xs text-neutral-400 hover:text-neutral-200 transition-colors"
+                      className="px-2 py-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
                     >
                       Override
                     </button>
@@ -715,12 +715,12 @@ export function ProjectSetupModal({
                       value={localProviders.providers.wavespeed?.apiKey || ""}
                       onChange={(e) => updateLocalProvider("wavespeed", { apiKey: e.target.value || null })}
                       placeholder="..."
-                      className="w-48 px-2 py-1 bg-neutral-800 border border-neutral-600 rounded text-neutral-100 text-xs focus:outline-none focus:border-neutral-500"
+                      className="w-48 px-2 py-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] text-xs focus:outline-none focus:border-[var(--border-subtle)]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowApiKey((prev) => ({ ...prev, wavespeed: !prev.wavespeed }))}
-                      className="text-xs text-neutral-400 hover:text-neutral-200"
+                      className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                     >
                       {showApiKey.wavespeed ? "Hide" : "Show"}
                     </button>
@@ -731,7 +731,7 @@ export function ProjectSetupModal({
                           setOverrideActive((prev) => ({ ...prev, wavespeed: false }));
                           updateLocalProvider("wavespeed", { apiKey: null });
                         }}
-                        className="text-xs text-neutral-500 hover:text-neutral-300"
+                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                       >
                         Cancel
                       </button>
@@ -741,8 +741,8 @@ export function ProjectSetupModal({
               </div>
             </div>
 
-            <p className="text-xs text-neutral-500 mt-2">
-              Add API keys via <code className="px-1 py-0.5 bg-neutral-800 rounded">.env.local</code> for better security. Keys added here override .env and are stored in your browser.
+            <p className="text-xs text-[var(--text-muted)] mt-2">
+              Add API keys via <code className="px-1 py-0.5 bg-[var(--bg-elevated)] rounded">.env.local</code> for better security. Keys added here override .env and are stored in your browser.
             </p>
           </div>
         )}
@@ -751,13 +751,13 @@ export function ProjectSetupModal({
         {activeTab === "nodeDefaults" && (
           <div className="space-y-3">
             {/* GenerateImage Section */}
-            <div className="p-3 bg-neutral-900 rounded-lg border border-neutral-700">
+            <div className="p-3 bg-[var(--bg-base)] rounded-lg border border-[var(--border-subtle)]">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-neutral-100">Default Image Model</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">Default Image Model</span>
                 <div className="flex items-center gap-2">
                   {localNodeDefaults.generateImage?.selectedModel ? (
                     <>
-                      <div className="flex items-center gap-1.5 text-xs text-neutral-300">
+                      <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
                         {getProviderIcon(localNodeDefaults.generateImage.selectedModel.provider)}
                         <span className="truncate max-w-[150px]">
                           {localNodeDefaults.generateImage.selectedModel.displayName}
@@ -766,7 +766,7 @@ export function ProjectSetupModal({
                       <button
                         type="button"
                         onClick={() => setShowImageModelDialog(true)}
-                        className="px-2 py-1 text-xs bg-neutral-700 hover:bg-neutral-600 text-neutral-200 rounded transition-colors"
+                        className="px-2 py-1 text-xs bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] text-[var(--text-primary)] rounded transition-all duration-[120ms]"
                       >
                         Change
                       </button>
@@ -776,18 +776,18 @@ export function ProjectSetupModal({
                           const { generateImage, ...rest } = localNodeDefaults;
                           setLocalNodeDefaults(rest);
                         }}
-                        className="text-xs text-neutral-400 hover:text-neutral-200"
+                        className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                       >
                         Clear
                       </button>
                     </>
                   ) : (
                     <>
-                      <span className="text-xs text-neutral-500">System default (Gemini nano-banana-pro)</span>
+                      <span className="text-xs text-[var(--text-muted)]">System default (Gemini nano-banana-pro)</span>
                       <button
                         type="button"
                         onClick={() => setShowImageModelDialog(true)}
-                        className="px-2 py-1 text-xs bg-neutral-700 hover:bg-neutral-600 text-neutral-200 rounded transition-colors"
+                        className="px-2 py-1 text-xs bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] text-[var(--text-primary)] rounded transition-all duration-[120ms]"
                       >
                         Select Model
                       </button>
@@ -798,13 +798,13 @@ export function ProjectSetupModal({
             </div>
 
             {/* GenerateVideo Section */}
-            <div className="p-3 bg-neutral-900 rounded-lg border border-neutral-700">
+            <div className="p-3 bg-[var(--bg-base)] rounded-lg border border-[var(--border-subtle)]">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-neutral-100">Default Video Model</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">Default Video Model</span>
                 <div className="flex items-center gap-2">
                   {localNodeDefaults.generateVideo?.selectedModel ? (
                     <>
-                      <div className="flex items-center gap-1.5 text-xs text-neutral-300">
+                      <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
                         {getProviderIcon(localNodeDefaults.generateVideo.selectedModel.provider)}
                         <span className="truncate max-w-[150px]">
                           {localNodeDefaults.generateVideo.selectedModel.displayName}
@@ -813,7 +813,7 @@ export function ProjectSetupModal({
                       <button
                         type="button"
                         onClick={() => setShowVideoModelDialog(true)}
-                        className="px-2 py-1 text-xs bg-neutral-700 hover:bg-neutral-600 text-neutral-200 rounded transition-colors"
+                        className="px-2 py-1 text-xs bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] text-[var(--text-primary)] rounded transition-all duration-[120ms]"
                       >
                         Change
                       </button>
@@ -823,18 +823,18 @@ export function ProjectSetupModal({
                           const { generateVideo, ...rest } = localNodeDefaults;
                           setLocalNodeDefaults(rest);
                         }}
-                        className="text-xs text-neutral-400 hover:text-neutral-200"
+                        className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                       >
                         Clear
                       </button>
                     </>
                   ) : (
                     <>
-                      <span className="text-xs text-neutral-500">None set (select on first use)</span>
+                      <span className="text-xs text-[var(--text-muted)]">None set (select on first use)</span>
                       <button
                         type="button"
                         onClick={() => setShowVideoModelDialog(true)}
-                        className="px-2 py-1 text-xs bg-neutral-700 hover:bg-neutral-600 text-neutral-200 rounded transition-colors"
+                        className="px-2 py-1 text-xs bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] text-[var(--text-primary)] rounded transition-all duration-[120ms]"
                       >
                         Select Model
                       </button>
@@ -845,10 +845,10 @@ export function ProjectSetupModal({
             </div>
 
             {/* LLM Section */}
-            <div className="p-3 bg-neutral-900 rounded-lg border border-neutral-700">
+            <div className="p-3 bg-[var(--bg-base)] rounded-lg border border-[var(--border-subtle)]">
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-neutral-100">Default LLM Settings</span>
+                  <span className="text-sm font-medium text-[var(--text-primary)]">Default LLM Settings</span>
                   {localNodeDefaults.llm && (
                     <button
                       type="button"
@@ -856,7 +856,7 @@ export function ProjectSetupModal({
                         const { llm, ...rest } = localNodeDefaults;
                         setLocalNodeDefaults(rest);
                       }}
-                      className="text-xs text-neutral-400 hover:text-neutral-200"
+                      className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                     >
                       Clear
                     </button>
@@ -864,12 +864,12 @@ export function ProjectSetupModal({
                 </div>
 
                 {!localNodeDefaults.llm ? (
-                  <p className="text-xs text-neutral-500">Using system defaults (Google Gemini 3 Flash)</p>
+                  <p className="text-xs text-[var(--text-muted)]">Using system defaults (Google Gemini 3 Flash)</p>
                 ) : null}
 
                 {/* Provider dropdown */}
                 <div className="flex items-center gap-2">
-                  <label className="text-xs text-neutral-400 w-20">Provider</label>
+                  <label className="text-xs text-[var(--text-secondary)] w-20">Provider</label>
                   <select
                     value={localNodeDefaults.llm?.provider || "google"}
                     onChange={(e) => {
@@ -884,7 +884,7 @@ export function ProjectSetupModal({
                         }
                       }));
                     }}
-                    className="flex-1 px-2 py-1 text-xs bg-neutral-800 border border-neutral-600 rounded text-neutral-100 focus:outline-none focus:border-neutral-500"
+                    className="flex-1 px-2 py-1 text-xs bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-subtle)]"
                   >
                     {LLM_PROVIDERS.map((p) => (
                       <option key={p.value} value={p.value}>{p.label}</option>
@@ -894,7 +894,7 @@ export function ProjectSetupModal({
 
                 {/* Model dropdown */}
                 <div className="flex items-center gap-2">
-                  <label className="text-xs text-neutral-400 w-20">Model</label>
+                  <label className="text-xs text-[var(--text-secondary)] w-20">Model</label>
                   <select
                     value={localNodeDefaults.llm?.model || LLM_MODELS[localNodeDefaults.llm?.provider || "google"][0].value}
                     onChange={(e) => {
@@ -903,7 +903,7 @@ export function ProjectSetupModal({
                         llm: { ...prev.llm, model: e.target.value as LLMModelType }
                       }));
                     }}
-                    className="flex-1 px-2 py-1 text-xs bg-neutral-800 border border-neutral-600 rounded text-neutral-100 focus:outline-none focus:border-neutral-500"
+                    className="flex-1 px-2 py-1 text-xs bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-subtle)]"
                   >
                     {LLM_MODELS[localNodeDefaults.llm?.provider || "google"].map((m) => (
                       <option key={m.value} value={m.value}>{m.label}</option>
@@ -913,7 +913,7 @@ export function ProjectSetupModal({
 
                 {/* Temperature slider */}
                 <div className="flex items-center gap-2">
-                  <label className="text-xs text-neutral-400 w-20">
+                  <label className="text-xs text-[var(--text-secondary)] w-20">
                     Temp: {(localNodeDefaults.llm?.temperature ?? 0.7).toFixed(1)}
                   </label>
                   <input
@@ -928,13 +928,13 @@ export function ProjectSetupModal({
                         llm: { ...prev.llm, temperature: parseFloat(e.target.value) }
                       }));
                     }}
-                    className="flex-1 h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-neutral-400"
+                    className="flex-1 h-1 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
                   />
                 </div>
 
                 {/* Max Tokens slider */}
                 <div className="flex items-center gap-2">
-                  <label className="text-xs text-neutral-400 w-20">
+                  <label className="text-xs text-[var(--text-secondary)] w-20">
                     Tokens: {(localNodeDefaults.llm?.maxTokens ?? 8192).toLocaleString()}
                   </label>
                   <input
@@ -949,20 +949,20 @@ export function ProjectSetupModal({
                         llm: { ...prev.llm, maxTokens: parseInt(e.target.value, 10) }
                       }));
                     }}
-                    className="flex-1 h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-neutral-400"
+                    className="flex-1 h-1 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
                   />
                 </div>
               </div>
             </div>
 
             {/* Execution Section */}
-            <div className="p-3 bg-neutral-900 rounded-lg border border-neutral-700">
+            <div className="p-3 bg-[var(--bg-base)] rounded-lg border border-[var(--border-subtle)]">
               <div className="flex flex-col gap-3">
-                <span className="text-sm font-medium text-neutral-100">Execution Settings</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">Execution Settings</span>
 
                 {/* Concurrency slider */}
                 <div className="flex items-center gap-2">
-                  <label className="text-xs text-neutral-400 w-32">
+                  <label className="text-xs text-[var(--text-secondary)] w-32">
                     Max Parallel Calls: {maxConcurrentCalls}
                   </label>
                   <input
@@ -972,17 +972,17 @@ export function ProjectSetupModal({
                     step="1"
                     value={maxConcurrentCalls}
                     onChange={(e) => setMaxConcurrentCalls(parseInt(e.target.value, 10))}
-                    className="flex-1 h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-neutral-400"
+                    className="flex-1 h-1 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
                   />
                 </div>
-                <p className="text-xs text-neutral-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   Maximum number of nodes to execute in parallel during workflow execution.
                   Higher values may improve speed but increase API rate limit risk.
                 </p>
               </div>
             </div>
 
-            <p className="text-xs text-neutral-500 mt-2">
+            <p className="text-xs text-[var(--text-muted)] mt-2">
               These defaults are applied when creating nodes via keyboard shortcuts (Shift+G, Shift+L, etc).
             </p>
           </div>
@@ -993,7 +993,7 @@ export function ProjectSetupModal({
           <div className="space-y-5">
             {/* Pan Mode */}
             <div>
-              <h3 className="text-sm font-medium text-neutral-200 mb-2">Pan Mode</h3>
+              <h3 className="text-sm font-medium text-[var(--text-primary)] mb-2">Pan Mode</h3>
               <div className="space-y-1.5">
                 {([
                   { value: "space" as PanMode, label: "Space + Drag", description: "Hold Space and drag to pan (default)" },
@@ -1002,10 +1002,10 @@ export function ProjectSetupModal({
                 ] as const).map((option) => (
                   <label
                     key={option.value}
-                    className={`flex items-start p-2.5 rounded-lg border cursor-pointer transition-colors ${
+                    className={`flex items-start p-2.5 rounded-lg border cursor-pointer transition-all duration-[120ms] ${
                       localCanvasSettings.panMode === option.value
-                        ? "border-blue-500 bg-blue-500/10"
-                        : "border-neutral-700 hover:border-neutral-600 bg-neutral-900/50"
+                        ? "border-[var(--accent-primary)] bg-[var(--accent-primary)]/10"
+                        : "border-[var(--border-subtle)] hover:border-[var(--border-subtle)] bg-[var(--bg-base)]/50"
                     }`}
                   >
                     <input
@@ -1017,8 +1017,8 @@ export function ProjectSetupModal({
                       className="mt-0.5 mr-3"
                     />
                     <div className="flex-1">
-                      <div className="text-sm font-medium text-neutral-200">{option.label}</div>
-                      <div className="text-xs text-neutral-400 mt-0.5">{option.description}</div>
+                      <div className="text-sm font-medium text-[var(--text-primary)]">{option.label}</div>
+                      <div className="text-xs text-[var(--text-secondary)] mt-0.5">{option.description}</div>
                     </div>
                   </label>
                 ))}
@@ -1027,7 +1027,7 @@ export function ProjectSetupModal({
 
             {/* Zoom Mode */}
             <div>
-              <h3 className="text-sm font-medium text-neutral-200 mb-2">Zoom Mode</h3>
+              <h3 className="text-sm font-medium text-[var(--text-primary)] mb-2">Zoom Mode</h3>
               <div className="space-y-1.5">
                 {([
                   { value: "altScroll" as ZoomMode, label: "Alt + Scroll", description: "Hold Alt and scroll to zoom (default)" },
@@ -1036,10 +1036,10 @@ export function ProjectSetupModal({
                 ] as const).map((option) => (
                   <label
                     key={option.value}
-                    className={`flex items-start p-2.5 rounded-lg border cursor-pointer transition-colors ${
+                    className={`flex items-start p-2.5 rounded-lg border cursor-pointer transition-all duration-[120ms] ${
                       localCanvasSettings.zoomMode === option.value
-                        ? "border-blue-500 bg-blue-500/10"
-                        : "border-neutral-700 hover:border-neutral-600 bg-neutral-900/50"
+                        ? "border-[var(--accent-primary)] bg-[var(--accent-primary)]/10"
+                        : "border-[var(--border-subtle)] hover:border-[var(--border-subtle)] bg-[var(--bg-base)]/50"
                     }`}
                   >
                     <input
@@ -1051,8 +1051,8 @@ export function ProjectSetupModal({
                       className="mt-0.5 mr-3"
                     />
                     <div className="flex-1">
-                      <div className="text-sm font-medium text-neutral-200">{option.label}</div>
-                      <div className="text-xs text-neutral-400 mt-0.5">{option.description}</div>
+                      <div className="text-sm font-medium text-[var(--text-primary)]">{option.label}</div>
+                      <div className="text-xs text-[var(--text-secondary)] mt-0.5">{option.description}</div>
                     </div>
                   </label>
                 ))}
@@ -1061,7 +1061,7 @@ export function ProjectSetupModal({
 
             {/* Selection Mode */}
             <div>
-              <h3 className="text-sm font-medium text-neutral-200 mb-2">Selection Mode</h3>
+              <h3 className="text-sm font-medium text-[var(--text-primary)] mb-2">Selection Mode</h3>
               <div className="space-y-1.5">
                 {([
                   { value: "click" as SelectionMode, label: "Click", description: "Click to select nodes (default)" },
@@ -1070,10 +1070,10 @@ export function ProjectSetupModal({
                 ] as const).map((option) => (
                   <label
                     key={option.value}
-                    className={`flex items-start p-2.5 rounded-lg border cursor-pointer transition-colors ${
+                    className={`flex items-start p-2.5 rounded-lg border cursor-pointer transition-all duration-[120ms] ${
                       localCanvasSettings.selectionMode === option.value
-                        ? "border-blue-500 bg-blue-500/10"
-                        : "border-neutral-700 hover:border-neutral-600 bg-neutral-900/50"
+                        ? "border-[var(--accent-primary)] bg-[var(--accent-primary)]/10"
+                        : "border-[var(--border-subtle)] hover:border-[var(--border-subtle)] bg-[var(--bg-base)]/50"
                     }`}
                   >
                     <input
@@ -1085,8 +1085,8 @@ export function ProjectSetupModal({
                       className="mt-0.5 mr-3"
                     />
                     <div className="flex-1">
-                      <div className="text-sm font-medium text-neutral-200">{option.label}</div>
-                      <div className="text-xs text-neutral-400 mt-0.5">{option.description}</div>
+                      <div className="text-sm font-medium text-[var(--text-primary)]">{option.label}</div>
+                      <div className="text-xs text-[var(--text-secondary)] mt-0.5">{option.description}</div>
                     </div>
                   </label>
                 ))}
@@ -1098,17 +1098,17 @@ export function ProjectSetupModal({
         </div>
 
         {/* Fixed footer */}
-        <div className="flex justify-end gap-2 px-6 py-4 border-t border-neutral-700 shrink-0">
+        <div className="flex justify-end gap-2 px-6 py-4 border-t border-[var(--border-subtle)] shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-neutral-400 hover:text-neutral-100 transition-colors"
+            className="px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={activeTab === "project" && (isValidating || isBrowsing)}
-            className="px-4 py-2 text-sm bg-white text-neutral-900 rounded hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 text-sm bg-white text-[var(--bg-base)] rounded hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-[120ms]"
           >
             {activeTab === "project"
               ? (isValidating ? "Validating..." : mode === "new" ? "Create" : "Save")

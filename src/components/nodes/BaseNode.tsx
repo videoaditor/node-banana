@@ -12,6 +12,16 @@ export interface CommentNavigationProps {
   onNext: () => void;
 }
 
+// Node type accent colors for visual identity
+const NODE_ACCENT_COLORS: Record<string, string> = {
+  green: '#3ecf8e',   // Image, Annotate, ImageCompare
+  blue: '#4a90d9',    // Prompt, PromptConstructor
+  purple: '#c084fc',  // Generate Image/Video/3D
+  amber: '#f5a623',   // Output, OutputGallery
+  coral: '#e85d75',   // LLM, Audio
+  cyan: '#22d3ee',    // Split Grid, Video Stitch
+};
+
 interface BaseNodeProps {
   id: string;
   title: string;
@@ -33,6 +43,7 @@ interface BaseNodeProps {
   headerButtons?: ReactNode;
   titlePrefix?: ReactNode;
   commentNavigation?: CommentNavigationProps;
+  nodeAccentColor?: string; // key from NODE_ACCENT_COLORS or raw hex
 }
 
 export function BaseNode({
@@ -56,7 +67,12 @@ export function BaseNode({
   headerButtons,
   titlePrefix,
   commentNavigation,
+  nodeAccentColor,
 }: BaseNodeProps) {
+  // Resolve accent color
+  const accentColor = nodeAccentColor
+    ? (NODE_ACCENT_COLORS[nodeAccentColor] || nodeAccentColor)
+    : undefined;
   const currentNodeIds = useWorkflowStore((state) => state.currentNodeIds);
   const groups = useWorkflowStore((state) => state.groups);
   const nodes = useWorkflowStore((state) => state.nodes);
@@ -253,14 +269,42 @@ export function BaseNode({
       />
       <div
         className={`
-          bg-neutral-800 rounded-md shadow-lg border h-full w-full flex flex-col
-          ${isCurrentlyExecuting || isExecuting ? "border-blue-500 ring-1 ring-blue-500/20" : "border-neutral-700"}
-          ${hasError ? "border-red-500" : ""}
-          ${selected ? "border-blue-500 ring-2 ring-blue-500/40 shadow-lg shadow-blue-500/25" : ""}
+          rounded-[8px] h-full w-full flex flex-col overflow-hidden
+          transition-all duration-[180ms] ease-out
+          ${isCurrentlyExecuting || isExecuting
+            ? "border border-[var(--accent-primary)] ring-1 ring-[var(--accent-glow)]"
+            : "border border-[var(--border-subtle)]"
+          }
+          ${hasError ? "border-[var(--node-error)]" : ""}
+          ${selected
+            ? "border-[var(--accent-primary)] ring-2 ring-[var(--accent-primary)]/40"
+            : ""
+          }
+          ${!selected && !isCurrentlyExecuting && !isExecuting && !hasError
+            ? "hover:border-[var(--accent-primary)]/60 hover:-translate-y-[1px]"
+            : ""
+          }
           ${className}
         `}
+        style={{
+          background: 'rgba(20, 21, 25, 0.85)',
+          backdropFilter: 'blur(16px) saturate(1.4)',
+          WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
+          boxShadow: selected
+            ? `0 0 0 1px var(--accent-primary), 0 0 20px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)${accentColor ? `, 0 0 24px ${accentColor}15` : ''}`
+            : `0 4px 16px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)${accentColor ? `, -3px 0 12px -4px ${accentColor}20` : ''}`,
+          borderLeft: accentColor ? `3px solid ${accentColor}` : undefined,
+        }}
       >
-        <div className="px-3 pt-2 pb-1 flex items-center justify-between shrink-0">
+        {/* Header bar — slightly darker strip with gradient separator */}
+        <div
+          className="px-3 pt-2 pb-1 flex items-center justify-between shrink-0"
+          style={{
+            background: 'rgba(13, 14, 17, 0.7)',
+            borderBottom: '1px solid transparent',
+            borderImage: 'linear-gradient(to right, transparent, var(--border-subtle), transparent) 1',
+          }}
+        >
           {/* Title Section */}
           <div className="flex-1 min-w-0 flex items-center gap-1.5">
             {titlePrefix}
@@ -273,11 +317,11 @@ export function BaseNode({
                 onBlur={handleTitleSubmit}
                 onKeyDown={handleTitleKeyDown}
                 placeholder="Custom title..."
-                className="nodrag nopan w-full bg-transparent border-none outline-none text-xs font-semibold tracking-wide text-neutral-300 placeholder:text-neutral-500 uppercase"
+                className="nodrag nopan w-full bg-transparent border-none outline-none text-[11px] font-medium tracking-[0.08em] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] uppercase font-['DM_Mono',monospace]"
               />
             ) : (
               <span
-                className="nodrag text-xs font-semibold uppercase tracking-wide text-neutral-400 cursor-text truncate"
+                className="nodrag text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-secondary)] cursor-text truncate font-['DM_Mono',monospace]"
                 onClick={() => setIsEditingTitle(true)}
                 title="Click to edit title"
               >
@@ -290,7 +334,7 @@ export function BaseNode({
           {/* Lock Badge for nodes in locked groups */}
           {isInLockedGroup && (
             <div className="ml-2 shrink-0 flex items-center" title="This node is in a locked group and will be skipped during execution">
-              <svg className="w-3.5 h-3.5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-3.5 h-3.5 text-[var(--node-warning)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
@@ -306,11 +350,10 @@ export function BaseNode({
               onClick={() => setIsEditingComment(!isEditingComment)}
               onMouseEnter={() => comment && !isCommentFocused && setShowCommentTooltip(true)}
               onMouseLeave={() => setShowCommentTooltip(false)}
-              className={`nodrag nopan p-0.5 rounded transition-colors ${
-                comment
-                  ? "text-blue-400 hover:text-blue-200"
-                  : "text-neutral-500 hover:text-neutral-200 border border-neutral-600"
-              }`}
+              className={`nodrag nopan p-0.5 rounded transition-all duration-[120ms] ease ${comment
+                ? "text-[var(--accent-primary)] hover:text-[var(--text-primary)]"
+                : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] border border-[var(--border-subtle)]"
+                }`}
               title={comment ? "Edit comment" : "Add comment"}
             >
               {comment ? (
@@ -324,33 +367,32 @@ export function BaseNode({
               )}
             </button>
 
-            {/* Comment Tooltip with Navigation - shown on hover OR when focused via navigation */}
+            {/* Comment Tooltip with Navigation */}
             {(showCommentTooltip || isCommentFocused) && comment && !isEditingComment && tooltipPosition && createPortal(
               <div
                 ref={tooltipRef}
-                className="fixed z-[9999] p-3 text-sm text-neutral-200 bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl"
+                className="fixed z-[9999] p-3 text-sm text-[var(--text-primary)] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg shadow-xl backdrop-blur-sm"
                 style={{
                   top: tooltipPosition.top,
                   left: tooltipPosition.left,
                   transform: "translateY(-100%) translateX(-50%)",
                 }}
               >
-                {/* Navigation controls - only show when focused and navigation available */}
                 {isCommentFocused && commentNavigation && (
-                  <div className="flex items-center justify-center gap-3 mb-2 pb-2 border-b border-neutral-700">
+                  <div className="flex items-center justify-center gap-3 mb-2 pb-2 border-b border-[var(--border-subtle)]">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         commentNavigation.onPrevious();
                       }}
-                      className="nodrag nopan w-6 h-6 flex items-center justify-center text-neutral-400 hover:text-neutral-100 hover:bg-neutral-700 rounded transition-colors"
+                      className="nodrag nopan w-6 h-6 flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] rounded transition-all duration-[120ms]"
                       title="Previous comment"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                       </svg>
                     </button>
-                    <span className="text-xs text-neutral-400 min-w-[32px] text-center">
+                    <span className="text-xs text-[var(--text-muted)] min-w-[32px] text-center font-['DM_Mono',monospace]">
                       {commentNavigation.currentIndex}/{commentNavigation.totalCount}
                     </span>
                     <button
@@ -358,7 +400,7 @@ export function BaseNode({
                         e.stopPropagation();
                         commentNavigation.onNext();
                       }}
-                      className="nodrag nopan w-6 h-6 flex items-center justify-center text-neutral-400 hover:text-neutral-100 hover:bg-neutral-700 rounded transition-colors"
+                      className="nodrag nopan w-6 h-6 flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] rounded transition-all duration-[120ms]"
                       title="Next comment"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -376,14 +418,14 @@ export function BaseNode({
 
             {/* Comment Edit Popover */}
             {isEditingComment && (
-              <div className="absolute z-[60] right-0 top-full mt-1 w-64 p-2 bg-neutral-800 border border-neutral-600 rounded shadow-lg">
+              <div className="absolute z-[60] right-0 top-full mt-1 w-64 p-2 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[4px] shadow-lg">
                 <textarea
                   value={editCommentValue}
                   onChange={(e) => setEditCommentValue(e.target.value)}
                   onKeyDown={handleCommentKeyDown}
                   placeholder="Add a comment..."
                   autoFocus
-                  className="nodrag nopan nowheel w-full h-20 p-2 text-xs text-neutral-100 bg-neutral-900/50 border border-neutral-700 rounded resize-none focus:outline-none focus:ring-1 focus:ring-neutral-600"
+                  className="nodrag nopan nowheel w-full h-20 p-2 text-xs text-[var(--text-primary)] bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-[4px] resize-none focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
                 />
                 <div className="flex justify-end gap-2 mt-2">
                   <button
@@ -391,13 +433,13 @@ export function BaseNode({
                       setEditCommentValue(comment || "");
                       setIsEditingComment(false);
                     }}
-                    className="px-2 py-1 text-xs text-neutral-400 hover:text-neutral-200 transition-colors"
+                    className="px-2 py-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleCommentSubmit}
-                    className="px-2 py-1 text-xs text-white bg-blue-600 hover:bg-blue-500 rounded transition-colors"
+                    className="px-2 py-1 text-xs text-white bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/90 rounded-[4px] transition-all duration-[120ms]"
                   >
                     Save
                   </button>
@@ -411,7 +453,7 @@ export function BaseNode({
             <div className="relative ml-2 shrink-0 group">
               <button
                 onClick={onExpand}
-                className="nodrag nopan p-0.5 rounded transition-all duration-200 ease-in-out text-neutral-500 group-hover:text-neutral-200 border border-neutral-600 flex items-center overflow-hidden group-hover:pr-2"
+                className="nodrag nopan p-0.5 rounded-[4px] transition-all duration-[120ms] ease text-[var(--text-muted)] group-hover:text-[var(--text-primary)] border border-[var(--border-subtle)] flex items-center overflow-hidden group-hover:pr-2 group-hover:border-[var(--accent-primary)]"
                 title="Expand editor"
               >
                 <svg
@@ -428,7 +470,7 @@ export function BaseNode({
                   <line x1="21" y1="3" x2="14" y2="10" />
                   <line x1="3" y1="21" x2="10" y2="14" />
                 </svg>
-                <span className="max-w-0 opacity-0 whitespace-nowrap text-[10px] transition-all duration-200 ease-in-out overflow-hidden group-hover:max-w-[60px] group-hover:opacity-100 group-hover:ml-1">
+                <span className="max-w-0 opacity-0 whitespace-nowrap text-[10px] font-['DM_Mono',monospace] transition-all duration-[120ms] ease overflow-hidden group-hover:max-w-[60px] group-hover:opacity-100 group-hover:ml-1">
                   Expand
                 </span>
               </button>
@@ -441,13 +483,13 @@ export function BaseNode({
               <button
                 onClick={onRun}
                 disabled={isExecuting}
-                className="nodrag nopan p-0.5 rounded transition-all duration-200 ease-in-out text-neutral-500 group-hover:text-neutral-200 border border-neutral-600 flex items-center overflow-hidden group-hover:pr-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="nodrag nopan p-0.5 rounded-[4px] transition-all duration-[120ms] ease text-[var(--text-muted)] group-hover:text-[var(--node-success)] border border-[var(--border-subtle)] flex items-center overflow-hidden group-hover:pr-2 group-hover:border-[var(--node-success)] disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Run this node"
               >
                 <svg className="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
-                <span className="max-w-0 opacity-0 whitespace-nowrap text-[10px] transition-all duration-200 ease-in-out overflow-hidden group-hover:max-w-[60px] group-hover:opacity-100 group-hover:ml-1">
+                <span className="max-w-0 opacity-0 whitespace-nowrap text-[10px] font-['DM_Mono',monospace] transition-all duration-[120ms] ease overflow-hidden group-hover:max-w-[60px] group-hover:opacity-100 group-hover:ml-1">
                   Run node
                 </span>
               </button>

@@ -18,7 +18,7 @@ function ProviderBadge({ provider }: { provider: ProviderType }) {
   const providerName = provider === "gemini" ? "Gemini" : provider === "replicate" ? "Replicate" : provider === "kie" ? "Kie.ai" : provider === "wavespeed" ? "WaveSpeed" : "fal.ai";
 
   return (
-    <span className="text-neutral-500 shrink-0" title={providerName}>
+    <span className="text-[var(--text-muted)] shrink-0" title={providerName}>
       {provider === "gemini" ? (
         <svg className="w-4 h-4" viewBox="0 0 65 65" fill="currentColor">
           <path d="M57.8647 29.0098C52.865 26.8576 48.4905 23.905 44.7393 20.1556C40.99 16.4063 38.0373 12.0299 35.8851 7.03022C35.0589 5.11406 34.395 3.14442 33.886 1.12498C33.72 0.464747 33.128 0 32.4475 0C31.7669 0 31.1749 0.464747 31.009 1.12498C30.4999 3.14442 29.836 5.11222 29.0098 7.03022C26.8576 12.0299 23.905 16.4063 20.1556 20.1556C16.4063 23.905 12.0299 26.8576 7.03022 29.0098C5.11406 29.836 3.14442 30.4999 1.12498 31.009C0.464747 31.1749 0 31.7669 0 32.4475C0 33.128 0.464747 33.72 1.12498 33.886C3.14442 34.395 5.11222 35.0589 7.03022 35.8851C12.0299 38.0373 16.4045 40.99 20.1556 44.7393C23.9068 48.4886 26.8576 52.865 29.0098 57.8647C29.836 59.7809 30.4999 61.7505 31.009 63.7699C31.1749 64.4302 31.7669 64.8949 32.4475 64.8949C33.128 64.8949 33.72 64.4302 33.886 63.7699C34.395 61.7505 35.0589 59.7827 35.8851 57.8647C38.0373 52.865 40.99 48.4905 44.7393 44.7393C48.4886 40.99 52.865 38.0373 57.8647 35.8851C59.7809 35.0589 61.7505 34.395 63.7699 33.886C64.4302 33.72 64.8949 33.128 64.8949 32.4475C64.8949 31.7669 64.4302 31.1749 63.7699 31.009C61.7505 30.4999 59.7827 29.836 57.8647 29.0098Z" />
@@ -308,7 +308,7 @@ export function GenerateVideoNode({ id, data, selected }: NodeProps<GenerateVide
   const headerAction = useMemo(() => (
     <button
       onClick={() => setIsBrowseDialogOpen(true)}
-      className="nodrag nopan text-[10px] py-0.5 px-1.5 bg-neutral-700 hover:bg-neutral-600 border border-neutral-600 rounded text-neutral-300 transition-colors"
+      className="nodrag nopan text-[10px] py-0.5 px-1.5 bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] border border-[var(--border-subtle)] rounded text-[var(--text-secondary)] transition-all duration-[120ms]"
     >
       Browse
     </button>
@@ -364,248 +364,355 @@ export function GenerateVideoNode({ id, data, selected }: NodeProps<GenerateVide
 
   return (
     <>
-    <BaseNode
-      id={id}
-      title={displayTitle}
-      customTitle={nodeData.customTitle}
-      comment={nodeData.comment}
-      onCustomTitleChange={(title) => updateNodeData(id, { customTitle: title || undefined })}
-      onCommentChange={(comment) => updateNodeData(id, { comment: comment || undefined })}
-      onRun={handleRegenerate}
-      selected={selected}
-      isExecuting={isRunning}
-      hasError={nodeData.status === "error"}
-      headerAction={headerAction}
-      titlePrefix={titlePrefix}
-      commentNavigation={commentNavigation ?? undefined}
-    >
-      {/* Dynamic input handles based on model schema */}
-      {nodeData.inputSchema && nodeData.inputSchema.length > 0 ? (
-        // Render handles from schema, sorted by type (images first, text second)
-        // IMPORTANT: Always render "image" and "text" handles to maintain connection
-        // compatibility. Schema may only have text inputs (text-to-video models) but
-        // we still need the image handle to preserve connections made before model selection.
-        (() => {
-          const imageInputs = nodeData.inputSchema!.filter(i => i.type === "image");
-          const textInputs = nodeData.inputSchema!.filter(i => i.type === "text");
+      <BaseNode
+        id={id}
+        title={displayTitle}
+        customTitle={nodeData.customTitle}
+        comment={nodeData.comment}
+        onCustomTitleChange={(title) => updateNodeData(id, { customTitle: title || undefined })}
+        onCommentChange={(comment) => updateNodeData(id, { comment: comment || undefined })}
+        onRun={handleRegenerate}
+        selected={selected}
+        isExecuting={isRunning}
+        hasError={nodeData.status === "error"}
+        headerAction={headerAction}
+        titlePrefix={titlePrefix}
+        commentNavigation={commentNavigation ?? undefined}
+        nodeAccentColor="purple"
+      >
+        {/* Dynamic input handles based on model schema */}
+        {nodeData.inputSchema && nodeData.inputSchema.length > 0 ? (
+          // Render handles from schema, sorted by type (images first, text second)
+          // IMPORTANT: Always render "image" and "text" handles to maintain connection
+          // compatibility. Schema may only have text inputs (text-to-video models) but
+          // we still need the image handle to preserve connections made before model selection.
+          (() => {
+            const imageInputs = nodeData.inputSchema!.filter(i => i.type === "image");
+            const textInputs = nodeData.inputSchema!.filter(i => i.type === "text");
 
-          // Always include at least one image and one text handle for connection stability
-          const hasImageInput = imageInputs.length > 0;
-          const hasTextInput = textInputs.length > 0;
+            // Always include at least one image and one text handle for connection stability
+            const hasImageInput = imageInputs.length > 0;
+            const hasTextInput = textInputs.length > 0;
 
-          // Build the handles array: schema inputs + fallback defaults if missing
-          const handles: Array<{
-            id: string;
-            type: "image" | "text";
-            label: string;
-            schemaName: string | null;
-            description: string | null;
-            isPlaceholder: boolean;
-          }> = [];
+            // Build the handles array: schema inputs + fallback defaults if missing
+            const handles: Array<{
+              id: string;
+              type: "image" | "text";
+              label: string;
+              schemaName: string | null;
+              description: string | null;
+              isPlaceholder: boolean;
+            }> = [];
 
-          // Add image handles from schema, or a placeholder if none exist
-          if (hasImageInput) {
-            imageInputs.forEach((input, index) => {
+            // Add image handles from schema, or a placeholder if none exist
+            if (hasImageInput) {
+              imageInputs.forEach((input, index) => {
+                handles.push({
+                  // Always use indexed IDs for schema inputs for consistency
+                  id: `image-${index}`,
+                  type: "image",
+                  label: input.label,
+                  schemaName: input.name,
+                  description: input.description || null,
+                  isPlaceholder: false,
+                });
+              });
+            } else {
+              // No image inputs in schema - add placeholder to preserve connections
               handles.push({
-                // Always use indexed IDs for schema inputs for consistency
-                id: `image-${index}`,
+                id: "image",
                 type: "image",
-                label: input.label,
-                schemaName: input.name,
-                description: input.description || null,
-                isPlaceholder: false,
+                label: "Image",
+                schemaName: null,
+                description: "Not used by this model",
+                isPlaceholder: true,
               });
-            });
-          } else {
-            // No image inputs in schema - add placeholder to preserve connections
-            handles.push({
-              id: "image",
-              type: "image",
-              label: "Image",
-              schemaName: null,
-              description: "Not used by this model",
-              isPlaceholder: true,
-            });
-          }
+            }
 
-          // Add text handles from schema, or a placeholder if none exist
-          if (hasTextInput) {
-            textInputs.forEach((input, index) => {
+            // Add text handles from schema, or a placeholder if none exist
+            if (hasTextInput) {
+              textInputs.forEach((input, index) => {
+                handles.push({
+                  // Always use indexed IDs for schema inputs for consistency
+                  id: `text-${index}`,
+                  type: "text",
+                  label: input.label,
+                  schemaName: input.name,
+                  description: input.description || null,
+                  isPlaceholder: false,
+                });
+              });
+            } else {
+              // No text inputs in schema - add placeholder to preserve connections
               handles.push({
-                // Always use indexed IDs for schema inputs for consistency
-                id: `text-${index}`,
+                id: "text",
                 type: "text",
-                label: input.label,
-                schemaName: input.name,
-                description: input.description || null,
-                isPlaceholder: false,
+                label: "Prompt",
+                schemaName: null,
+                description: "Not used by this model",
+                isPlaceholder: true,
               });
+            }
+
+            // Calculate positions
+            const imageHandles = handles.filter(h => h.type === "image");
+            const textHandles = handles.filter(h => h.type === "text");
+            const totalSlots = imageHandles.length + textHandles.length + 1; // +1 for gap
+
+            const renderedHandles = handles.map((handle, index) => {
+              // Position: images first, then gap, then text
+              const isImage = handle.type === "image";
+              const typeIndex = isImage
+                ? imageHandles.findIndex(h => h.id === handle.id)
+                : textHandles.findIndex(h => h.id === handle.id);
+              const adjustedIndex = isImage ? typeIndex : imageHandles.length + 1 + typeIndex;
+              const topPercent = ((adjustedIndex + 1) / (totalSlots + 1)) * 100;
+
+              return (
+                <React.Fragment key={handle.id}>
+                  <Handle
+                    type="target"
+                    position={Position.Left}
+                    id={handle.id}
+                    style={{
+                      top: `${topPercent}%`,
+                      opacity: handle.isPlaceholder ? 0.3 : 1,
+                    }}
+                    data-handletype={handle.type}
+                    data-schema-name={handle.schemaName || undefined}
+                    isConnectable={true}
+                    title={handle.description || handle.label}
+                  />
+                  {/* Handle label - positioned outside node, above the connector */}
+                  <div
+                    className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none text-right"
+                    style={{
+                      right: `calc(100% + 8px)`,
+                      top: `calc(${topPercent}% - 18px)`,
+                      color: isImage ? "var(--handle-color-image)" : "var(--handle-color-text)",
+                      opacity: handle.isPlaceholder ? 0.3 : 1,
+                    }}
+                  >
+                    {handle.label}
+                  </div>
+                </React.Fragment>
+              );
             });
-          } else {
-            // No text inputs in schema - add placeholder to preserve connections
-            handles.push({
-              id: "text",
-              type: "text",
-              label: "Prompt",
-              schemaName: null,
-              description: "Not used by this model",
-              isPlaceholder: true,
-            });
-          }
 
-          // Calculate positions
-          const imageHandles = handles.filter(h => h.type === "image");
-          const textHandles = handles.filter(h => h.type === "text");
-          const totalSlots = imageHandles.length + textHandles.length + 1; // +1 for gap
-
-          const renderedHandles = handles.map((handle, index) => {
-            // Position: images first, then gap, then text
-            const isImage = handle.type === "image";
-            const typeIndex = isImage
-              ? imageHandles.findIndex(h => h.id === handle.id)
-              : textHandles.findIndex(h => h.id === handle.id);
-            const adjustedIndex = isImage ? typeIndex : imageHandles.length + 1 + typeIndex;
-            const topPercent = ((adjustedIndex + 1) / (totalSlots + 1)) * 100;
-
+            // Add hidden backward-compatibility handles for edges using non-indexed IDs
+            // This ensures edges created with "image"/"text" still work when schema uses "image-0"/"text-0"
+            // Note: No data-handletype to avoid being counted in tests - these are purely for edge routing
             return (
-              <React.Fragment key={handle.id}>
-                <Handle
-                  type="target"
-                  position={Position.Left}
-                  id={handle.id}
-                  style={{
-                    top: `${topPercent}%`,
-                    opacity: handle.isPlaceholder ? 0.3 : 1,
-                  }}
-                  data-handletype={handle.type}
-                  data-schema-name={handle.schemaName || undefined}
-                  isConnectable={true}
-                  title={handle.description || handle.label}
-                />
-                {/* Handle label - positioned outside node, above the connector */}
-                <div
-                  className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none text-right"
-                  style={{
-                    right: `calc(100% + 8px)`,
-                    top: `calc(${topPercent}% - 18px)`,
-                    color: isImage ? "var(--handle-color-image)" : "var(--handle-color-text)",
-                    opacity: handle.isPlaceholder ? 0.3 : 1,
-                  }}
-                >
-                  {handle.label}
-                </div>
-              </React.Fragment>
+              <>
+                {renderedHandles}
+                {hasImageInput && (
+                  <Handle
+                    type="target"
+                    position={Position.Left}
+                    id="image"
+                    style={{ top: "35%", opacity: 0, pointerEvents: "none" }}
+                    isConnectable={false}
+                  />
+                )}
+                {hasTextInput && (
+                  <Handle
+                    type="target"
+                    position={Position.Left}
+                    id="text"
+                    style={{ top: "65%", opacity: 0, pointerEvents: "none" }}
+                    isConnectable={false}
+                  />
+                )}
+              </>
             );
-          });
+          })()
+        ) : (
+          // Default handles when no schema
+          <>
+            <Handle
+              type="target"
+              position={Position.Left}
+              id="image"
+              style={{ top: "35%" }}
+              data-handletype="image"
+              isConnectable={true}
+            />
+            {/* Default image label */}
+            <div
+              className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none text-right"
+              style={{
+                right: `calc(100% + 8px)`,
+                top: "calc(35% - 18px)",
+                color: "var(--handle-color-image)",
+              }}
+            >
+              Image
+            </div>
+            <Handle
+              type="target"
+              position={Position.Left}
+              id="text"
+              style={{ top: "65%" }}
+              data-handletype="text"
+            />
+            {/* Default text label */}
+            <div
+              className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none text-right"
+              style={{
+                right: `calc(100% + 8px)`,
+                top: "calc(65% - 18px)",
+                color: "var(--handle-color-text)",
+              }}
+            >
+              Prompt
+            </div>
+          </>
+        )}
+        {/* Video output */}
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="video"
+          data-handletype="video"
+        />
+        {/* Output label */}
+        <div
+          className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none"
+          style={{
+            left: `calc(100% + 8px)`,
+            top: "calc(50% - 18px)",
+            color: "var(--handle-color-image)",
+          }}
+        >
+          Video
+        </div>
 
-          // Add hidden backward-compatibility handles for edges using non-indexed IDs
-          // This ensures edges created with "image"/"text" still work when schema uses "image-0"/"text-0"
-          // Note: No data-handletype to avoid being counted in tests - these are purely for edge routing
-          return (
+        <div className="flex-1 flex flex-col min-h-0 gap-2">
+          {/* Preview area */}
+          {nodeData.outputVideo ? (
             <>
-              {renderedHandles}
-              {hasImageInput && (
-                <Handle
-                  type="target"
-                  position={Position.Left}
-                  id="image"
-                  style={{ top: "35%", opacity: 0, pointerEvents: "none" }}
-                  isConnectable={false}
+              <div className="relative w-full flex-1 min-h-0">
+                <video
+                  key={nodeData.videoHistory?.[nodeData.selectedVideoHistoryIndex || 0]?.id}
+                  src={nodeData.outputVideo}
+                  controls
+                  autoPlay
+                  loop
+                  muted
+                  className="w-full h-full object-contain rounded"
+                  playsInline
                 />
-              )}
-              {hasTextInput && (
-                <Handle
-                  type="target"
-                  position={Position.Left}
-                  id="text"
-                  style={{ top: "65%", opacity: 0, pointerEvents: "none" }}
-                  isConnectable={false}
-                />
+                {/* Loading overlay for generation */}
+                {nodeData.status === "loading" && (
+                  <div className="absolute inset-0 bg-[var(--bg-base)]/70 rounded flex items-center justify-center">
+                    <svg
+                      className="w-6 h-6 animate-spin text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                  </div>
+                )}
+                {/* Error overlay when generation failed */}
+                {nodeData.status === "error" && (
+                  <div className="absolute inset-0 bg-red-900/40 rounded flex flex-col items-center justify-center gap-1">
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-white text-xs font-medium">Generation failed</span>
+                    <span className="text-white/70 text-[10px]">See toast for details</span>
+                  </div>
+                )}
+                {/* Loading overlay for carousel navigation */}
+                {isLoadingCarouselVideo && (
+                  <div className="absolute inset-0 bg-[var(--bg-base)]/50 rounded flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 animate-spin text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <div className="absolute top-1 right-1">
+                  <button
+                    onClick={handleClearVideo}
+                    className="w-5 h-5 bg-[var(--bg-base)]/80 hover:bg-[var(--node-error)]/80 rounded flex items-center justify-center text-[var(--text-secondary)] hover:text-white transition-all duration-[120ms]"
+                    title="Clear video"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Carousel controls - only show if there are multiple videos */}
+              {hasCarouselVideos && (
+                <div className="flex items-center justify-center gap-2 shrink-0">
+                  <button
+                    onClick={handleCarouselPrevious}
+                    disabled={isLoadingCarouselVideo}
+                    className="w-5 h-5 rounded bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-[var(--text-secondary)] hover:text-white transition-all duration-[120ms]"
+                    title="Previous video"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <span className="text-[10px] text-[var(--text-secondary)] min-w-[32px] text-center">
+                    {(nodeData.selectedVideoHistoryIndex || 0) + 1} / {(nodeData.videoHistory || []).length}
+                  </span>
+                  <button
+                    onClick={handleCarouselNext}
+                    disabled={isLoadingCarouselVideo}
+                    className="w-5 h-5 rounded bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-[var(--text-secondary)] hover:text-white transition-all duration-[120ms]"
+                    title="Next video"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
               )}
             </>
-          );
-        })()
-      ) : (
-        // Default handles when no schema
-        <>
-          <Handle
-            type="target"
-            position={Position.Left}
-            id="image"
-            style={{ top: "35%" }}
-            data-handletype="image"
-            isConnectable={true}
-          />
-          {/* Default image label */}
-          <div
-            className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none text-right"
-            style={{
-              right: `calc(100% + 8px)`,
-              top: "calc(35% - 18px)",
-              color: "var(--handle-color-image)",
-            }}
-          >
-            Image
-          </div>
-          <Handle
-            type="target"
-            position={Position.Left}
-            id="text"
-            style={{ top: "65%" }}
-            data-handletype="text"
-          />
-          {/* Default text label */}
-          <div
-            className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none text-right"
-            style={{
-              right: `calc(100% + 8px)`,
-              top: "calc(65% - 18px)",
-              color: "var(--handle-color-text)",
-            }}
-          >
-            Prompt
-          </div>
-        </>
-      )}
-      {/* Video output */}
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="video"
-        data-handletype="video"
-      />
-      {/* Output label */}
-      <div
-        className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none"
-        style={{
-          left: `calc(100% + 8px)`,
-          top: "calc(50% - 18px)",
-          color: "var(--handle-color-image)",
-        }}
-      >
-        Video
-      </div>
-
-      <div className="flex-1 flex flex-col min-h-0 gap-2">
-        {/* Preview area */}
-        {nodeData.outputVideo ? (
-          <>
-          <div className="relative w-full flex-1 min-h-0">
-            <video
-              key={nodeData.videoHistory?.[nodeData.selectedVideoHistoryIndex || 0]?.id}
-              src={nodeData.outputVideo}
-              controls
-              autoPlay
-              loop
-              muted
-              className="w-full h-full object-contain rounded"
-              playsInline
-            />
-            {/* Loading overlay for generation */}
-            {nodeData.status === "loading" && (
-              <div className="absolute inset-0 bg-neutral-900/70 rounded flex items-center justify-center">
+          ) : (
+            <div className="w-full flex-1 min-h-[112px] border border-dashed border-[var(--border-subtle)] rounded flex flex-col items-center justify-center">
+              {nodeData.status === "loading" ? (
                 <svg
-                  className="w-6 h-6 animate-spin text-white"
+                  className="w-4 h-4 animate-spin text-[var(--text-secondary)]"
                   fill="none"
                   viewBox="0 0 24 24"
                 >
@@ -623,147 +730,41 @@ export function GenerateVideoNode({ id, data, selected }: NodeProps<GenerateVide
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-              </div>
-            )}
-            {/* Error overlay when generation failed */}
-            {nodeData.status === "error" && (
-              <div className="absolute inset-0 bg-red-900/40 rounded flex flex-col items-center justify-center gap-1">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-white text-xs font-medium">Generation failed</span>
-                <span className="text-white/70 text-[10px]">See toast for details</span>
-              </div>
-            )}
-            {/* Loading overlay for carousel navigation */}
-            {isLoadingCarouselVideo && (
-              <div className="absolute inset-0 bg-neutral-900/50 rounded flex items-center justify-center">
-                <svg
-                  className="w-4 h-4 animate-spin text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-              </div>
-            )}
-            <div className="absolute top-1 right-1">
-              <button
-                onClick={handleClearVideo}
-                className="w-5 h-5 bg-neutral-900/80 hover:bg-red-600/80 rounded flex items-center justify-center text-neutral-400 hover:text-white transition-colors"
-                title="Clear video"
-              >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Carousel controls - only show if there are multiple videos */}
-          {hasCarouselVideos && (
-            <div className="flex items-center justify-center gap-2 shrink-0">
-              <button
-                onClick={handleCarouselPrevious}
-                disabled={isLoadingCarouselVideo}
-                className="w-5 h-5 rounded bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-neutral-400 hover:text-white transition-colors"
-                title="Previous video"
-              >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <span className="text-[10px] text-neutral-400 min-w-[32px] text-center">
-                {(nodeData.selectedVideoHistoryIndex || 0) + 1} / {(nodeData.videoHistory || []).length}
-              </span>
-              <button
-                onClick={handleCarouselNext}
-                disabled={isLoadingCarouselVideo}
-                className="w-5 h-5 rounded bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-neutral-400 hover:text-white transition-colors"
-                title="Next video"
-              >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+              ) : nodeData.status === "error" ? (
+                <span className="text-[10px] text-[var(--node-error)] text-center px-2">
+                  {nodeData.error || "Failed"}
+                </span>
+              ) : (
+                <span className="text-[var(--text-muted)] text-[10px]">
+                  Run to generate
+                </span>
+              )}
             </div>
           )}
-        </>
-        ) : (
-          <div className="w-full flex-1 min-h-[112px] border border-dashed border-neutral-600 rounded flex flex-col items-center justify-center">
-            {nodeData.status === "loading" ? (
-              <svg
-                className="w-4 h-4 animate-spin text-neutral-400"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-            ) : nodeData.status === "error" ? (
-              <span className="text-[10px] text-red-400 text-center px-2">
-                {nodeData.error || "Failed"}
-              </span>
-            ) : (
-              <span className="text-neutral-500 text-[10px]">
-                Run to generate
-              </span>
-            )}
-          </div>
-        )}
 
-        {/* Model-specific parameters */}
-        {nodeData.selectedModel?.modelId && (
-          <ModelParameters
-            modelId={nodeData.selectedModel.modelId}
-            provider={currentProvider}
-            parameters={nodeData.parameters || {}}
-            onParametersChange={handleParametersChange}
-            onExpandChange={handleParametersExpandChange}
-            onInputsLoaded={handleInputsLoaded}
-          />
-        )}
-      </div>
-    </BaseNode>
+          {/* Model-specific parameters */}
+          {nodeData.selectedModel?.modelId && (
+            <ModelParameters
+              modelId={nodeData.selectedModel.modelId}
+              provider={currentProvider}
+              parameters={nodeData.parameters || {}}
+              onParametersChange={handleParametersChange}
+              onExpandChange={handleParametersExpandChange}
+              onInputsLoaded={handleInputsLoaded}
+            />
+          )}
+        </div>
+      </BaseNode>
 
-    {/* Model browser dialog */}
-    {isBrowseDialogOpen && (
-      <ModelSearchDialog
-        isOpen={isBrowseDialogOpen}
-        onClose={() => setIsBrowseDialogOpen(false)}
-        onModelSelected={handleBrowseModelSelect}
-        initialCapabilityFilter="video"
-      />
-    )}
+      {/* Model browser dialog */}
+      {isBrowseDialogOpen && (
+        <ModelSearchDialog
+          isOpen={isBrowseDialogOpen}
+          onClose={() => setIsBrowseDialogOpen(false)}
+          onModelSelected={handleBrowseModelSelect}
+          initialCapabilityFilter="video"
+        />
+      )}
     </>
   );
 }

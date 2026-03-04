@@ -40,6 +40,7 @@ import {
   ImageIteratorNode,
   TextIteratorNode,
   WebScraperNode,
+  StickyNoteNode,
 } from "./nodes";
 
 // Lazy-load GLBViewerNode to avoid bundling three.js for users who don't use 3D nodes
@@ -81,6 +82,7 @@ const nodeTypes: NodeTypes = {
   imageIterator: ImageIteratorNode,
   textIterator: TextIteratorNode,
   webScraper: WebScraperNode,
+  stickyNote: StickyNoteNode,
 };
 
 const edgeTypes: EdgeTypes = {
@@ -180,7 +182,7 @@ const isMouseWheel = (event: WheelEvent): boolean => {
   // Fallback: large delta values suggest mouse wheel
   const threshold = 50;
   return Math.abs(event.deltaY) >= threshold &&
-         Math.abs(event.deltaY) % 40 === 0; // Mouse deltas often in multiples
+    Math.abs(event.deltaY) % 40 === 0; // Mouse deltas often in multiples
 };
 
 // Check if an element can scroll and has room to scroll in the given direction
@@ -251,6 +253,7 @@ export function WorkflowCanvas() {
   const [isBuildingWorkflow, setIsBuildingWorkflow] = useState(false);
   const [showNewProjectSetup, setShowNewProjectSetup] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; flowPos: { x: number; y: number } } | null>(null);
+  const contextMenuOpenedAt = useRef<number>(0);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
   // Auto-setup default project if none exists
@@ -585,17 +588,17 @@ export function WorkflowCanvas() {
               // Create the connection
               const connection: Connection = isFromSource
                 ? {
-                    source: connectionState.fromNode.id,
-                    sourceHandle: fromHandleId,
-                    target: targetNodeId,
-                    targetHandle: compatibleHandle,
-                  }
+                  source: connectionState.fromNode.id,
+                  sourceHandle: fromHandleId,
+                  target: targetNodeId,
+                  targetHandle: compatibleHandle,
+                }
                 : {
-                    source: targetNodeId,
-                    sourceHandle: compatibleHandle,
-                    target: connectionState.fromNode.id,
-                    targetHandle: fromHandleId,
-                  };
+                  source: targetNodeId,
+                  sourceHandle: compatibleHandle,
+                  target: connectionState.fromNode.id,
+                  targetHandle: fromHandleId,
+                };
 
               if (isValidConnection(connection)) {
                 handleConnect(connection);
@@ -1077,242 +1080,243 @@ export function WorkflowCanvas() {
       return;
     }
 
-      // Helper to get viewport center position in flow coordinates
-      const getViewportCenter = () => {
-        const viewport = getViewport();
-        const centerX = (-viewport.x + window.innerWidth / 2) / viewport.zoom;
-        const centerY = (-viewport.y + window.innerHeight / 2) / viewport.zoom;
-        return { centerX, centerY };
-      };
+    // Helper to get viewport center position in flow coordinates
+    const getViewportCenter = () => {
+      const viewport = getViewport();
+      const centerX = (-viewport.x + window.innerWidth / 2) / viewport.zoom;
+      const centerY = (-viewport.y + window.innerHeight / 2) / viewport.zoom;
+      return { centerX, centerY };
+    };
 
-      // Handle node creation hotkeys (Shift + key)
-      if (event.shiftKey && !event.ctrlKey && !event.metaKey) {
-        const key = event.key.toLowerCase();
-        let nodeType: NodeType | null = null;
+    // Handle node creation hotkeys (Shift + key)
+    if (event.shiftKey && !event.ctrlKey && !event.metaKey) {
+      const key = event.key.toLowerCase();
+      let nodeType: NodeType | null = null;
 
-        switch (key) {
-          case "p":
-            nodeType = "prompt";
-            break;
-          case "i":
-            nodeType = "imageInput";
-            break;
-          case "g":
-            nodeType = "nanoBanana";
-            break;
-          case "v":
-            nodeType = "generateVideo";
-            break;
-          case "l":
-            nodeType = "llmGenerate";
-            break;
-          case "a":
-            nodeType = "annotation";
-            break;
-        }
-
-        if (nodeType) {
-          event.preventDefault();
-          const { centerX, centerY } = getViewportCenter();
-          // Offset by half the default node dimensions to center it
-          const defaultDimensions: Record<NodeType, { width: number; height: number }> = {
-            imageInput: { width: 300, height: 280 },
-            audioInput: { width: 300, height: 200 },
-            annotation: { width: 300, height: 280 },
-            prompt: { width: 320, height: 220 },
-            promptConstructor: { width: 340, height: 280 },
-            promptConcatenator: { width: 320, height: 240 },
-            nanoBanana: { width: 300, height: 300 },
-            generateVideo: { width: 300, height: 300 },
-            generate3d: { width: 300, height: 300 },
-            llmGenerate: { width: 320, height: 360 },
-            splitGrid: { width: 300, height: 320 },
-            output: { width: 320, height: 320 },
-            outputGallery: { width: 320, height: 360 },
-            imageCompare: { width: 400, height: 360 },
-            videoStitch: { width: 400, height: 280 },
-            easeCurve: { width: 340, height: 480 },
-            glbViewer: { width: 360, height: 380 },
-            imageIterator: { width: 340, height: 300 },
-            textIterator: { width: 340, height: 280 },
-            webScraper: { width: 340, height: 320 },
-          };
-          const dims = defaultDimensions[nodeType];
-          addNode(nodeType, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
-          return;
-        }
+      switch (key) {
+        case "p":
+          nodeType = "prompt";
+          break;
+        case "i":
+          nodeType = "imageInput";
+          break;
+        case "g":
+          nodeType = "nanoBanana";
+          break;
+        case "v":
+          nodeType = "generateVideo";
+          break;
+        case "l":
+          nodeType = "llmGenerate";
+          break;
+        case "a":
+          nodeType = "annotation";
+          break;
       }
 
-      // Handle paste (Ctrl/Cmd + V)
-      if ((event.ctrlKey || event.metaKey) && event.key === "v") {
+      if (nodeType) {
         event.preventDefault();
+        const { centerX, centerY } = getViewportCenter();
+        // Offset by half the default node dimensions to center it
+        const defaultDimensions: Record<NodeType, { width: number; height: number }> = {
+          imageInput: { width: 300, height: 280 },
+          audioInput: { width: 300, height: 200 },
+          annotation: { width: 300, height: 280 },
+          prompt: { width: 320, height: 220 },
+          promptConstructor: { width: 340, height: 280 },
+          promptConcatenator: { width: 320, height: 240 },
+          nanoBanana: { width: 300, height: 300 },
+          generateVideo: { width: 300, height: 300 },
+          generate3d: { width: 300, height: 300 },
+          llmGenerate: { width: 320, height: 360 },
+          splitGrid: { width: 300, height: 320 },
+          output: { width: 320, height: 320 },
+          outputGallery: { width: 320, height: 360 },
+          imageCompare: { width: 400, height: 360 },
+          videoStitch: { width: 400, height: 280 },
+          easeCurve: { width: 340, height: 480 },
+          glbViewer: { width: 360, height: 380 },
+          imageIterator: { width: 340, height: 300 },
+          textIterator: { width: 340, height: 280 },
+          webScraper: { width: 340, height: 320 },
+          stickyNote: { width: 200, height: 160 },
+        };
+        const dims = defaultDimensions[nodeType];
+        addNode(nodeType, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
+        return;
+      }
+    }
 
-        // If we have nodes in the internal clipboard, prioritize pasting those
-        if (clipboard && clipboard.nodes.length > 0) {
-          pasteNodes();
-          clearClipboard(); // Clear so next paste uses system clipboard
-          return;
-        }
+    // Handle paste (Ctrl/Cmd + V)
+    if ((event.ctrlKey || event.metaKey) && event.key === "v") {
+      event.preventDefault();
 
-        // Check system clipboard for images first, then text
-        navigator.clipboard.read().then(async (items) => {
-          for (const item of items) {
-            // Check for image
-            const imageType = item.types.find(type => type.startsWith('image/'));
-            if (imageType) {
-              const blob = await item.getType(imageType);
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                const dataUrl = e.target?.result as string;
-
-                const img = new Image();
-                img.onload = () => {
-                  // Check if an imageInput node is selected - if so, update it instead of creating new
-                  const selectedImageInputNode = nodes.find(
-                    (node) => node.selected && node.type === "imageInput"
-                  );
-
-                  if (selectedImageInputNode) {
-                    // Update the selected imageInput node with the pasted image
-                    updateNodeData(selectedImageInputNode.id, {
-                      image: dataUrl,
-                      imageRef: undefined,
-                      filename: `pasted-${Date.now()}.png`,
-                      dimensions: { width: img.width, height: img.height },
-                    });
-                  } else {
-                    // No imageInput node selected - create a new one at viewport center
-                    const viewport = getViewport();
-                    const centerX = (-viewport.x + window.innerWidth / 2) / viewport.zoom;
-                    const centerY = (-viewport.y + window.innerHeight / 2) / viewport.zoom;
-
-                    // ImageInput node default dimensions: 300x280
-                    const nodeId = addNode("imageInput", { x: centerX - 150, y: centerY - 140 });
-                    updateNodeData(nodeId, {
-                      image: dataUrl,
-                      filename: `pasted-${Date.now()}.png`,
-                      dimensions: { width: img.width, height: img.height },
-                    });
-                  }
-                };
-                img.src = dataUrl;
-              };
-              reader.readAsDataURL(blob);
-              return; // Exit after handling image
-            }
-
-            // Check for text
-            if (item.types.includes('text/plain')) {
-              const blob = await item.getType('text/plain');
-              const text = await blob.text();
-              if (text.trim()) {
-                const viewport = getViewport();
-                const centerX = (-viewport.x + window.innerWidth / 2) / viewport.zoom;
-                const centerY = (-viewport.y + window.innerHeight / 2) / viewport.zoom;
-                // Prompt node default dimensions: 320x220
-                const nodeId = addNode("prompt", { x: centerX - 160, y: centerY - 110 });
-                updateNodeData(nodeId, { prompt: text });
-                return; // Exit after handling text
-              }
-            }
-          }
-        }).catch(() => {
-          // Clipboard API failed - nothing to paste
-        });
+      // If we have nodes in the internal clipboard, prioritize pasting those
+      if (clipboard && clipboard.nodes.length > 0) {
+        pasteNodes();
+        clearClipboard(); // Clear so next paste uses system clipboard
         return;
       }
 
-      const selectedNodes = nodes.filter((node) => node.selected);
-      if (selectedNodes.length < 2) return;
+      // Check system clipboard for images first, then text
+      navigator.clipboard.read().then(async (items) => {
+        for (const item of items) {
+          // Check for image
+          const imageType = item.types.find(type => type.startsWith('image/'));
+          if (imageType) {
+            const blob = await item.getType(imageType);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const dataUrl = e.target?.result as string;
 
-      const STACK_GAP = 20;
+              const img = new Image();
+              img.onload = () => {
+                // Check if an imageInput node is selected - if so, update it instead of creating new
+                const selectedImageInputNode = nodes.find(
+                  (node) => node.selected && node.type === "imageInput"
+                );
 
-      if (event.key === "v" || event.key === "V") {
-        // Stack vertically - sort by current y position to maintain relative order
-        const sortedNodes = [...selectedNodes].sort((a, b) => a.position.y - b.position.y);
+                if (selectedImageInputNode) {
+                  // Update the selected imageInput node with the pasted image
+                  updateNodeData(selectedImageInputNode.id, {
+                    image: dataUrl,
+                    imageRef: undefined,
+                    filename: `pasted-${Date.now()}.png`,
+                    dimensions: { width: img.width, height: img.height },
+                  });
+                } else {
+                  // No imageInput node selected - create a new one at viewport center
+                  const viewport = getViewport();
+                  const centerX = (-viewport.x + window.innerWidth / 2) / viewport.zoom;
+                  const centerY = (-viewport.y + window.innerHeight / 2) / viewport.zoom;
 
-        // Use the leftmost x position as the alignment point
-        const alignX = Math.min(...sortedNodes.map((n) => n.position.x));
+                  // ImageInput node default dimensions: 300x280
+                  const nodeId = addNode("imageInput", { x: centerX - 150, y: centerY - 140 });
+                  updateNodeData(nodeId, {
+                    image: dataUrl,
+                    filename: `pasted-${Date.now()}.png`,
+                    dimensions: { width: img.width, height: img.height },
+                  });
+                }
+              };
+              img.src = dataUrl;
+            };
+            reader.readAsDataURL(blob);
+            return; // Exit after handling image
+          }
 
-        let currentY = sortedNodes[0].position.y;
+          // Check for text
+          if (item.types.includes('text/plain')) {
+            const blob = await item.getType('text/plain');
+            const text = await blob.text();
+            if (text.trim()) {
+              const viewport = getViewport();
+              const centerX = (-viewport.x + window.innerWidth / 2) / viewport.zoom;
+              const centerY = (-viewport.y + window.innerHeight / 2) / viewport.zoom;
+              // Prompt node default dimensions: 320x220
+              const nodeId = addNode("prompt", { x: centerX - 160, y: centerY - 110 });
+              updateNodeData(nodeId, { prompt: text });
+              return; // Exit after handling text
+            }
+          }
+        }
+      }).catch(() => {
+        // Clipboard API failed - nothing to paste
+      });
+      return;
+    }
 
-        sortedNodes.forEach((node) => {
-          const nodeHeight = (node.style?.height as number) || (node.measured?.height) || 200;
+    const selectedNodes = nodes.filter((node) => node.selected);
+    if (selectedNodes.length < 2) return;
 
-          onNodesChange([
-            {
-              type: "position",
-              id: node.id,
-              position: { x: alignX, y: currentY },
+    const STACK_GAP = 20;
+
+    if (event.key === "v" || event.key === "V") {
+      // Stack vertically - sort by current y position to maintain relative order
+      const sortedNodes = [...selectedNodes].sort((a, b) => a.position.y - b.position.y);
+
+      // Use the leftmost x position as the alignment point
+      const alignX = Math.min(...sortedNodes.map((n) => n.position.x));
+
+      let currentY = sortedNodes[0].position.y;
+
+      sortedNodes.forEach((node) => {
+        const nodeHeight = (node.style?.height as number) || (node.measured?.height) || 200;
+
+        onNodesChange([
+          {
+            type: "position",
+            id: node.id,
+            position: { x: alignX, y: currentY },
+          },
+        ]);
+
+        currentY += nodeHeight + STACK_GAP;
+      });
+    } else if (event.key === "h" || event.key === "H") {
+      // Stack horizontally - sort by current x position to maintain relative order
+      const sortedNodes = [...selectedNodes].sort((a, b) => a.position.x - b.position.x);
+
+      // Use the topmost y position as the alignment point
+      const alignY = Math.min(...sortedNodes.map((n) => n.position.y));
+
+      let currentX = sortedNodes[0].position.x;
+
+      sortedNodes.forEach((node) => {
+        const nodeWidth = (node.style?.width as number) || (node.measured?.width) || 220;
+
+        onNodesChange([
+          {
+            type: "position",
+            id: node.id,
+            position: { x: currentX, y: alignY },
+          },
+        ]);
+
+        currentX += nodeWidth + STACK_GAP;
+      });
+    } else if (event.key === "g" || event.key === "G") {
+      // Arrange as grid
+      const count = selectedNodes.length;
+      const cols = Math.ceil(Math.sqrt(count));
+
+      // Sort nodes by their current position (top-to-bottom, left-to-right)
+      const sortedNodes = [...selectedNodes].sort((a, b) => {
+        const rowA = Math.floor(a.position.y / 100);
+        const rowB = Math.floor(b.position.y / 100);
+        if (rowA !== rowB) return rowA - rowB;
+        return a.position.x - b.position.x;
+      });
+
+      // Find the starting position (top-left of bounding box)
+      const startX = Math.min(...sortedNodes.map((n) => n.position.x));
+      const startY = Math.min(...sortedNodes.map((n) => n.position.y));
+
+      // Get max node dimensions for consistent spacing
+      const maxWidth = Math.max(
+        ...sortedNodes.map((n) => (n.style?.width as number) || (n.measured?.width) || 220)
+      );
+      const maxHeight = Math.max(
+        ...sortedNodes.map((n) => (n.style?.height as number) || (n.measured?.height) || 200)
+      );
+
+      // Position each node in the grid
+      sortedNodes.forEach((node, index) => {
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+
+        onNodesChange([
+          {
+            type: "position",
+            id: node.id,
+            position: {
+              x: startX + col * (maxWidth + STACK_GAP),
+              y: startY + row * (maxHeight + STACK_GAP),
             },
-          ]);
-
-          currentY += nodeHeight + STACK_GAP;
-        });
-      } else if (event.key === "h" || event.key === "H") {
-        // Stack horizontally - sort by current x position to maintain relative order
-        const sortedNodes = [...selectedNodes].sort((a, b) => a.position.x - b.position.x);
-
-        // Use the topmost y position as the alignment point
-        const alignY = Math.min(...sortedNodes.map((n) => n.position.y));
-
-        let currentX = sortedNodes[0].position.x;
-
-        sortedNodes.forEach((node) => {
-          const nodeWidth = (node.style?.width as number) || (node.measured?.width) || 220;
-
-          onNodesChange([
-            {
-              type: "position",
-              id: node.id,
-              position: { x: currentX, y: alignY },
-            },
-          ]);
-
-          currentX += nodeWidth + STACK_GAP;
-        });
-      } else if (event.key === "g" || event.key === "G") {
-        // Arrange as grid
-        const count = selectedNodes.length;
-        const cols = Math.ceil(Math.sqrt(count));
-
-        // Sort nodes by their current position (top-to-bottom, left-to-right)
-        const sortedNodes = [...selectedNodes].sort((a, b) => {
-          const rowA = Math.floor(a.position.y / 100);
-          const rowB = Math.floor(b.position.y / 100);
-          if (rowA !== rowB) return rowA - rowB;
-          return a.position.x - b.position.x;
-        });
-
-        // Find the starting position (top-left of bounding box)
-        const startX = Math.min(...sortedNodes.map((n) => n.position.x));
-        const startY = Math.min(...sortedNodes.map((n) => n.position.y));
-
-        // Get max node dimensions for consistent spacing
-        const maxWidth = Math.max(
-          ...sortedNodes.map((n) => (n.style?.width as number) || (n.measured?.width) || 220)
-        );
-        const maxHeight = Math.max(
-          ...sortedNodes.map((n) => (n.style?.height as number) || (n.measured?.height) || 200)
-        );
-
-        // Position each node in the grid
-        sortedNodes.forEach((node, index) => {
-          const col = index % cols;
-          const row = Math.floor(index / cols);
-
-          onNodesChange([
-            {
-              type: "position",
-              id: node.id,
-              position: {
-                x: startX + col * (maxWidth + STACK_GAP),
-                y: startY + row * (maxHeight + STACK_GAP),
-              },
-            },
-          ]);
-        });
-      }
+          },
+        ]);
+      });
+    }
   }, [nodes, onNodesChange, copySelectedNodes, pasteNodes, clearClipboard, clipboard, getViewport, addNode, updateNodeData, executeWorkflow, setShortcutsDialogOpen]);
 
   useEffect(() => {
@@ -1563,16 +1567,16 @@ export function WorkflowCanvas() {
     >
       {/* Drop overlay indicator */}
       {isDragOver && (
-        <div className="absolute inset-0 bg-blue-500/10 z-50 pointer-events-none flex items-center justify-center">
-          <div className="bg-neutral-800 border border-neutral-600 rounded-lg px-6 py-4 shadow-xl">
-            <p className="text-neutral-200 text-sm font-medium">
+        <div className="absolute inset-0 bg-[var(--accent-primary)]/10 z-50 pointer-events-none flex items-center justify-center">
+          <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[6px] px-6 py-4 shadow-xl">
+            <p className="text-[var(--text-primary)] text-sm font-medium font-['DM_Mono',monospace]">
               {dropType === "workflow"
                 ? "Drop to load workflow"
                 : dropType === "node"
-                ? "Drop to create node"
-                : dropType === "audio"
-                ? "Drop audio to create node"
-                : "Drop image to create node"}
+                  ? "Drop to create node"
+                  : dropType === "audio"
+                    ? "Drop audio to create node"
+                    : "Drop image to create node"}
             </p>
           </div>
         </div>
@@ -1581,9 +1585,9 @@ export function WorkflowCanvas() {
       {/* Splitting indicator */}
       {isSplitting && (
         <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center">
-          <div className="bg-neutral-800 border border-neutral-600 rounded-lg px-6 py-4 shadow-xl flex items-center gap-3">
+          <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[6px] px-6 py-4 shadow-xl flex items-center gap-3">
             <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-neutral-200 text-sm font-medium">Splitting image grid...</p>
+            <p className="text-[var(--text-primary)] text-sm font-medium font-['DM_Mono',monospace]">Splitting image grid...</p>
           </div>
         </div>
       )}
@@ -1619,38 +1623,127 @@ export function WorkflowCanvas() {
         />
       )}
 
-      {/* Right-click context menu */}
+      {/* Right-click context menu — Premium Glass */}
       {contextMenu && (
         <div
-          className="fixed z-[9999] bg-neutral-800 border border-neutral-600 rounded-lg shadow-2xl py-1 min-w-[200px]"
-          style={{ left: contextMenu.x, top: contextMenu.y }}
+          className="fixed z-[9999] rounded-[10px] py-1.5 min-w-[220px]"
+          style={{
+            left: contextMenu.x,
+            top: contextMenu.y,
+            background: 'rgba(28, 30, 36, 0.82)',
+            backdropFilter: 'blur(20px) saturate(1.6)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 16px 48px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+            animation: 'contextMenuIn 120ms ease-out',
+          }}
           onClick={() => setContextMenu(null)}
         >
+          {/* Category: INPUT */}
+          <div className="px-3 pt-1.5 pb-1">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] font-['DM_Mono',monospace]">Input</span>
+          </div>
           {[
-            { type: "imageInput", icon: "🖼️", label: "Image Input" },
-            { type: "audioInput", icon: "🎵", label: "Audio Input" },
-            { type: "prompt", icon: "✏️", label: "Prompt" },
-            { type: "promptConstructor", icon: "🔧", label: "Prompt Constructor" },
-            { type: "nanoBanana", icon: "🍌", label: "Generate Image" },
-            { type: "generateVideo", icon: "🎬", label: "Generate Video" },
-            { type: "generate3d", icon: "🧊", label: "Generate 3D" },
-            { type: "llmGenerate", icon: "🤖", label: "LLM Generate" },
-            { type: "splitGrid", icon: "⊞", label: "Split Grid" },
-            { type: "output", icon: "📤", label: "Output" },
-            { type: "outputGallery", icon: "🖼", label: "Output Gallery" },
-            { type: "imageCompare", icon: "🔀", label: "Image Compare" },
-            { type: "videoStitch", icon: "🎞️", label: "Video Stitch" },
-            { type: "annotation", icon: "📝", label: "Annotation" },
-          ].map(({ type, icon, label }) => (
+            { type: "imageInput", label: "Image Input", icon: "M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 3h18v18H3V3z" },
+            { type: "audioInput", label: "Audio Input", icon: "M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303" },
+          ].map(({ type, label, icon }) => (
             <button
               key={type}
-              className="w-full text-left px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-700 flex items-center gap-2"
-              onClick={() => {
-                addNode(type as any, contextMenu.flowPos);
-                setContextMenu(null);
-              }}
+              className="w-full text-left px-3 py-1.5 text-[11px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
+              onClick={() => { addNode(type as any, contextMenu.flowPos); setContextMenu(null); }}
             >
-              <span>{icon}</span> {label}
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[var(--accent-primary)] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
+              <svg className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={icon} /></svg>
+              {label}
+            </button>
+          ))}
+
+          <div className="mx-3 my-1.5 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-subtle), transparent)' }} />
+
+          {/* Category: PROCESSING */}
+          <div className="px-3 pt-1 pb-1">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] font-['DM_Mono',monospace]">Processing</span>
+          </div>
+          {[
+            { type: "prompt", label: "Prompt", icon: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" },
+            { type: "promptConstructor", label: "Prompt Constructor", icon: "M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959" },
+            { type: "splitGrid", label: "Split Grid", icon: "M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6z" },
+            { type: "annotation", label: "Annotate", icon: "M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" },
+            { type: "imageCompare", label: "Image Compare", icon: "M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" },
+          ].map(({ type, label, icon }) => (
+            <button
+              key={type}
+              className="w-full text-left px-3 py-1.5 text-[11px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
+              onClick={() => { addNode(type as any, contextMenu.flowPos); setContextMenu(null); }}
+            >
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[var(--accent-primary)] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
+              <svg className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={icon} /></svg>
+              {label}
+            </button>
+          ))}
+
+          <div className="mx-3 my-1.5 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-subtle), transparent)' }} />
+
+          {/* Category: GENERATION */}
+          <div className="px-3 pt-1 pb-1">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] font-['DM_Mono',monospace]">Generation</span>
+          </div>
+          {[
+            { type: "nanoBanana", label: "Generate Image", icon: "M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5z" },
+            { type: "generateVideo", label: "Generate Video", icon: "m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" },
+            { type: "generate3d", label: "Generate 3D", icon: "M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25l-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3l2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15" },
+            { type: "llmGenerate", label: "LLM Generate", icon: "M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" },
+          ].map(({ type, label, icon }) => (
+            <button
+              key={type}
+              className="w-full text-left px-3 py-1.5 text-[11px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
+              onClick={() => { addNode(type as any, contextMenu.flowPos); setContextMenu(null); }}
+            >
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[#c084fc] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
+              <svg className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={icon} /></svg>
+              {label}
+            </button>
+          ))}
+
+          <div className="mx-3 my-1.5 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-subtle), transparent)' }} />
+
+          {/* Category: OUTPUT */}
+          <div className="px-3 pt-1 pb-1">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] font-['DM_Mono',monospace]">Output</span>
+          </div>
+          {[
+            { type: "output", label: "Output", icon: "M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" },
+            { type: "outputGallery", label: "Output Gallery", icon: "M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25z" },
+            { type: "videoStitch", label: "Video Stitch", icon: "M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" },
+          ].map(({ type, label, icon }) => (
+            <button
+              key={type}
+              className="w-full text-left px-3 py-1.5 text-[11px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
+              onClick={() => { addNode(type as any, contextMenu.flowPos); setContextMenu(null); }}
+            >
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[#f5a623] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
+              <svg className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={icon} /></svg>
+              {label}
+            </button>
+          ))}
+
+          <div className="mx-3 my-1.5 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-subtle), transparent)' }} />
+
+          {/* Category: UTILITY */}
+          <div className="px-3 pt-1 pb-1">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] font-['DM_Mono',monospace]">Utility</span>
+          </div>
+          {[
+            { type: "stickyNote", label: "Sticky Note", icon: "M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75h9z" },
+          ].map(({ type, label, icon }) => (
+            <button
+              key={type}
+              className="w-full text-left px-3 py-1.5 text-[11px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
+              onClick={() => { addNode(type as any, contextMenu.flowPos); setContextMenu(null); }}
+            >
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[#fbbf24] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
+              <svg className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={icon} /></svg>
+              {label}
             </button>
           ))}
         </div>
@@ -1672,9 +1765,14 @@ export function WorkflowCanvas() {
           event.preventDefault();
           const flowPos = screenToFlowPosition({ x: event.clientX, y: event.clientY });
           setContextMenu({ x: event.clientX, y: event.clientY, flowPos });
+          contextMenuOpenedAt.current = Date.now();
         }}
-        onPaneClick={() => setContextMenu(null)}
-        onMoveStart={() => setContextMenu(null)}
+        onPaneClick={() => {
+          if (Date.now() - contextMenuOpenedAt.current > 300) setContextMenu(null);
+        }}
+        onMoveStart={() => {
+          if (Date.now() - contextMenuOpenedAt.current > 300) setContextMenu(null);
+        }}
         fitView
         deleteKeyCode={["Backspace", "Delete"]}
         multiSelectionKeyCode="Shift"
@@ -1682,23 +1780,23 @@ export function WorkflowCanvas() {
           canvasNavigationSettings.selectionMode === "altDrag" || canvasNavigationSettings.selectionMode === "shiftDrag"
             ? false
             : canvasNavigationSettings.panMode === "always"
-            ? false
-            : isMacOS && !isModalOpen
+              ? false
+              : isMacOS && !isModalOpen
         }
         selectionKeyCode={
           isModalOpen ? null
             : canvasNavigationSettings.selectionMode === "altDrag" ? "Alt"
-            : canvasNavigationSettings.selectionMode === "shiftDrag" ? "Shift"
-            : "Shift"
+              : canvasNavigationSettings.selectionMode === "shiftDrag" ? "Shift"
+                : "Shift"
         }
         panOnDrag={
           isModalOpen
             ? false
             : canvasNavigationSettings.panMode === "always"
-            ? true
-            : canvasNavigationSettings.panMode === "middleMouse"
-            ? [2]
-            : !isMacOS
+              ? true
+              : canvasNavigationSettings.panMode === "middleMouse"
+                ? [2]
+                : !isMacOS
         }
         selectNodesOnDrag={false}
         nodeDragThreshold={5}
@@ -1711,13 +1809,13 @@ export function WorkflowCanvas() {
           isModalOpen
             ? null
             : canvasNavigationSettings.panMode === "space"
-            ? "Space"
-            : null
+              ? "Space"
+              : null
         }
         nodesDraggable={!isModalOpen}
         nodesConnectable={!isModalOpen}
         elementsSelectable={!isModalOpen}
-        className="bg-neutral-900"
+        className="bg-[var(--bg-base)]"
         proOptions={{ hideAttribution: true }}
         defaultEdgeOptions={{
           type: "editable",
@@ -1727,9 +1825,9 @@ export function WorkflowCanvas() {
         <GroupBackgroundsPortal />
         <GroupControlsOverlay />
         <Background color="#404040" gap={20} size={1} />
-        <Controls className="bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg [&>button]:bg-neutral-800 [&>button]:border-neutral-700 [&>button]:fill-neutral-300 [&>button:hover]:bg-neutral-700 [&>button:hover]:fill-neutral-100" />
+        <Controls className="!bg-[var(--bg-elevated)] !border-[var(--border-subtle)] !rounded-[6px] !shadow-lg" />
         <MiniMap
-          className="bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg"
+          className="!bg-[var(--bg-elevated)]/80 !border-[var(--border-subtle)] !rounded-[6px] !shadow-lg backdrop-blur-[8px]"
           maskColor="rgba(0, 0, 0, 0.6)"
           nodeColor={(node) => {
             switch (node.type) {

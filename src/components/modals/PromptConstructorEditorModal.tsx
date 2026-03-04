@@ -178,10 +178,10 @@ export const PromptConstructorEditorModal: React.FC<PromptConstructorEditorModal
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
       onClick={handleBackdropClick}
     >
-      <div className="relative bg-neutral-800 border border-neutral-700 rounded-lg shadow-2xl w-full max-w-3xl h-[85vh] flex flex-col mx-4">
+      <div className="relative bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg shadow-2xl w-full max-w-3xl h-[85vh] flex flex-col mx-4">
         {/* Header */}
         <div className="px-6 pt-6 pb-4 flex items-center gap-3">
-          <h2 className="text-xl font-semibold text-neutral-100">Edit Prompt Constructor</h2>
+          <h2 className="text-xl font-semibold text-[var(--text-primary)]">Edit Prompt Constructor</h2>
           {unresolvedVars.length > 0 && (
             <span className="px-2 py-0.5 bg-amber-900/30 border border-amber-700/50 rounded text-[11px] text-amber-400">
               Unresolved: {unresolvedVars.map((v) => `@${v}`).join(", ")}
@@ -190,14 +190,14 @@ export const PromptConstructorEditorModal: React.FC<PromptConstructorEditorModal
         </div>
 
         {/* Box containing toolbar and textarea */}
-        <div className="mx-6 flex-1 flex flex-col border border-neutral-700 rounded bg-neutral-900/30 overflow-hidden mb-4">
+        <div className="mx-6 flex-1 flex flex-col border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/30 overflow-hidden mb-4">
           {/* Toolbar */}
-          <div className="min-h-[48px] bg-neutral-900 border-b border-neutral-700 flex items-center px-4 gap-3 shrink-0 flex-wrap py-2">
+          <div className="min-h-[48px] bg-[var(--bg-base)] border-b border-[var(--border-subtle)] flex items-center px-4 gap-3 shrink-0 flex-wrap py-2">
             {/* Font Size Control */}
             <select
               value={fontSize}
               onChange={handleFontSizeChange}
-              className="text-sm py-1 px-2 border border-neutral-700 rounded bg-neutral-900/50 focus:outline-none focus:ring-1 focus:ring-neutral-600 text-neutral-300"
+              className="text-sm py-1 px-2 border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-[var(--text-secondary)]"
             >
               {FONT_SIZE_OPTIONS.map((size) => (
                 <option key={size} value={size}>
@@ -208,7 +208,7 @@ export const PromptConstructorEditorModal: React.FC<PromptConstructorEditorModal
 
             {/* Divider */}
             {availableVariables.length > 0 && (
-              <div className="w-px h-5 bg-neutral-700" />
+              <div className="w-px h-5 bg-[var(--bg-surface)]" />
             )}
 
             {/* Variable pills */}
@@ -216,7 +216,7 @@ export const PromptConstructorEditorModal: React.FC<PromptConstructorEditorModal
               <button
                 key={v.nodeId}
                 onClick={() => handleVariablePillClick(v.name)}
-                className="px-2 py-0.5 text-[11px] text-blue-400 bg-blue-900/20 border border-blue-700/40 rounded hover:bg-blue-900/40 transition-colors"
+                className="px-2 py-0.5 text-[11px] text-[var(--accent-primary)] bg-blue-900/20 border border-blue-700/40 rounded hover:bg-blue-900/40 transition-all duration-[120ms]"
                 title={v.value || "(empty)"}
               >
                 @{v.name}
@@ -232,7 +232,7 @@ export const PromptConstructorEditorModal: React.FC<PromptConstructorEditorModal
               onChange={autocompleteHandleChange}
               onKeyDown={autocompleteHandleKeyDown}
               placeholder="Type @ to insert variables..."
-              className="nodrag nopan nowheel flex-1 w-full p-6 leading-relaxed text-neutral-100 bg-transparent border-0 resize-none focus:outline-none placeholder:text-neutral-500"
+              className="nodrag nopan nowheel flex-1 w-full p-6 leading-relaxed text-[var(--text-primary)] bg-transparent border-0 resize-none focus:outline-none placeholder:text-[var(--text-muted)]"
               style={{ fontSize: `${fontSize}px` }}
               autoFocus
             />
@@ -240,7 +240,7 @@ export const PromptConstructorEditorModal: React.FC<PromptConstructorEditorModal
             {/* Autocomplete dropdown */}
             {showAutocomplete && filteredAutocompleteVars.length > 0 && (
               <div
-                className="absolute z-10 bg-neutral-800 border border-neutral-600 rounded shadow-xl max-h-40 overflow-y-auto"
+                className="absolute z-10 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded shadow-xl max-h-40 overflow-y-auto"
                 style={{
                   top: autocompletePosition.top + 16,
                   left: autocompletePosition.left + 24,
@@ -253,14 +253,14 @@ export const PromptConstructorEditorModal: React.FC<PromptConstructorEditorModal
                       e.preventDefault();
                       handleAutocompleteSelect(variable.name);
                     }}
-                    className={`w-full px-3 py-2 text-left text-[11px] flex flex-col gap-0.5 transition-colors ${
+                    className={`w-full px-3 py-2 text-left text-[11px] flex flex-col gap-0.5 transition-all duration-[120ms] ${
                       index === selectedAutocompleteIndex
-                        ? "bg-neutral-700 text-neutral-100"
-                        : "text-neutral-300 hover:bg-neutral-700"
+                        ? "bg-[var(--bg-surface)] text-[var(--text-primary)]"
+                        : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
                     }`}
                   >
-                    <div className="font-medium text-blue-400">@{variable.name}</div>
-                    <div className="text-neutral-500 truncate max-w-[200px]">
+                    <div className="font-medium text-[var(--accent-primary)]">@{variable.name}</div>
+                    <div className="text-[var(--text-muted)] truncate max-w-[200px]">
                       {variable.value || "(empty)"}
                     </div>
                   </button>
@@ -272,12 +272,12 @@ export const PromptConstructorEditorModal: React.FC<PromptConstructorEditorModal
 
         {/* Resolved preview */}
         {availableVariables.length > 0 && (
-          <div className="mx-6 mb-4 border border-neutral-700 rounded bg-neutral-900/30 overflow-hidden">
-            <div className="px-4 py-2 bg-neutral-900 border-b border-neutral-700 text-[11px] text-neutral-400 uppercase tracking-wide font-semibold">
+          <div className="mx-6 mb-4 border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/30 overflow-hidden">
+            <div className="px-4 py-2 bg-[var(--bg-base)] border-b border-[var(--border-subtle)] text-[11px] text-[var(--text-secondary)] uppercase tracking-wide font-semibold">
               Resolved Preview
             </div>
-            <div className="p-4 text-sm text-neutral-300 whitespace-pre-wrap max-h-32 overflow-y-auto leading-relaxed">
-              {resolvedPreview || <span className="text-neutral-500 italic">Empty template</span>}
+            <div className="p-4 text-sm text-[var(--text-secondary)] whitespace-pre-wrap max-h-32 overflow-y-auto leading-relaxed">
+              {resolvedPreview || <span className="text-[var(--text-muted)] italic">Empty template</span>}
             </div>
           </div>
         )}
@@ -286,13 +286,13 @@ export const PromptConstructorEditorModal: React.FC<PromptConstructorEditorModal
         <div className="flex justify-end gap-3 px-6 pb-6">
           <button
             onClick={handleAttemptClose}
-            className="px-4 py-2 text-sm font-medium text-neutral-300 bg-neutral-700 hover:bg-neutral-600 rounded transition-colors focus:outline-none focus:ring-1 focus:ring-neutral-500"
+            className="px-4 py-2 text-sm font-medium text-[var(--text-secondary)] bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] rounded transition-all duration-[120ms] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded transition-colors focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="px-4 py-2 text-sm font-medium text-white bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)] rounded transition-all duration-[120ms] focus:outline-none focus:ring-1 focus:ring-blue-400"
           >
             Submit
           </button>
@@ -304,10 +304,10 @@ export const PromptConstructorEditorModal: React.FC<PromptConstructorEditorModal
             className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-lg"
             onClick={handleConfirmationBackdropClick}
           >
-            <div className="relative bg-neutral-800 border border-neutral-600 rounded-lg p-6 mx-4 max-w-sm shadow-xl">
+            <div className="relative bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg p-6 mx-4 max-w-sm shadow-xl">
               <button
                 onClick={handleDismissConfirmation}
-                className="absolute top-3 right-3 text-neutral-400 hover:text-neutral-200 transition-colors focus:outline-none"
+                className="absolute top-3 right-3 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms] focus:outline-none"
                 aria-label="Close"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,17 +320,17 @@ export const PromptConstructorEditorModal: React.FC<PromptConstructorEditorModal
                 </svg>
               </button>
 
-              <p className="text-neutral-100 text-center mb-6">You have unsaved changes</p>
+              <p className="text-[var(--text-primary)] text-center mb-6">You have unsaved changes</p>
               <div className="flex justify-center gap-3">
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 text-sm font-medium text-neutral-300 bg-neutral-700 hover:bg-neutral-600 rounded transition-colors focus:outline-none focus:ring-1 focus:ring-neutral-500"
+                  className="px-4 py-2 text-sm font-medium text-[var(--text-secondary)] bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] rounded transition-all duration-[120ms] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
                 >
                   Discard
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded transition-colors focus:outline-none focus:ring-1 focus:ring-blue-400"
+                  className="px-4 py-2 text-sm font-medium text-white bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)] rounded transition-all duration-[120ms] focus:outline-none focus:ring-1 focus:ring-blue-400"
                 >
                   Submit
                 </button>

@@ -84,7 +84,7 @@ export function WebScraperNode({ id, data, selected }: NodeProps<WebScraperNodeT
       id={id}
       selected={selected}
       title="Web Scraper"
-      className="bg-neutral-800 border-neutral-700"
+      className="bg-[var(--bg-elevated)] border-[var(--border-subtle)]"
     >
       {/* Text input handle for URL */}
       <Handle
@@ -117,23 +117,23 @@ export function WebScraperNode({ id, data, selected }: NodeProps<WebScraperNodeT
       <div className="space-y-3 p-3">
         {/* URL input */}
         <div>
-          <label className="block text-xs text-neutral-400 mb-1">URL</label>
+          <label className="block text-xs text-[var(--text-secondary)] mb-1">URL</label>
           <input
             type="text"
             value={nodeData.url}
             onChange={handleUrlChange}
             placeholder="https://example.com"
-            className="w-full px-2 py-1 text-xs bg-neutral-900 border border-neutral-700 rounded focus:outline-none focus:border-orange-500"
+            className="w-full px-2 py-1 text-xs bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded focus:outline-none focus:border-orange-500"
           />
         </div>
 
         {/* Scrape mode dropdown */}
         <div>
-          <label className="block text-xs text-neutral-400 mb-1">Scrape mode</label>
+          <label className="block text-xs text-[var(--text-secondary)] mb-1">Scrape mode</label>
           <select
             value={nodeData.scrapeMode}
             onChange={handleScrapeModeChange}
-            className="w-full px-2 py-1 text-xs bg-neutral-900 border border-neutral-700 rounded focus:outline-none focus:border-orange-500"
+            className="w-full px-2 py-1 text-xs bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded focus:outline-none focus:border-orange-500"
           >
             {SCRAPE_MODES.map((mode) => (
               <option key={mode.value} value={mode.value}>
@@ -147,39 +147,39 @@ export function WebScraperNode({ id, data, selected }: NodeProps<WebScraperNodeT
         <button
           onClick={handleScrape}
           disabled={!nodeData.url || isScraping}
-          className="w-full px-3 py-2 text-xs font-medium bg-orange-600 hover:bg-orange-700 disabled:bg-neutral-700 disabled:text-neutral-500 rounded"
+          className="w-full px-3 py-2 text-xs font-medium bg-orange-600 hover:bg-orange-700 disabled:bg-[var(--bg-surface)] disabled:text-[var(--text-muted)] rounded"
         >
           {isScraping ? "Scraping..." : "Scrape"}
         </button>
 
         {/* Status display */}
         {nodeData.status === "loading" && (
-          <div className="text-xs text-blue-400">Fetching data...</div>
+          <div className="text-xs text-[var(--accent-primary)]">Fetching data...</div>
         )}
         {nodeData.status === "complete" && (
-          <div className="text-xs text-green-400">
+          <div className="text-xs text-[var(--node-success)]">
             {nodeData.scrapeMode === "best-image" ? "Image scraped" : "Text scraped"}
           </div>
         )}
         {nodeData.error && (
-          <div className="text-xs text-red-400">{nodeData.error}</div>
+          <div className="text-xs text-[var(--node-error)]">{nodeData.error}</div>
         )}
 
         {/* Result preview */}
         {nodeData.outputImage && (
           <div>
-            <div className="text-xs text-neutral-400 mb-1">Preview:</div>
+            <div className="text-xs text-[var(--text-secondary)] mb-1">Preview:</div>
             <img
               src={nodeData.outputImage}
               alt="Scraped"
-              className="w-full rounded border border-neutral-700"
+              className="w-full rounded border border-[var(--border-subtle)]"
             />
           </div>
         )}
         {nodeData.outputText && (
           <div>
-            <div className="text-xs text-neutral-400 mb-1">Preview:</div>
-            <div className="bg-neutral-900 p-2 rounded max-h-20 overflow-y-auto text-xs">
+            <div className="text-xs text-[var(--text-secondary)] mb-1">Preview:</div>
+            <div className="bg-[var(--bg-base)] p-2 rounded max-h-20 overflow-y-auto text-xs">
               {nodeData.outputText.substring(0, 150)}
               {nodeData.outputText.length > 150 && "..."}
             </div>

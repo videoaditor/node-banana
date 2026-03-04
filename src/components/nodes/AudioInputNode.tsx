@@ -285,6 +285,7 @@ export function AudioInputNode({ id, data, selected }: NodeProps<AudioInputNodeT
       onCommentChange={(comment) => updateNodeData(id, { comment: comment || undefined })}
       selected={selected}
       commentNavigation={commentNavigation ?? undefined}
+      nodeAccentColor="coral"
       minWidth={250}
       minHeight={150}
     >
@@ -300,11 +301,11 @@ export function AudioInputNode({ id, data, selected }: NodeProps<AudioInputNodeT
         <div className="relative group flex-1 flex flex-col min-h-0 gap-2">
           {/* Filename and duration */}
           <div className="flex items-center justify-between shrink-0">
-            <span className="text-[10px] text-neutral-400 truncate max-w-[150px]" title={nodeData.filename || ""}>
+            <span className="text-[10px] text-[var(--text-secondary)] truncate max-w-[150px]" title={nodeData.filename || ""}>
               {nodeData.filename}
             </span>
             {nodeData.duration && (
-              <span className="text-[10px] text-neutral-500 bg-neutral-700/50 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] text-[var(--text-muted)] bg-[var(--bg-surface)]/50 px-1.5 py-0.5 rounded">
                 {formatTime(nodeData.duration)}
               </span>
             )}
@@ -312,20 +313,20 @@ export function AudioInputNode({ id, data, selected }: NodeProps<AudioInputNodeT
 
           {/* Waveform visualization */}
           {isLoading ? (
-            <div className="flex-1 flex items-center justify-center bg-neutral-900/50 rounded min-h-[60px]">
-              <span className="text-xs text-neutral-500">Loading waveform...</span>
+            <div className="flex-1 flex items-center justify-center bg-[var(--bg-base)]/50 rounded min-h-[60px]">
+              <span className="text-xs text-[var(--text-muted)]">Loading waveform...</span>
             </div>
           ) : waveformData ? (
             <div
               ref={waveformContainerRef}
-              className="flex-1 min-h-[60px] bg-neutral-900/50 rounded cursor-pointer relative"
+              className="flex-1 min-h-[60px] bg-[var(--bg-base)]/50 rounded cursor-pointer relative"
               onClick={handleSeek}
             >
               <canvas ref={canvasRef} className="w-full h-full" />
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center bg-neutral-900/50 rounded min-h-[60px]">
-              <span className="text-xs text-neutral-500">Processing...</span>
+            <div className="flex-1 flex items-center justify-center bg-[var(--bg-base)]/50 rounded min-h-[60px]">
+              <span className="text-xs text-[var(--text-muted)]">Processing...</span>
             </div>
           )}
 
@@ -333,7 +334,7 @@ export function AudioInputNode({ id, data, selected }: NodeProps<AudioInputNodeT
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handlePlayPause}
-              className="w-7 h-7 flex items-center justify-center bg-violet-600 hover:bg-violet-500 rounded transition-colors"
+              className="w-7 h-7 flex items-center justify-center bg-violet-600 hover:bg-violet-500 rounded transition-all duration-[120ms]"
               title={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
@@ -348,7 +349,7 @@ export function AudioInputNode({ id, data, selected }: NodeProps<AudioInputNodeT
             </button>
 
             {/* Progress bar / scrubber */}
-            <div className="flex-1 h-1 bg-neutral-700 rounded-full overflow-hidden relative">
+            <div className="flex-1 h-1 bg-[var(--bg-surface)] rounded-full overflow-hidden relative">
               {nodeData.duration && (
                 <div
                   className="h-full bg-violet-500 transition-all"
@@ -358,7 +359,7 @@ export function AudioInputNode({ id, data, selected }: NodeProps<AudioInputNodeT
             </div>
 
             {/* Current time */}
-            <span className="text-[10px] text-neutral-500 min-w-[32px] text-right">
+            <span className="text-[10px] text-[var(--text-muted)] min-w-[32px] text-right">
               {formatTime(currentTime)}
             </span>
           </div>
@@ -378,12 +379,12 @@ export function AudioInputNode({ id, data, selected }: NodeProps<AudioInputNodeT
           onClick={() => fileInputRef.current?.click()}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-          className="w-full flex-1 min-h-[112px] border border-dashed border-neutral-600 rounded flex flex-col items-center justify-center cursor-pointer hover:border-neutral-500 hover:bg-neutral-700/50 transition-colors"
+          className="w-full flex-1 min-h-[112px] border border-dashed border-[var(--border-subtle)] rounded flex flex-col items-center justify-center cursor-pointer hover:border-[var(--border-subtle)] hover:bg-[var(--bg-surface)]/50 transition-all duration-[120ms]"
         >
-          <svg className="w-6 h-6 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-6 h-6 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z" />
           </svg>
-          <span className="text-[10px] text-neutral-400 mt-1">
+          <span className="text-[10px] text-[var(--text-secondary)] mt-1">
             Drop audio or click
           </span>
         </div>

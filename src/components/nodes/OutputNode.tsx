@@ -81,6 +81,7 @@ export function OutputNode({ id, data, selected }: NodeProps<OutputNodeType>) {
         selected={selected}
         className="min-w-[200px]"
         commentNavigation={commentNavigation ?? undefined}
+        nodeAccentColor="amber"
       >
         <Handle
           type="target"
@@ -113,7 +114,7 @@ export function OutputNode({ id, data, selected }: NodeProps<OutputNodeType>) {
                   className="w-full h-full object-contain rounded"
                 />
               )}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center rounded pointer-events-none">
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-[120ms] flex items-center justify-center rounded pointer-events-none">
                 <span className="text-[10px] font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-2 py-1 rounded">
                   View full size
                 </span>
@@ -121,14 +122,14 @@ export function OutputNode({ id, data, selected }: NodeProps<OutputNodeType>) {
             </div>
             <button
               onClick={handleDownload}
-              className="w-full py-1.5 bg-white hover:bg-neutral-200 text-neutral-900 text-[10px] font-medium rounded transition-colors shrink-0"
+              className="w-full py-1.5 bg-white hover:bg-white/90 text-[var(--bg-base)] text-[10px] font-medium rounded transition-all duration-[120ms] shrink-0"
             >
               Download
             </button>
           </div>
         ) : (
-          <div className="w-full flex-1 min-h-[144px] border border-dashed border-neutral-600 rounded flex items-center justify-center">
-            <span className="text-neutral-500 text-[10px]">Waiting for image or video</span>
+          <div className="w-full flex-1 min-h-[144px] border border-dashed border-[var(--border-subtle)] rounded flex items-center justify-center">
+            <span className="text-[var(--text-muted)] text-[10px]">Waiting for image or video</span>
           </div>
         )}
 
@@ -139,7 +140,7 @@ export function OutputNode({ id, data, selected }: NodeProps<OutputNodeType>) {
             value={nodeData.outputFilename || ""}
             onChange={(e) => updateNodeData(id, { outputFilename: e.target.value })}
             placeholder="Output filename (optional)"
-            className="nodrag nopan w-full px-2 py-1.5 text-[10px] bg-neutral-900/50 border border-neutral-700 rounded text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-600"
+            className="nodrag nopan w-full px-2 py-1.5 text-[10px] bg-[var(--bg-base)]/50 border border-[var(--border-subtle)] rounded text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
           />
         </div>
       </BaseNode>
@@ -170,7 +171,7 @@ export function OutputNode({ id, data, selected }: NodeProps<OutputNodeType>) {
             )}
             <button
               onClick={() => setShowLightbox(false)}
-              className="absolute top-4 right-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded text-white text-sm transition-colors flex items-center justify-center"
+              className="absolute top-4 right-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded text-white text-sm transition-all duration-[120ms] flex items-center justify-center"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

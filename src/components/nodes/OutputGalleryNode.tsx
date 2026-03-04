@@ -121,6 +121,7 @@ export function OutputGalleryNode({ id, data, selected }: NodeProps<OutputGaller
         selected={selected}
         className="min-w-[200px]"
         commentNavigation={commentNavigation ?? undefined}
+        nodeAccentColor="amber"
       >
         <Handle
           type="target"
@@ -130,8 +131,8 @@ export function OutputGalleryNode({ id, data, selected }: NodeProps<OutputGaller
         />
 
         {displayImages.length === 0 ? (
-          <div className="w-full flex-1 min-h-[200px] border border-dashed border-neutral-600 rounded flex items-center justify-center">
-            <span className="text-neutral-500 text-[10px] text-center px-4">
+          <div className="w-full flex-1 min-h-[200px] border border-dashed border-[var(--border-subtle)] rounded flex items-center justify-center">
+            <span className="text-[var(--text-muted)] text-[10px] text-center px-4">
               Connect image nodes to view gallery
             </span>
           </div>
@@ -142,7 +143,7 @@ export function OutputGalleryNode({ id, data, selected }: NodeProps<OutputGaller
                 <button
                   key={idx}
                   onClick={() => openLightbox(idx)}
-                  className="aspect-square rounded border border-neutral-700 hover:border-neutral-500 overflow-hidden transition-colors"
+                  className="aspect-square rounded border border-[var(--border-subtle)] hover:border-[var(--border-subtle)] overflow-hidden transition-all duration-[120ms]"
                 >
                   <img
                     src={img}
@@ -173,7 +174,7 @@ export function OutputGalleryNode({ id, data, selected }: NodeProps<OutputGaller
               {/* Close button */}
               <button
                 onClick={closeLightbox}
-                className="absolute top-4 right-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded text-white text-sm transition-colors flex items-center justify-center"
+                className="absolute top-4 right-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded text-white text-sm transition-all duration-[120ms] flex items-center justify-center"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -183,7 +184,7 @@ export function OutputGalleryNode({ id, data, selected }: NodeProps<OutputGaller
               {/* Download button */}
               <button
                 onClick={downloadImage}
-                className="absolute top-4 left-4 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded text-white text-xs font-medium transition-colors flex items-center gap-1.5"
+                className="absolute top-4 left-4 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded text-white text-xs font-medium transition-all duration-[120ms] flex items-center gap-1.5"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -195,7 +196,7 @@ export function OutputGalleryNode({ id, data, selected }: NodeProps<OutputGaller
               {lightboxIndex > 0 && (
                 <button
                   onClick={() => navigateLightbox("prev")}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors flex items-center justify-center"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all duration-[120ms] flex items-center justify-center"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -207,7 +208,7 @@ export function OutputGalleryNode({ id, data, selected }: NodeProps<OutputGaller
               {lightboxIndex < displayImages.length - 1 && (
                 <button
                   onClick={() => navigateLightbox("next")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors flex items-center justify-center"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all duration-[120ms] flex items-center justify-center"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />

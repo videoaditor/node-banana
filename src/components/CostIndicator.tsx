@@ -28,7 +28,7 @@ export function CostIndicator() {
     <>
       <button
         onClick={() => setShowDialog(true)}
-        className="px-2 py-0.5 rounded text-xs text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition-colors"
+        className="px-2 py-0.5 rounded text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-all duration-[120ms]"
         title="View cost details"
       >
         {displayCost}

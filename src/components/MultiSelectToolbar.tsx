@@ -219,7 +219,7 @@ export function MultiSelectToolbar() {
 
   return (
     <div
-      className="fixed z-[100] flex items-center gap-1 bg-neutral-800 border border-neutral-600 rounded-lg shadow-xl p-1"
+      className="fixed z-[100] flex items-center gap-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg shadow-xl p-1"
       style={{
         left: toolbarPosition.x,
         top: toolbarPosition.y,
@@ -228,7 +228,7 @@ export function MultiSelectToolbar() {
     >
       <button
         onClick={handleStackHorizontally}
-        className="p-1.5 rounded hover:bg-neutral-700 text-neutral-400 hover:text-neutral-100 transition-colors"
+        className="p-1.5 rounded hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
         title="Stack horizontally (H)"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -237,7 +237,7 @@ export function MultiSelectToolbar() {
       </button>
       <button
         onClick={handleStackVertically}
-        className="p-1.5 rounded hover:bg-neutral-700 text-neutral-400 hover:text-neutral-100 transition-colors"
+        className="p-1.5 rounded hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
         title="Stack vertically (V)"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -246,7 +246,7 @@ export function MultiSelectToolbar() {
       </button>
       <button
         onClick={handleArrangeAsGrid}
-        className="p-1.5 rounded hover:bg-neutral-700 text-neutral-400 hover:text-neutral-100 transition-colors"
+        className="p-1.5 rounded hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
         title="Arrange as grid (G)"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -255,13 +255,13 @@ export function MultiSelectToolbar() {
       </button>
 
       {/* Separator */}
-      <div className="w-px h-4 bg-neutral-600 mx-0.5" />
+      <div className="w-px h-4 bg-[var(--border-subtle)] mx-0.5" />
 
       {/* Group/Ungroup buttons */}
       {someInGroup ? (
         <button
           onClick={handleUngroup}
-          className="p-1.5 rounded hover:bg-neutral-700 text-neutral-400 hover:text-neutral-100 transition-colors"
+          className="p-1.5 rounded hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
           title="Remove from group"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -271,7 +271,7 @@ export function MultiSelectToolbar() {
       ) : (
         <button
           onClick={handleCreateGroup}
-          className="p-1.5 rounded hover:bg-neutral-700 text-neutral-400 hover:text-neutral-100 transition-colors"
+          className="p-1.5 rounded hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
           title="Create group"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -281,12 +281,12 @@ export function MultiSelectToolbar() {
       )}
 
       {/* Separator */}
-      <div className="w-px h-4 bg-neutral-600 mx-0.5" />
+      <div className="w-px h-4 bg-[var(--border-subtle)] mx-0.5" />
 
       {/* Download images button */}
       <button
         onClick={handleDownloadImages}
-        className="p-1.5 rounded hover:bg-neutral-700 text-neutral-400 hover:text-neutral-100 transition-colors"
+        className="p-1.5 rounded hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
         title="Download images as ZIP"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

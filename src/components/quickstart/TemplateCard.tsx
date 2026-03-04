@@ -26,7 +26,7 @@ const CATEGORY_LABELS: Record<TemplateCategory, string> = {
 };
 
 const CATEGORY_COLORS: Record<TemplateCategory, string> = {
-  simple: "bg-blue-500/20 text-blue-300",
+  simple: "bg-[var(--accent-primary)]/20 text-blue-300",
   advanced: "bg-purple-500/20 text-purple-300",
   community: "bg-amber-500/20 text-amber-300",
 };
@@ -46,8 +46,8 @@ export function TemplateCard({
         group w-full rounded-lg border p-4 transition-all flex gap-4
         ${
           isLoading
-            ? "bg-blue-600/20 border-blue-500/50"
-            : "bg-neutral-900/50 border-neutral-700"
+            ? "bg-[var(--accent-primary)]/20 border-[var(--accent-primary)]/50"
+            : "bg-[var(--bg-base)]/50 border-[var(--border-subtle)]"
         }
         ${disabled && !isLoading ? "opacity-50" : ""}
       `}
@@ -58,8 +58,8 @@ export function TemplateCard({
           w-36 h-36 flex-shrink-0 rounded-lg overflow-hidden relative
           ${
             isLoading
-              ? "bg-blue-500/20"
-              : "bg-neutral-800"
+              ? "bg-[var(--accent-primary)]/20"
+              : "bg-[var(--bg-elevated)]"
           }
         `}
       >
@@ -87,7 +87,7 @@ export function TemplateCard({
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <svg
-              className="w-8 h-8 text-neutral-600"
+              className="w-8 h-8 text-[var(--text-muted)]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -103,7 +103,7 @@ export function TemplateCard({
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header row */}
         <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="text-sm font-medium text-neutral-200 truncate">
+          <h3 className="text-sm font-medium text-[var(--text-primary)] truncate">
             {template.name}
           </h3>
           <span
@@ -117,7 +117,7 @@ export function TemplateCard({
         </div>
 
         {/* Description */}
-        <p className="text-xs text-neutral-400 line-clamp-2 flex-1">
+        <p className="text-xs text-[var(--text-secondary)] line-clamp-2 flex-1">
           {template.description}
         </p>
 
@@ -126,12 +126,12 @@ export function TemplateCard({
           {template.tags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-700/30 text-neutral-400"
+              className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--bg-surface)]/30 text-[var(--text-secondary)]"
             >
               {tag}
             </span>
           ))}
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-neutral-700/50 text-neutral-400">
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--bg-surface)]/50 text-[var(--text-secondary)]">
             {nodeCount} nodes
           </span>
         </div>
@@ -141,7 +141,7 @@ export function TemplateCard({
           <button
             onClick={onUseWorkflow}
             disabled={disabled || isLoading}
-            className="px-3 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+            className="px-3 py-1.5 text-xs font-medium bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)] text-white rounded-md transition-all duration-[120ms] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
           >
             {isLoading ? (
               <>

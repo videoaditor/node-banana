@@ -39,7 +39,7 @@ export function TextIteratorNode({ id, data, selected }: NodeProps<TextIteratorN
       id={id}
       selected={selected}
       title="Text Iterator"
-      className="bg-neutral-800 border-neutral-700"
+      className="bg-[var(--bg-elevated)] border-[var(--border-subtle)]"
     >
       {/* Text input handle */}
       <Handle
@@ -62,11 +62,11 @@ export function TextIteratorNode({ id, data, selected }: NodeProps<TextIteratorN
       <div className="space-y-3 p-3">
         {/* Split mode dropdown */}
         <div>
-          <label className="block text-xs text-neutral-400 mb-1">Split at</label>
+          <label className="block text-xs text-[var(--text-secondary)] mb-1">Split at</label>
           <select
             value={nodeData.splitMode}
             onChange={handleSplitModeChange}
-            className="w-full px-2 py-1 text-xs bg-neutral-900 border border-neutral-700 rounded focus:outline-none focus:border-blue-500"
+            className="w-full px-2 py-1 text-xs bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded focus:outline-none focus:border-[var(--accent-primary)]"
           >
             {SPLIT_MODES.map((mode) => (
               <option key={mode.value} value={mode.value}>
@@ -79,22 +79,22 @@ export function TextIteratorNode({ id, data, selected }: NodeProps<TextIteratorN
         {/* Custom separator input */}
         {nodeData.splitMode === "custom" && (
           <div>
-            <label className="block text-xs text-neutral-400 mb-1">Custom separator</label>
+            <label className="block text-xs text-[var(--text-secondary)] mb-1">Custom separator</label>
             <input
               type="text"
               value={nodeData.customSeparator}
               onChange={handleCustomSeparatorChange}
               placeholder="Enter separator"
-              className="w-full px-2 py-1 text-xs bg-neutral-900 border border-neutral-700 rounded focus:outline-none focus:border-blue-500"
+              className="w-full px-2 py-1 text-xs bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded focus:outline-none focus:border-[var(--accent-primary)]"
             />
           </div>
         )}
 
         {/* Input preview */}
         {nodeData.inputText && (
-          <div className="text-xs text-neutral-400">
+          <div className="text-xs text-[var(--text-secondary)]">
             <div className="mb-1">Input text:</div>
-            <div className="bg-neutral-900 p-2 rounded max-h-20 overflow-y-auto">
+            <div className="bg-[var(--bg-base)] p-2 rounded max-h-20 overflow-y-auto">
               {nodeData.inputText.substring(0, 100)}
               {nodeData.inputText.length > 100 && "..."}
             </div>
@@ -103,10 +103,10 @@ export function TextIteratorNode({ id, data, selected }: NodeProps<TextIteratorN
 
         {/* Status */}
         {nodeData.status === "loading" && (
-          <div className="text-xs text-blue-400">Processing segments...</div>
+          <div className="text-xs text-[var(--accent-primary)]">Processing segments...</div>
         )}
         {nodeData.error && (
-          <div className="text-xs text-red-400">{nodeData.error}</div>
+          <div className="text-xs text-[var(--node-error)]">{nodeData.error}</div>
         )}
       </div>
     </BaseNode>

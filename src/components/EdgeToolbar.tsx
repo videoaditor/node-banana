@@ -91,7 +91,7 @@ export function EdgeToolbar() {
 
   return (
     <div
-      className="fixed z-[100] flex items-center gap-1 bg-neutral-800 border border-neutral-600 rounded-lg shadow-xl p-1"
+      className="fixed z-[100] flex items-center gap-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg shadow-xl p-1"
       style={{
         left: toolbarPosition.x,
         top: toolbarPosition.y,
@@ -99,16 +99,16 @@ export function EdgeToolbar() {
       }}
     >
       {sequenceNumber !== null && (
-        <span className="text-[10px] font-medium text-neutral-300 px-2 border-r border-neutral-600">
+        <span className="text-[10px] font-medium text-[var(--text-secondary)] px-2 border-r border-[var(--border-subtle)]">
           Image {sequenceNumber}
         </span>
       )}
       <button
         onClick={handleTogglePause}
-        className={`p-1.5 rounded hover:bg-neutral-700 transition-colors ${
+        className={`p-1.5 rounded hover:bg-[var(--bg-surface)] transition-all duration-[120ms] ${
           hasPause
             ? "text-amber-400 hover:text-amber-300"
-            : "text-neutral-400 hover:text-neutral-100"
+            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
         }`}
         title={hasPause ? "Remove pause" : "Add pause"}
       >
@@ -126,7 +126,7 @@ export function EdgeToolbar() {
       </button>
       <button
         onClick={handleDelete}
-        className="p-1.5 rounded hover:bg-neutral-700 text-neutral-400 hover:text-red-400 transition-colors"
+        className="p-1.5 rounded hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--node-error)] transition-all duration-[120ms]"
         title="Delete"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

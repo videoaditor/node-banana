@@ -16,12 +16,12 @@ interface EdgeData extends WorkflowEdgeData {
   offsetY?: number;
 }
 
-// Colors for different connection types (dimmed for softer appearance)
+// Colors for different connection types — Dark Foundry palette
 const EDGE_COLORS = {
-  image: "#0d9668", // Dimmed green for image connections
-  prompt: "#2563eb", // Dimmed blue for prompt connections
-  default: "#64748b", // Dimmed gray for unknown
-  pause: "#ea580c", // Dimmed orange for paused edges
+  image: "#3ecf8e",   // Success green for image connections
+  prompt: "#4a90d9",  // Accent blue for prompt connections
+  default: "#4a4f60", // Muted for unknown
+  pause: "#f5a623",   // Warning amber for paused edges
 };
 
 export function EditableEdge({
@@ -184,11 +184,25 @@ export function EditableEdge({
       {/* SVG gradient definition for bright-dim-bright effect */}
       <defs>
         <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 1 : 0.25} />
-          <stop offset="50%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 0.55 : 0.1} />
-          <stop offset="100%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 1 : 0.25} />
+          <stop offset="0%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 1 : 0.4} />
+          <stop offset="50%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 0.6 : 0.15} />
+          <stop offset="100%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 1 : 0.4} />
         </linearGradient>
       </defs>
+
+      {/* Subtle glow path behind the main edge for depth */}
+      <path
+        d={edgePath}
+        fill="none"
+        stroke={edgeColor}
+        strokeWidth={6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{
+          opacity: isConnectedToSelection ? 0.12 : 0.05,
+          filter: 'blur(4px)',
+        }}
+      />
 
       <BaseEdge
         id={id}
@@ -197,7 +211,7 @@ export function EditableEdge({
         style={{
           ...style,
           stroke: `url(#${gradientId})`,
-          strokeWidth: 3,
+          strokeWidth: 2,
           strokeLinecap: "round",
           strokeLinejoin: "round",
         }}
@@ -250,7 +264,7 @@ export function EditableEdge({
           {/* Background circle */}
           <circle
             r={10}
-            fill="#27272a"
+            fill="#141519"
             stroke={edgeColor}
             strokeWidth={2}
           />
@@ -268,8 +282,8 @@ export function EditableEdge({
               cx={handle.x}
               cy={handle.y}
               r={6}
-              fill="white"
-              stroke="#3b82f6"
+              fill="#4a90d9"
+              stroke="#4a90d9"
               strokeWidth={2}
               style={{
                 cursor: handle.direction === "horizontal" ? "ew-resize" : "ns-resize",

@@ -116,23 +116,23 @@ export const PromptEditorModal: React.FC<PromptEditorModalProps> = ({
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
       onClick={handleBackdropClick}
     >
-      <div className="relative bg-neutral-800 border border-neutral-700 rounded-lg shadow-2xl w-full max-w-3xl h-[85vh] flex flex-col mx-4">
+      <div className="relative bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg shadow-2xl w-full max-w-3xl h-[85vh] flex flex-col mx-4">
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
-          <h2 className="text-xl font-semibold text-neutral-100">
+          <h2 className="text-xl font-semibold text-[var(--text-primary)]">
             Edit Prompt
           </h2>
         </div>
 
         {/* Box containing toolbar and textarea */}
-        <div className="mx-6 flex-1 flex flex-col border border-neutral-700 rounded bg-neutral-900/30 overflow-hidden mb-4">
+        <div className="mx-6 flex-1 flex flex-col border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/30 overflow-hidden mb-4">
           {/* Toolbar - header of the box */}
-          <div className="h-12 bg-neutral-900 border-b border-neutral-700 flex items-center px-4 gap-3 shrink-0">
+          <div className="h-12 bg-[var(--bg-base)] border-b border-[var(--border-subtle)] flex items-center px-4 gap-3 shrink-0">
             {/* Font Size Control */}
             <select
               value={fontSize}
               onChange={handleFontSizeChange}
-              className="text-sm py-1 px-2 border border-neutral-700 rounded bg-neutral-900/50 focus:outline-none focus:ring-1 focus:ring-neutral-600 text-neutral-300"
+              className="text-sm py-1 px-2 border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-[var(--text-secondary)]"
             >
               {FONT_SIZE_OPTIONS.map((size) => (
                 <option key={size} value={size}>
@@ -147,7 +147,7 @@ export const PromptEditorModal: React.FC<PromptEditorModalProps> = ({
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Describe what to generate..."
-            className="nodrag nopan nowheel flex-1 w-full p-6 leading-relaxed text-neutral-100 bg-transparent border-0 resize-none focus:outline-none placeholder:text-neutral-500"
+            className="nodrag nopan nowheel flex-1 w-full p-6 leading-relaxed text-[var(--text-primary)] bg-transparent border-0 resize-none focus:outline-none placeholder:text-[var(--text-muted)]"
             style={{ fontSize: `${fontSize}px` }}
             autoFocus
           />
@@ -157,13 +157,13 @@ export const PromptEditorModal: React.FC<PromptEditorModalProps> = ({
         <div className="flex justify-end gap-3 px-6 pb-6">
           <button
             onClick={handleAttemptClose}
-            className="px-4 py-2 text-sm font-medium text-neutral-300 bg-neutral-700 hover:bg-neutral-600 rounded transition-colors focus:outline-none focus:ring-1 focus:ring-neutral-500"
+            className="px-4 py-2 text-sm font-medium text-[var(--text-secondary)] bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] rounded transition-all duration-[120ms] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded transition-colors focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="px-4 py-2 text-sm font-medium text-white bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)] rounded transition-all duration-[120ms] focus:outline-none focus:ring-1 focus:ring-blue-400"
           >
             Submit
           </button>
@@ -175,11 +175,11 @@ export const PromptEditorModal: React.FC<PromptEditorModalProps> = ({
             className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-lg"
             onClick={handleConfirmationBackdropClick}
           >
-            <div className="relative bg-neutral-800 border border-neutral-600 rounded-lg p-6 mx-4 max-w-sm shadow-xl">
+            <div className="relative bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg p-6 mx-4 max-w-sm shadow-xl">
               {/* Close button */}
               <button
                 onClick={handleDismissConfirmation}
-                className="absolute top-3 right-3 text-neutral-400 hover:text-neutral-200 transition-colors focus:outline-none"
+                className="absolute top-3 right-3 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms] focus:outline-none"
                 aria-label="Close"
               >
                 <svg
@@ -197,19 +197,19 @@ export const PromptEditorModal: React.FC<PromptEditorModalProps> = ({
                 </svg>
               </button>
 
-              <p className="text-neutral-100 text-center mb-6">
+              <p className="text-[var(--text-primary)] text-center mb-6">
                 You have unsaved changes
               </p>
               <div className="flex justify-center gap-3">
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 text-sm font-medium text-neutral-300 bg-neutral-700 hover:bg-neutral-600 rounded transition-colors focus:outline-none focus:ring-1 focus:ring-neutral-500"
+                  className="px-4 py-2 text-sm font-medium text-[var(--text-secondary)] bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] rounded transition-all duration-[120ms] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
                 >
                   Discard
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 rounded transition-colors focus:outline-none focus:ring-1 focus:ring-blue-400"
+                  className="px-4 py-2 text-sm font-medium text-white bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)] rounded transition-all duration-[120ms] focus:outline-none focus:ring-1 focus:ring-blue-400"
                 >
                   Submit
                 </button>
