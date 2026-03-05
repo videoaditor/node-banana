@@ -125,7 +125,7 @@ describe("/api/generate route", () => {
       expect(data.image).toBe("data:image/png;base64,base64ImageData");
       expect(mockGenerateContent).toHaveBeenCalledWith(
         expect.objectContaining({
-          model: "gemini-3-pro-image-preview",
+          model: "gemini-2.0-flash-exp",
           contents: [
             {
               role: "user",
@@ -314,7 +314,7 @@ describe("/api/generate route", () => {
       expect(data.success).toBe(true);
       expect(mockGenerateContent).toHaveBeenCalledWith(
         expect.objectContaining({
-          model: "gemini-3-pro-image-preview", // nano-banana-pro maps to this
+          model: "gemini-2.0-flash-exp", // nano-banana-pro maps to this
         })
       );
     });
@@ -779,7 +779,7 @@ describe("/api/generate route", () => {
         model: "nano-banana-pro",
         selectedModel: {
           provider: "gemini",
-          modelId: "gemini-3-pro-image-preview",
+          modelId: "gemini-2.0-flash-exp",
           displayName: "Gemini 3 Pro",
         },
       });

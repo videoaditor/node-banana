@@ -109,8 +109,16 @@ export function GenerateImageNode({ id, data, selected }: NodeProps<NanoBananaNo
 
   const isGeminiOnly = !hasExternalProviders;
 
-  // Migrate legacy data: derive selectedModel from model field if missing
+  // Known Gemini model IDs — these should always have provider="gemini"
+  const GEMINI_MODEL_IDS = ["nano-banana", "nano-banana-pro", "veo-2.0-generate-video-001"];
+
+  // Migrate legacy data: derive selectedModel from model field if missing,
+  // OR correct provider if saved incorrectly (e.g., provider="kie" for a Gemini model)
   useEffect(() => {
+    const modelId = nodeData.selectedModel?.modelId || nodeData.model;
+    const savedProvider = nodeData.selectedModel?.provider;
+
+    // Case 1: No selectedModel at all — create one from legacy model field
     if (nodeData.model && !nodeData.selectedModel) {
       const displayName = nodeData.model === "nano-banana" ? "Nano Banana" : "Nano Banana Pro";
       const newSelectedModel: SelectedModel = {
@@ -119,8 +127,28 @@ export function GenerateImageNode({ id, data, selected }: NodeProps<NanoBananaNo
         displayName,
       };
       updateNodeData(id, { selectedModel: newSelectedModel });
+      return;
     }
-  }, [id, nodeData.model, nodeData.selectedModel, updateNodeData]);
+
+    // Case 2: selectedModel exists but provider is wrong for a known Gemini model
+    if (modelId && GEMINI_MODEL_IDS.includes(modelId) && savedProvider && savedProvider !== "gemini") {
+      const existingDisplay = nodeData.selectedModel?.displayName;
+      const displayName = existingDisplay ||
+        (modelId === "nano-banana" ? "Nano Banana" :
+          modelId === "nano-banana-pro" ? "Nano Banana Pro" :
+            modelId === "veo-2.0-generate-video-001" ? "Veo 2" : modelId);
+      console.log(`[Node:${id}] Correcting provider from "${savedProvider}" to "gemini" for model "${modelId}"`);
+      updateNodeData(id, {
+        selectedModel: {
+          ...nodeData.selectedModel!,
+          provider: "gemini",
+          displayName,
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, nodeData.model, nodeData.selectedModel?.modelId, nodeData.selectedModel?.provider]);
+
 
   // Fetch models from external providers when provider changes
   const fetchModels = useCallback(async () => {

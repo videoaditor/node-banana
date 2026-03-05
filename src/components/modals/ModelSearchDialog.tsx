@@ -138,6 +138,10 @@ export function ModelSearchDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The model the user has clicked but not yet confirmed
+  const [previewModel, setPreviewModel] = useState<ProviderModel | null>(null);
+  // After confirmation, briefly show a "selected" flash
+  const [justSelectedId, setJustSelectedId] = useState<string | null>(null);
 
   // Refs
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -201,8 +205,8 @@ export function ModelSearchDialog({
           capabilityFilter === "image"
             ? "text-to-image,image-to-image"
             : capabilityFilter === "video"
-            ? "text-to-video,image-to-video"
-            : "text-to-3d,image-to-3d";
+              ? "text-to-video,image-to-video"
+              : "text-to-3d,image-to-3d";
         params.set("capabilities", capabilities);
       }
       if (bypassCache) {
@@ -289,7 +293,11 @@ export function ModelSearchDialog({
     }
   }, [isOpen]);
 
-  // Handle model selection
+  // Handle model selection — now two-step: click to preview, confirm to select
+  const handlePreviewModel = useCallback((model: ProviderModel) => {
+    setPreviewModel(model);
+  }, []);
+
   const handleSelectModel = useCallback(
     (model: ProviderModel) => {
       // Track model usage for "recently used" feature
@@ -298,6 +306,10 @@ export function ModelSearchDialog({
         modelId: model.id,
         displayName: model.name,
       });
+
+      // Flash the selected indicator
+      setJustSelectedId(model.id);
+      setTimeout(() => setJustSelectedId(null), 1500);
 
       // If onModelSelected is provided, use it to update an existing node
       if (onModelSelected) {
@@ -572,73 +584,67 @@ export function ModelSearchDialog({
               />
             </div>
 
-            {/* Provider Filter - Icon Buttons */}
-            <div className="flex items-center gap-0.5 bg-[var(--bg-surface)]/50 rounded p-0.5">
+            {/* Provider Filter - Icon + Label Buttons */}
+            <div className="flex items-center gap-0.5 bg-[var(--bg-surface)]/50 rounded p-0.5 flex-wrap">
               <button
                 onClick={() => setProviderFilter("all")}
                 title="All Providers"
-                className={`px-3 py-1.5 text-xs font-medium rounded transition-all duration-[120ms] ${
-                  providerFilter === "all"
-                    ? "bg-[var(--border-subtle)] text-[var(--text-primary)]"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
-                }`}
+                className={`px-3 py-1.5 text-xs font-medium rounded transition-all duration-[120ms] ${providerFilter === "all"
+                  ? "bg-[var(--border-subtle)] text-[var(--text-primary)]"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
+                  }`}
               >
                 All
               </button>
               <button
                 onClick={() => setProviderFilter("gemini")}
                 title="Gemini"
-                className={`p-2 rounded transition-all duration-[120ms] ${
-                  providerFilter === "gemini"
-                    ? "bg-[var(--node-success)]/20 text-green-300"
-                    : "text-[var(--text-secondary)] hover:text-green-300 hover:bg-[var(--bg-surface)]"
-                }`}
+                className={`flex items-center gap-1.5 pl-2 pr-3 py-1.5 text-xs rounded transition-all duration-[120ms] ${providerFilter === "gemini"
+                  ? "bg-[var(--node-success)]/20 text-green-300"
+                  : "text-[var(--text-secondary)] hover:text-green-300 hover:bg-[var(--bg-surface)]"
+                  }`}
               >
-                <GeminiIcon />
+                <GeminiIcon /> Gemini
               </button>
               <button
                 onClick={() => setProviderFilter("replicate")}
                 title="Replicate"
-                className={`p-2 rounded transition-all duration-[120ms] ${
-                  providerFilter === "replicate"
-                    ? "bg-[var(--accent-primary)]/20 text-blue-300"
-                    : "text-[var(--text-secondary)] hover:text-blue-300 hover:bg-[var(--bg-surface)]"
-                }`}
+                className={`flex items-center gap-1.5 pl-2 pr-3 py-1.5 text-xs rounded transition-all duration-[120ms] ${providerFilter === "replicate"
+                  ? "bg-[var(--accent-primary)]/20 text-blue-300"
+                  : "text-[var(--text-secondary)] hover:text-blue-300 hover:bg-[var(--bg-surface)]"
+                  }`}
               >
-                <ReplicateIcon />
+                <ReplicateIcon /> Replicate
               </button>
               <button
                 onClick={() => setProviderFilter("fal")}
                 title="fal.ai"
-                className={`p-2 rounded transition-all duration-[120ms] ${
-                  providerFilter === "fal"
-                    ? "bg-yellow-500/20 text-yellow-300"
-                    : "text-[var(--text-secondary)] hover:text-yellow-300 hover:bg-[var(--bg-surface)]"
-                }`}
+                className={`flex items-center gap-1.5 pl-2 pr-3 py-1.5 text-xs rounded transition-all duration-[120ms] ${providerFilter === "fal"
+                  ? "bg-yellow-500/20 text-yellow-300"
+                  : "text-[var(--text-secondary)] hover:text-yellow-300 hover:bg-[var(--bg-surface)]"
+                  }`}
               >
-                <FalIcon />
+                <FalIcon /> fal.ai
               </button>
               <button
                 onClick={() => setProviderFilter("kie")}
                 title="Kie.ai"
-                className={`p-2 rounded transition-all duration-[120ms] ${
-                  providerFilter === "kie"
-                    ? "bg-orange-500/20 text-orange-300"
-                    : "text-[var(--text-secondary)] hover:text-orange-300 hover:bg-[var(--bg-surface)]"
-                }`}
+                className={`flex items-center gap-1.5 pl-2 pr-3 py-1.5 text-xs rounded transition-all duration-[120ms] ${providerFilter === "kie"
+                  ? "bg-orange-500/20 text-orange-300"
+                  : "text-[var(--text-secondary)] hover:text-orange-300 hover:bg-[var(--bg-surface)]"
+                  }`}
               >
-                <KieIcon />
+                <KieIcon /> Kie.ai
               </button>
               <button
                 onClick={() => setProviderFilter("wavespeed")}
                 title="WaveSpeed"
-                className={`p-2 rounded transition-all duration-[120ms] ${
-                  providerFilter === "wavespeed"
-                    ? "bg-orange-500/20 text-orange-300"
-                    : "text-[var(--text-secondary)] hover:text-orange-300 hover:bg-[var(--bg-surface)]"
-                }`}
+                className={`flex items-center gap-1.5 pl-2 pr-3 py-1.5 text-xs rounded transition-all duration-[120ms] ${providerFilter === "wavespeed"
+                  ? "bg-purple-500/20 text-purple-300"
+                  : "text-[var(--text-secondary)] hover:text-purple-300 hover:bg-[var(--bg-surface)]"
+                  }`}
               >
-                <WaveSpeedIcon />
+                <WaveSpeedIcon /> WaveSpeed
               </button>
             </div>
 
@@ -755,189 +761,261 @@ export function ModelSearchDialog({
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {/* Recently Used Section */}
-              {filteredRecentModels.length > 0 && !searchQuery && (
-                <div className="bg-[var(--bg-surface)]/30 rounded-lg p-3">
-                  <h3 className="text-xs font-medium text-[var(--text-muted)] mb-2">
-                    Recently Used
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {filteredRecentModels.map((recent) => {
-                      const matchingModel = models.find(
-                        (m) => m.id === recent.modelId
-                      );
-                      // Create a ProviderModel from RecentModel for handleSelectModel
-                      const model: ProviderModel = matchingModel || {
-                        id: recent.modelId,
-                        name: recent.displayName,
-                        description: null,
-                        provider: recent.provider,
-                        capabilities: [],
-                      };
-                      return (
-                        <button
-                          key={`recent-${recent.modelId}`}
-                          onClick={() => handleSelectModel(model)}
-                          className="flex items-center gap-3 p-3 bg-[var(--bg-surface)]/50 hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)]/30 hover:border-[var(--border-subtle)] rounded-lg transition-all duration-[120ms] text-left cursor-pointer group"
-                        >
-                          {/* Small cover image */}
-                          <div className="w-10 h-10 rounded bg-[var(--border-subtle)] overflow-hidden flex-shrink-0">
-                            {matchingModel?.coverImage ? (
-                              <img
-                                src={matchingModel.coverImage}
-                                alt={recent.displayName}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <svg
-                                  className="w-5 h-5 text-[var(--text-muted)]"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={1.5}
-                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                  />
-                                </svg>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-[var(--text-primary)] text-sm truncate">
-                              {recent.displayName}
+            <div className="flex gap-4">
+              {/* All models section - two panel layout */}
+              <div className="flex-1 min-w-0 space-y-4 overflow-y-auto" style={{ maxHeight: "calc(85vh - 200px)" }}>
+                {/* Recently Used Section */}
+                {filteredRecentModels.length > 0 && !searchQuery && (
+                  <div className="bg-[var(--bg-surface)]/30 rounded-lg p-3">
+                    <h3 className="text-xs font-medium text-[var(--text-muted)] mb-2">
+                      Recently Used
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {filteredRecentModels.map((recent) => {
+                        const matchingModel = models.find(
+                          (m) => m.id === recent.modelId
+                        );
+                        // Create a ProviderModel from RecentModel for handleSelectModel
+                        const model: ProviderModel = matchingModel || {
+                          id: recent.modelId,
+                          name: recent.displayName,
+                          description: null,
+                          provider: recent.provider,
+                          capabilities: [],
+                        };
+                        const isSelected = justSelectedId === recent.modelId;
+                        return (
+                          <button
+                            key={`recent-${recent.modelId}`}
+                            onClick={() => handlePreviewModel(model)}
+                            className={`flex items-center gap-3 p-3 border rounded-lg transition-all duration-[120ms] text-left cursor-pointer group ${previewModel?.id === recent.modelId
+                              ? "bg-[var(--accent-primary)]/10 border-[var(--accent-primary)]/50 text-[var(--text-primary)]"
+                              : isSelected
+                                ? "bg-green-500/10 border-green-500/40"
+                                : "bg-[var(--bg-surface)]/50 hover:bg-[var(--bg-surface)] border-[var(--border-subtle)]/30 hover:border-[var(--border-subtle)]"
+                              }`}
+                          >
+                            {/* Small cover image */}
+                            <div className="w-10 h-10 rounded bg-[var(--border-subtle)] overflow-hidden flex-shrink-0">
+                              {matchingModel?.coverImage ? (
+                                <img
+                                  src={matchingModel.coverImage}
+                                  alt={recent.displayName}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <svg
+                                    className="w-5 h-5 text-[var(--text-muted)]"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={1.5}
+                                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                    />
+                                  </svg>
+                                </div>
+                              )}
                             </div>
-                            <span
-                              className={`text-[10px] px-1.5 py-0.5 rounded ${getProviderBadgeColor(recent.provider)}`}
-                            >
-                              {getProviderDisplayName(recent.provider)}
-                            </span>
-                          </div>
-                        </button>
-                      );
-                    })}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-[var(--text-primary)] text-sm truncate">
+                                {recent.displayName}
+                              </div>
+                              <span
+                                className={`text-[10px] px-1.5 py-0.5 rounded ${getProviderBadgeColor(recent.provider)}`}
+                              >
+                                {getProviderDisplayName(recent.provider)}
+                              </span>
+                            </div>
+                            {isSelected && (
+                              <svg className="w-4 h-4 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Main Model List */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {models.map((model) => (
-                <button
-                  key={`${model.provider}-${model.id}`}
-                  onClick={() => handleSelectModel(model)}
-                  className="flex items-start gap-3 p-4 bg-[var(--bg-surface)]/50 hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)]/50 hover:border-[var(--border-subtle)] rounded-lg transition-all duration-[120ms] text-left cursor-pointer group"
-                >
-                  {/* Cover Image - larger */}
-                  <div className="w-20 h-20 rounded bg-[var(--border-subtle)] overflow-hidden flex-shrink-0">
-                    {model.coverImage ? (
-                      <img
-                        src={model.coverImage}
-                        alt={model.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          // Hide broken images
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                      />
+                {/* Main Model List */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {models.map((model) => {
+                    const isPreview = previewModel?.id === model.id && previewModel?.provider === model.provider;
+                    const isSelected = justSelectedId === model.id;
+                    return (
+                      <button
+                        key={`${model.provider}-${model.id}`}
+                        onClick={() => handlePreviewModel(model)}
+                        className={`flex items-start gap-3 p-3 border rounded-lg transition-all duration-[120ms] text-left cursor-pointer group ${isPreview
+                          ? "bg-[var(--accent-primary)]/10 border-[var(--accent-primary)]/60 ring-1 ring-[var(--accent-primary)]/30"
+                          : isSelected
+                            ? "bg-green-500/10 border-green-500/40"
+                            : "bg-[var(--bg-surface)]/50 hover:bg-[var(--bg-surface)] border-[var(--border-subtle)]/50 hover:border-[var(--border-subtle)]"
+                          }`}
+                      >
+                        {/* Cover Image */}
+                        <div className="w-14 h-14 rounded bg-[var(--border-subtle)] overflow-hidden flex-shrink-0">
+                          {model.coverImage ? (
+                            <img
+                              src={model.coverImage}
+                              alt={model.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = "none";
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <svg
+                                className="w-6 h-6 text-[var(--text-muted)]"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={1.5}
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Model Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-[var(--text-primary)] text-sm truncate">
+                            {getDisplayName(model)}
+                          </div>
+
+                          {/* Badges row */}
+                          <div className="flex items-center gap-1 flex-wrap mt-1">
+                            <span
+                              className={`text-[10px] px-1.5 py-0.5 rounded ${getProviderBadgeColor(model.provider)}`}
+                            >
+                              {getProviderDisplayName(model.provider)}
+                            </span>
+                            {getCapabilityBadges(model.capabilities)}
+                          </div>
+
+                          {/* Description short */}
+                          {model.description && (
+                            <p className="mt-1 text-[11px] text-[var(--text-secondary)] line-clamp-2">
+                              {model.description}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Selected check / arrow */}
+                        {isSelected ? (
+                          <svg className="w-4 h-4 text-green-400 flex-shrink-0 self-center" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          <svg
+                            className={`w-4 h-4 flex-shrink-0 self-center transition-opacity duration-[120ms] ${isPreview ? "opacity-100 text-[var(--accent-primary)]" : "opacity-0 group-hover:opacity-60 text-[var(--text-secondary)]"
+                              }`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Right column: model detail panel */}
+              {previewModel && (
+                <div className="w-72 flex-shrink-0 bg-[var(--bg-surface)]/60 border border-[var(--border-subtle)] rounded-lg p-4 flex flex-col gap-4 self-start sticky top-0" style={{ maxHeight: "calc(85vh - 200px)", overflowY: "auto" }}>
+                  {/* Cover image */}
+                  <div className="w-full h-36 rounded bg-[var(--border-subtle)] overflow-hidden">
+                    {previewModel.coverImage ? (
+                      <img src={previewModel.coverImage} alt={previewModel.name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <svg
-                          className="w-8 h-8 text-[var(--text-muted)]"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
+                        <svg className="w-10 h-10 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                       </div>
                     )}
                   </div>
 
-                  {/* Model Info */}
-                  <div className="flex-1 min-w-0">
-                    {/* Model name with variant suffix for fal.ai */}
-                    <div className="font-medium text-[var(--text-primary)] text-sm truncate">
-                      {getDisplayName(model)}
-                    </div>
-
-                    {/* Model ID with link to provider page */}
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-xs text-[var(--text-muted)] truncate font-mono">
-                        {model.id}
+                  {/* Name + provider */}
+                  <div>
+                    <h3 className="font-semibold text-[var(--text-primary)] text-sm">{getDisplayName(previewModel)}</h3>
+                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${getProviderBadgeColor(previewModel.provider)}`}>
+                        {getProviderDisplayName(previewModel.provider)}
                       </span>
-                      {getModelUrl(model) && (
-                        <a
-                          href={getModelUrl(model)!}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-all duration-[120ms] flex-shrink-0"
-                          title={`View on ${getProviderDisplayName(model.provider)}`}
-                        >
-                          <svg
-                            className="w-3 h-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                            />
-                          </svg>
-                        </a>
-                      )}
+                      {getCapabilityBadges(previewModel.capabilities)}
                     </div>
+                  </div>
 
-                    {/* Badges row */}
-                    <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
-                      <span
-                        className={`text-[10px] px-1.5 py-0.5 rounded ${getProviderBadgeColor(model.provider)}`}
+                  {/* Model ID */}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-mono text-[var(--text-muted)] truncate flex-1">{previewModel.id}</span>
+                    {getModelUrl(previewModel) && (
+                      <a
+                        href={getModelUrl(previewModel)!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] flex-shrink-0"
+                        title="View on provider's website"
                       >
-                        {getProviderDisplayName(model.provider)}
-                      </span>
-                      {getCapabilityBadges(model.capabilities)}
-                    </div>
-
-                    {/* Description - more lines */}
-                    {model.description && (
-                      <p className="mt-1.5 text-xs text-[var(--text-secondary)] line-clamp-3">
-                        {model.description}
-                      </p>
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
                     )}
                   </div>
 
-                  {/* Hover indicator */}
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 self-center">
-                    <svg
-                      className="w-5 h-5 text-[var(--text-secondary)]"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 4v16m8-8H4"
-                      />
+                  {/* Description */}
+                  {previewModel.description && (
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{previewModel.description}</p>
+                  )}
+
+                  {/* Pricing */}
+                  {previewModel.pricing && (
+                    <div className="text-xs text-[var(--text-muted)]">
+                      <span className="font-medium text-[var(--text-secondary)]">
+                        ${previewModel.pricing.amount.toFixed(3)}
+                      </span>{" "}
+                      {previewModel.pricing.currency} / {previewModel.pricing.type === "per-run" ? "run" : previewModel.pricing.type}
+                    </div>
+                  )}
+
+                  {/* CTA */}
+                  <button
+                    onClick={() => handleSelectModel(previewModel)}
+                    className="w-full py-2 px-4 bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/80 text-white rounded-lg text-sm font-semibold transition-all duration-[120ms] flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
-                  </div>
-                </button>
-              ))}
-              </div>
+                    Use this model
+                  </button>
+
+                  {/* Dismiss */}
+                  <button
+                    onClick={() => setPreviewModel(null)}
+                    className="w-full py-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                  >
+                    Back to list
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

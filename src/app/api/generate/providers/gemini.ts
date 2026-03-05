@@ -9,13 +9,27 @@ import { GoogleGenAI } from "@google/genai";
 import { GenerateResponse, ModelType } from "@/types";
 
 /**
- * Map model types to Gemini model IDs
+ * Map model types to Gemini API model IDs.
+ * These are the "friendly" names exposed in the UI.
  */
-export const MODEL_MAP: Record<ModelType, string> = {
+export const MODEL_MAP: Record<string, string> = {
   "nano-banana": "gemini-2.5-flash-preview-image-generation",
-  "nano-banana-pro": "gemini-3-pro-image-preview",
+  "nano-banana-pro": "gemini-2.0-flash-exp",     // Pro-quality image generation
   "veo-2.0-generate-video-001": "veo-2.0-generate-video-001",
+  // Allow direct Gemini model IDs to pass through
+  "gemini-2.5-flash-preview-image-generation": "gemini-2.5-flash-preview-image-generation",
+  "gemini-2.0-flash-exp": "gemini-2.0-flash-exp",
+  "gemini-3-pro-image-preview": "gemini-2.0-flash-exp", // Legacy alias → same model
 };
+
+/**
+ * Resolve a model type/ID to the actual Gemini API model ID.
+ * If the model is not in the map, pass it through as-is (allows future models).
+ */
+function resolveGeminiModelId(model: string): string {
+  return MODEL_MAP[model] || model;
+}
+
 
 /**
  * Generate image using Gemini API (legacy/default path)
@@ -182,7 +196,7 @@ export async function generateWithGemini(
   const geminiStartTime = Date.now();
 
   const response = await ai.models.generateContent({
-    model: MODEL_MAP[model],
+    model: resolveGeminiModelId(model),
     contents: [
       {
         role: "user",

@@ -84,14 +84,25 @@ export async function POST(request: NextRequest) {
     let provider: ProviderType = selectedModel?.provider || "gemini";
     let actualModelId = selectedModel?.modelId || model;
 
-    // Backward compatibility: If an old workflow node was saved with provider="kie" for nano-banana models,
-    // intercept and force it to Gemini.
-    if ((provider === "kie" || provider as string === "fal") && (actualModelId === "nano-banana-pro" || actualModelId === "nano-banana" || actualModelId === "veo-2.0-generate-video-001")) {
-      console.log(`[API:${requestId}] Intercepting legacy provider ${provider} for model ${actualModelId}, routing to Gemini.`);
+    // Comprehensive Gemini model ID whitelist — these model IDs MUST always go to Gemini,
+    // regardless of what provider was saved in the workflow node.
+    // This handles backward compatibility when nodes were saved with provider="kie" or "fal".
+    const GEMINI_MODEL_IDS = new Set([
+      "nano-banana",
+      "nano-banana-pro",
+      "veo-2.0-generate-video-001",
+      // Underlying Gemini API model IDs (in case selectedModel.modelId was set directly)
+      "gemini-2.5-flash-preview-image-generation",
+      "gemini-3-pro-image-preview",
+    ]);
+
+    if (GEMINI_MODEL_IDS.has(actualModelId) && provider !== "gemini") {
+      console.log(`[API:${requestId}] Rerouting model "${actualModelId}" from "${provider}" → "gemini" (provider mismatch corrected).`);
       provider = "gemini";
     }
 
     console.log(`[API:${requestId}] Provider: ${provider}, Model: ${actualModelId}`);
+
 
     // Route to appropriate provider
     if (provider === "replicate") {
