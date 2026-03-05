@@ -974,14 +974,20 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
             let items: string[] = [];
 
             if (iterator.type === "imageIterator") {
-              const { images } = ctx.getConnectedInputs(iterator.id);
+              const { images: connectedImages } = ctx.getConnectedInputs(iterator.id);
               const data = iterator.data as any;
 
+              // Combine connected images AND locally uploaded images
+              const allImages = [
+                ...connectedImages,
+                ...(data.localImages || []),
+              ];
+
               if (data.mode === "random" && data.randomCount > 0) {
-                const shuffled = [...images].sort(() => 0.5 - Math.random());
+                const shuffled = [...allImages].sort(() => 0.5 - Math.random());
                 items = shuffled.slice(0, data.randomCount);
               } else {
-                items = images;
+                items = allImages;
               }
             } else if (iterator.type === "textIterator") {
               const { text } = ctx.getConnectedInputs(iterator.id);

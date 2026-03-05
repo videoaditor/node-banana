@@ -89,7 +89,10 @@ function getSourceOutput(sourceNode: WorkflowNode): { type: "image" | "text" | "
   } else if (sourceNode.type === "glbViewer") {
     return { type: "image", value: (sourceNode.data as GLBViewerNodeData).capturedImage };
   } else if (sourceNode.type === "imageIterator") {
-    return { type: "image", value: (sourceNode.data as any).currentImage || null };
+    const iterData = sourceNode.data as any;
+    // During iteration: currentImage is set per-loop. Otherwise fall back to first local image.
+    const value = iterData.currentImage || (iterData.localImages?.length > 0 ? iterData.localImages[0] : null);
+    return { type: "image", value };
   } else if (sourceNode.type === "textIterator") {
     return { type: "text", value: (sourceNode.data as any).currentText || null };
   }
