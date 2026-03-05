@@ -142,15 +142,7 @@ const KIE_MODELS: ProviderModel[] = [
     coverImage: undefined,
     pageUrl: "https://kie.ai/flux-2",
   },
-  {
-    id: "nano-banana-pro",
-    name: "Nano Banana Pro",
-    description: "Google Gemini 3 Pro image generation via Kie.ai. Supports text-to-image and image-to-image with up to 8 input images.",
-    provider: "kie",
-    capabilities: ["text-to-image", "image-to-image"],
-    coverImage: undefined,
-    pageUrl: "https://docs.kie.ai/market/google/pro-image-to-image",
-  },
+
   {
     id: "grok-imagine/text-to-image",
     name: "Grok Imagine",
@@ -273,46 +265,10 @@ const KIE_MODELS: ProviderModel[] = [
     coverImage: undefined,
     pageUrl: "https://kie.ai/topaz",
   },
-  {
-    id: "veo3/text-to-video",
-    name: "Veo 3",
-    description: "Google Veo 3.1 high-quality text-to-video generation with audio via Kie.ai.",
-    provider: "kie",
-    capabilities: ["text-to-video"],
-    coverImage: undefined,
-    pageUrl: "https://docs.kie.ai/veo3-api/quickstart",
-  },
-  {
-    id: "veo3/image-to-video",
-    name: "Veo 3 I2V",
-    description: "Google Veo 3.1 image-to-video generation via Kie.ai. Supports 1-2 reference images.",
-    provider: "kie",
-    capabilities: ["image-to-video"],
-    coverImage: undefined,
-    pageUrl: "https://docs.kie.ai/veo3-api/quickstart",
-  },
-  {
-    id: "veo3-fast/text-to-video",
-    name: "Veo 3 Fast",
-    description: "Google Veo 3.1 fast text-to-video generation with audio via Kie.ai.",
-    provider: "kie",
-    capabilities: ["text-to-video"],
-    coverImage: undefined,
-    pageUrl: "https://docs.kie.ai/veo3-api/quickstart",
-  },
-  {
-    id: "veo3-fast/image-to-video",
-    name: "Veo 3 Fast I2V",
-    description: "Google Veo 3.1 fast image-to-video generation via Kie.ai. Supports 1-2 reference images.",
-    provider: "kie",
-    capabilities: ["image-to-video"],
-    coverImage: undefined,
-    pageUrl: "https://docs.kie.ai/veo3-api/quickstart",
-  },
 ];
 
-// Gemini image models (hardcoded - these don't come from an external API)
-const GEMINI_IMAGE_MODELS: ProviderModel[] = [
+// Gemini models (hardcoded - these don't come from an external API)
+const GEMINI_MODELS: ProviderModel[] = [
   {
     id: "nano-banana",
     name: "Nano Banana",
@@ -330,6 +286,14 @@ const GEMINI_IMAGE_MODELS: ProviderModel[] = [
     capabilities: ["text-to-image", "image-to-image"],
     coverImage: undefined,
     pricing: { type: "per-run", amount: 0.134, currency: "USD" },
+  },
+  {
+    id: "veo-2.0-generate-video-001",
+    name: "Veo 2",
+    description: "Google Veo 2 high-quality text-to-video and image-to-video generation.",
+    provider: "gemini",
+    capabilities: ["text-to-video", "image-to-video"],
+    coverImage: undefined,
   },
 ];
 
@@ -665,10 +629,10 @@ function mapWaveSpeedModel(model: WaveSpeedModel): ProviderModel {
     coverImage: model.thumbnail_url || model.cover_image || model.coverImage,
     pricing: model.pricing
       ? {
-          type: "per-run",
-          amount: model.pricing.amount || 0,
-          currency: model.pricing.currency || "USD",
-        }
+        type: "per-run",
+        amount: model.pricing.amount || 0,
+        currency: model.pricing.currency || "USD",
+      }
       : undefined,
   };
 }
@@ -883,7 +847,7 @@ export async function GET(
   // Add Gemini models first if included (they appear at the top)
   if (includeGemini) {
     // Filter by search query if provided
-    let geminiModels = GEMINI_IMAGE_MODELS;
+    let geminiModels = GEMINI_MODELS;
     if (searchQuery) {
       geminiModels = filterModelsBySearch(geminiModels, searchQuery);
     }

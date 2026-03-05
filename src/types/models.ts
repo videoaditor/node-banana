@@ -22,4 +22,4 @@ export type AspectRatio =
 export type Resolution = "1K" | "2K" | "4K";
 
 // Image Generation Model Options
-export type ModelType = "nano-banana" | "nano-banana-pro";
+export type ModelType = "nano-banana" | "nano-banana-pro" | "veo-2.0-generate-video-001";

@@ -389,7 +389,7 @@ export async function generateWithFalQueue(
 
   if (submitResult.status_url) {
     const statusCheck = validateMediaUrl(submitResult.status_url);
-    if (statusCheck.valid && submitResult.status_url.startsWith('https://queue.fal.run/')) {
+    if (statusCheck.valid && submitResult.status_url.includes('fal.run')) {
       statusUrl = submitResult.status_url;
     } else {
       console.warn(`[API:${requestId}] fal.ai provided invalid status URL: ${submitResult.status_url} — falling back to constructed URL`);
@@ -397,7 +397,7 @@ export async function generateWithFalQueue(
   }
   if (submitResult.response_url) {
     const responseCheck = validateMediaUrl(submitResult.response_url);
-    if (responseCheck.valid && submitResult.response_url.startsWith('https://queue.fal.run/')) {
+    if (responseCheck.valid && submitResult.response_url.includes('fal.run')) {
       responseUrl = submitResult.response_url;
     } else {
       console.warn(`[API:${requestId}] fal.ai provided invalid response URL: ${submitResult.response_url} — falling back to constructed URL`);

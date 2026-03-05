@@ -14,6 +14,7 @@ import { GenerateResponse, ModelType } from "@/types";
 export const MODEL_MAP: Record<ModelType, string> = {
   "nano-banana": "gemini-2.5-flash-preview-image-generation",
   "nano-banana-pro": "gemini-3-pro-image-preview",
+  "veo-2.0-generate-video-001": "veo-2.0-generate-video-001",
 };
 
 /**
@@ -48,7 +49,97 @@ export async function generateWithGemini(
   // Initialize Gemini client
   const ai = new GoogleGenAI({ apiKey });
 
-  // Build request parts array with prompt and all images
+  // Convert first image for potentially Use in Veo 2
+  let firstImageData: { data: string, mimeType: string } | undefined;
+  if (imageData.length > 0) {
+    firstImageData = imageData[0];
+  }
+
+  // Handle Veo 2 Video Generation
+  if (model === "veo-2.0-generate-video-001") {
+    console.log(`[API:${requestId}] Starting Veo 2 video generation`);
+    try {
+      const operation = await ai.models.generateVideos({
+        model: "veo-2.0-generate-video-001",
+        prompt: prompt,
+        // Wait, the new API has `image` as input
+        ...(firstImageData && {
+          image: {
+            imageBytes: firstImageData.data,
+            mimeType: firstImageData.mimeType,
+          }
+        })
+      });
+
+      console.log(`[API:${requestId}] Veo operation started: ${operation.name || 'unknown'}`);
+
+      // Poll for completion
+      let currentOp = operation;
+      let attempts = 0;
+      const MAX_ATTEMPTS = 60; // 5 minutes max
+
+      while (!currentOp.done && attempts < MAX_ATTEMPTS) {
+        await new Promise(r => setTimeout(r, 5000));
+        attempts++;
+        if (attempts % 6 === 0) {
+          console.log(`[API:${requestId}] Polling Veo operation... (${attempts * 5}s)`);
+        }
+
+        try {
+          if (ai.operations && (ai.operations as any).get) {
+            currentOp = await (ai.operations as any).get({ name: currentOp.name });
+          } else {
+            currentOp = await (ai.models as any).getVideosOperation({ operation: { name: currentOp.name } } as any);
+          }
+        } catch (e) {
+          console.error(`[API:${requestId}] Polling error:`, e);
+          // Don't break immediately, might be a transient network error
+        }
+      }
+
+      if (!currentOp.done) {
+        throw new Error("Video generation timed out after 5 minutes.");
+      }
+
+      if (currentOp.error) {
+        throw new Error(`Video generation failed: ${JSON.stringify(currentOp.error)}`);
+      }
+
+      const generatedVideos = currentOp.response?.generatedVideos;
+      if (!generatedVideos || generatedVideos.length === 0 || !generatedVideos[0].video) {
+        throw new Error("API returned no video data.");
+      }
+
+      const videoData = generatedVideos[0].video;
+
+      // Ensure we return data URI correctly
+      if (videoData.videoBytes) {
+        const mimeType = videoData.mimeType || "video/mp4";
+        const videoDataUri = `data:${mimeType};base64,${videoData.videoBytes}`;
+        return NextResponse.json<GenerateResponse>({
+          success: true,
+          video: videoDataUri,
+          contentType: "video",
+        });
+      } else if (videoData.uri) {
+        return NextResponse.json<GenerateResponse>({
+          success: true,
+          videoUrl: videoData.uri,
+          contentType: "video",
+        });
+      } else {
+        throw new Error("Video output contained neither bytes nor URI.");
+      }
+    } catch (e) {
+      console.error(`[API:${requestId}] Veo Error:`, e);
+      return NextResponse.json<GenerateResponse>({
+        success: false,
+        error: e instanceof Error ? e.message : "Unknown Veo error",
+      }, { status: 500 });
+    }
+  }
+
+  // Build request parts array with prompt and all images for standard Gemini Image Generation
   const requestParts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
     { text: prompt },
     ...imageData.map(({ data, mimeType }) => ({
