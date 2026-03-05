@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     const {
       images,
       prompt,
-      model = "nano-banana-pro",
+      model = "nano-banana-2",
       aspectRatio,
       resolution,
       useGoogleSearch,
@@ -89,11 +89,16 @@ export async function POST(request: NextRequest) {
     // This handles backward compatibility when nodes were saved with provider="kie" or "fal".
     const GEMINI_MODEL_IDS = new Set([
       "nano-banana",
+      "nano-banana-2",
       "nano-banana-pro",
       "veo-2.0-generate-video-001",
       // Underlying Gemini API model IDs (in case selectedModel.modelId was set directly)
+      "gemini-2.5-flash-image",
       "gemini-2.5-flash-preview-image-generation",
       "gemini-3-pro-image-preview",
+      "gemini-3.1-flash-image-preview",
+      "nano-banana-pro-preview",
+      "gemini-2.0-flash-exp-image-generation",
     ]);
 
     if (GEMINI_MODEL_IDS.has(actualModelId) && provider !== "gemini") {

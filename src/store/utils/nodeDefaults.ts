@@ -132,7 +132,7 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
       if (nodeDefaults.generateImage?.selectedModel) {
         selectedModel = nodeDefaults.generateImage.selectedModel;
       } else {
-        const modelDisplayName = legacyDefaults.model === "nano-banana" ? "Nano Banana" : "Nano Banana Pro";
+        const modelDisplayName = legacyDefaults.model === "nano-banana" ? "Nano Banana" : legacyDefaults.model === "nano-banana-2" ? "Nano Banana 2" : "Nano Banana Pro";
         selectedModel = {
           provider: "gemini",
           modelId: legacyDefaults.model,
@@ -210,7 +210,7 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         generateSettings: {
           aspectRatio: "1:1",
           resolution: "1K",
-          model: "nano-banana-pro",
+          model: "nano-banana-2",
           useGoogleSearch: false,
         },
         childNodeIds: [],

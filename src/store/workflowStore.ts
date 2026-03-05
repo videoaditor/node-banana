@@ -1482,7 +1482,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       if (node.type === "nanoBanana") {
         const data = node.data as NanoBananaNodeData;
         if (data.model && !data.selectedModel) {
-          const displayName = data.model === "nano-banana" ? "Nano Banana" : "Nano Banana Pro";
+          const displayName = data.model === "nano-banana" ? "Nano Banana" : data.model === "nano-banana-2" ? "Nano Banana 2" : "Nano Banana Pro";
           return {
             ...node,
             data: {

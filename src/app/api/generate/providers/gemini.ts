@@ -13,13 +13,18 @@ import { GenerateResponse, ModelType } from "@/types";
  * These are the "friendly" names exposed in the UI.
  */
 export const MODEL_MAP: Record<string, string> = {
-  "nano-banana": "gemini-2.5-flash-preview-image-generation",
-  "nano-banana-pro": "gemini-2.0-flash-exp",     // Pro-quality image generation
+  "nano-banana": "gemini-2.5-flash-image",                    // Flash-quality image generation
+  "nano-banana-2": "gemini-3.1-flash-image-preview",          // Nano Banana 2 (Gemini 3.1 Flash)
+  "nano-banana-pro": "gemini-3-pro-image-preview",            // Pro-quality image generation
   "veo-2.0-generate-video-001": "veo-2.0-generate-video-001",
   // Allow direct Gemini model IDs to pass through
-  "gemini-2.5-flash-preview-image-generation": "gemini-2.5-flash-preview-image-generation",
-  "gemini-2.0-flash-exp": "gemini-2.0-flash-exp",
-  "gemini-3-pro-image-preview": "gemini-2.0-flash-exp", // Legacy alias → same model
+  "gemini-2.5-flash-image": "gemini-2.5-flash-image",
+  "gemini-2.5-flash-preview-image-generation": "gemini-2.5-flash-image", // Legacy alias
+  "gemini-2.0-flash-exp": "gemini-3-pro-image-preview",                  // Deprecated → Pro
+  "gemini-2.0-flash-exp-image-generation": "gemini-2.0-flash-exp-image-generation",
+  "gemini-3-pro-image-preview": "gemini-3-pro-image-preview",
+  "gemini-3.1-flash-image-preview": "gemini-3.1-flash-image-preview",
+  "nano-banana-pro-preview": "nano-banana-pro-preview",
 };
 
 /**
@@ -176,17 +181,17 @@ export async function generateWithGemini(
     };
   }
 
-  // Add resolution only for Nano Banana Pro
-  if (model === "nano-banana-pro" && resolution) {
+  // Add resolution for Pro and Nano Banana 2
+  if ((model === "nano-banana-pro" || model === "nano-banana-2") && resolution) {
     if (!config.imageConfig) {
       config.imageConfig = {};
     }
     (config.imageConfig as Record<string, unknown>).imageSize = resolution;
   }
 
-  // Add tools array for Google Search (only Nano Banana Pro)
+  // Add tools array for Google Search (Pro and Nano Banana 2)
   const tools = [];
-  if (model === "nano-banana-pro" && useGoogleSearch) {
+  if ((model === "nano-banana-pro" || model === "nano-banana-2") && useGoogleSearch) {
     tools.push({ googleSearch: {} });
   }
 

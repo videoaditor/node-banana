@@ -270,9 +270,18 @@ const KIE_MODELS: ProviderModel[] = [
 // Gemini models (hardcoded - these don't come from an external API)
 const GEMINI_MODELS: ProviderModel[] = [
   {
+    id: "nano-banana-2",
+    name: "Nano Banana 2",
+    description: "Latest image generation with Gemini 3.1 Flash. Fast, high quality, supports text-to-image and image-to-image with aspect ratio control.",
+    provider: "gemini",
+    capabilities: ["text-to-image", "image-to-image"],
+    coverImage: undefined,
+    pricing: { type: "per-run", amount: 0.039, currency: "USD" },
+  },
+  {
     id: "nano-banana",
     name: "Nano Banana",
-    description: "Fast image generation with Gemini 2.5 Flash. Supports text-to-image and image-to-image with aspect ratio control.",
+    description: "Image generation with Gemini 2.5 Flash. Supports text-to-image and image-to-image with aspect ratio control.",
     provider: "gemini",
     capabilities: ["text-to-image", "image-to-image"],
     coverImage: undefined,

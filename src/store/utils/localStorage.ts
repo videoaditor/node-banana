@@ -34,7 +34,7 @@ export interface GenerateImageDefaults {
 const DEFAULT_GENERATE_IMAGE_SETTINGS: GenerateImageDefaults = {
   aspectRatio: "1:1",
   resolution: "1K",
-  model: "nano-banana-pro",
+  model: "nano-banana-2",
   useGoogleSearch: false,
 };
 
@@ -44,7 +44,7 @@ export const defaultProviderSettings: ProviderSettings = {
     gemini: { id: "gemini", name: "Google Gemini", enabled: true, apiKey: null, apiKeyEnvVar: "GEMINI_API_KEY" },
     openai: { id: "openai", name: "OpenAI", enabled: true, apiKey: null, apiKeyEnvVar: "OPENAI_API_KEY" },
     replicate: { id: "replicate", name: "Replicate", enabled: false, apiKey: null, apiKeyEnvVar: "REPLICATE_API_KEY" },
-    fal: { id: "fal", name: "fal.ai", enabled: false, apiKey: null, apiKeyEnvVar: "FAL_API_KEY" },
+    fal: { id: "fal", name: "fal.ai", enabled: true, apiKey: null, apiKeyEnvVar: "FAL_API_KEY" },
     kie: { id: "kie", name: "Kie.ai", enabled: false, apiKey: null, apiKeyEnvVar: "KIE_API_KEY" },
     wavespeed: { id: "wavespeed", name: "WaveSpeed", enabled: false, apiKey: null, apiKeyEnvVar: "WAVESPEED_API_KEY" },
   }
