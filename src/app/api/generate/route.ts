@@ -81,8 +81,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine which provider to use
-    const provider: ProviderType = selectedModel?.provider || "gemini";
-    console.log(`[API:${requestId}] Provider: ${provider}, Model: ${selectedModel?.modelId || model}`);
+    let provider: ProviderType = selectedModel?.provider || "gemini";
+    let actualModelId = selectedModel?.modelId || model;
+
+    // Backward compatibility: If an old workflow node was saved with provider="kie" for nano-banana models,
+    // intercept and force it to Gemini.
+    if ((provider === "kie" || provider as string === "fal") && (actualModelId === "nano-banana-pro" || actualModelId === "nano-banana" || actualModelId === "veo-2.0-generate-video-001")) {
+      console.log(`[API:${requestId}] Intercepting legacy provider ${provider} for model ${actualModelId}, routing to Gemini.`);
+      provider = "gemini";
+    }
+
+    console.log(`[API:${requestId}] Provider: ${provider}, Model: ${actualModelId}`);
 
     // Route to appropriate provider
     if (provider === "replicate") {
