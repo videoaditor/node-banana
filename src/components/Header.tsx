@@ -217,14 +217,9 @@ export function Header() {
         onChange={handleFileChange}
         className="hidden"
       />
-      <header className="h-11 border-b border-[var(--border-subtle)] flex items-center justify-between px-4 shrink-0" style={{ background: 'var(--bg-elevated)' }}>
+      <header className="h-11 border-b border-[var(--border-subtle)] flex items-center justify-between px-4 shrink-0 bg-[var(--bg-base)] font-mono">
         <div className="flex items-center gap-2">
-          <img src="/banana_icon.png" alt="Banana" className="w-6 h-6" />
-          <h1 className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight font-['DM_Mono',monospace]">
-            Node Banana
-          </h1>
-
-          <div className="flex items-center gap-2 ml-4 pl-4 border-l border-[var(--border-subtle)]">
+          <div className="flex items-center gap-2">
             {isProjectConfigured ? (
               <>
                 <span className="text-sm text-[var(--text-secondary)]">{workflowName}</span>
@@ -387,7 +382,7 @@ export function Header() {
             </button>
           )}
           <CommentsNavigationIcon />
-          <span className="text-[var(--text-secondary)] font-['DM_Mono',monospace] text-[10px]">
+          <span className="text-[var(--text-secondary)] text-[10px]">
             {isProjectConfigured ? (
               isSaving ? (
                 "Saving..."
@@ -400,16 +395,7 @@ export function Header() {
               "Not saved"
             )}
           </span>
-          <span className="text-[var(--text-muted)]">·</span>
-          <a
-            href="https://x.com/ReflctWillie"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
-          >
-            Made by Willie
-          </a>
-          <span className="text-[var(--text-muted)]">·</span>
+          <span className="text-[var(--border-subtle)]">|</span>
           <button
             onClick={() => setShortcutsDialogOpen(true)}
             className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-all duration-[120ms]"
@@ -420,7 +406,7 @@ export function Header() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8" />
             </svg>
           </button>
-          <span className="text-[var(--text-muted)]">·</span>
+          <span className="text-[var(--border-subtle)]">|</span>
           <a
             href="https://discord.com/invite/89Nr6EKkTf"
             target="_blank"

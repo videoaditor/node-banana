@@ -1689,7 +1689,7 @@ export function WorkflowCanvas() {
       {/* Right-click context menu — Premium Glass */}
       {contextMenu && (
         <div
-          className="fixed z-[9999] rounded-[10px] py-1.5 min-w-[220px]"
+          className="fixed z-[9999] rounded-[8px] py-1 min-w-[200px] max-h-[80vh] overflow-y-auto overflow-x-hidden"
           style={{
             left: contextMenu.x,
             top: contextMenu.y,
@@ -1703,7 +1703,7 @@ export function WorkflowCanvas() {
           onClick={() => setContextMenu(null)}
         >
           {/* Category: INPUT */}
-          <div className="px-3 pt-1.5 pb-1">
+          <div className="px-3 pt-1 pb-0.5">
             <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] font-['DM_Mono',monospace]">Input</span>
           </div>
           {[
@@ -1712,43 +1712,45 @@ export function WorkflowCanvas() {
           ].map(({ type, label, icon }) => (
             <button
               key={type}
-              className="w-full text-left px-3 py-1.5 text-[11px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
+              className="w-full text-left px-3 py-1 text-[10px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
               onClick={() => { addNode(type as any, contextMenu.flowPos); setContextMenu(null); }}
             >
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[var(--accent-primary)] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3.5 bg-[var(--accent-primary)] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
               <svg className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={icon} /></svg>
               {label}
             </button>
           ))}
 
-          <div className="mx-3 my-1.5 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-subtle), transparent)' }} />
+          <div className="mx-3 my-1 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-subtle), transparent)' }} />
 
           {/* Category: PROCESSING */}
-          <div className="px-3 pt-1 pb-1">
+          <div className="px-3 pt-0.5 pb-0.5">
             <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] font-['DM_Mono',monospace]">Processing</span>
           </div>
           {[
             { type: "prompt", label: "Prompt", icon: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" },
             { type: "promptConstructor", label: "Prompt Constructor", icon: "M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959" },
+            { type: "imageIterator", label: "Image Iterator", icon: "M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" },
+            { type: "textIterator", label: "Text Iterator", icon: "M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" },
             { type: "splitGrid", label: "Split Grid", icon: "M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6z" },
             { type: "annotation", label: "Annotate", icon: "M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" },
             { type: "imageCompare", label: "Image Compare", icon: "M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" },
           ].map(({ type, label, icon }) => (
             <button
               key={type}
-              className="w-full text-left px-3 py-1.5 text-[11px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
+              className="w-full text-left px-3 py-1 text-[10px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
               onClick={() => { addNode(type as any, contextMenu.flowPos); setContextMenu(null); }}
             >
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[var(--accent-primary)] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3.5 bg-[var(--accent-primary)] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
               <svg className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={icon} /></svg>
               {label}
             </button>
           ))}
 
-          <div className="mx-3 my-1.5 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-subtle), transparent)' }} />
+          <div className="mx-3 my-1 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-subtle), transparent)' }} />
 
           {/* Category: GENERATION */}
-          <div className="px-3 pt-1 pb-1">
+          <div className="px-3 pt-0.5 pb-0.5">
             <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] font-['DM_Mono',monospace]">Generation</span>
           </div>
           {[
@@ -1761,19 +1763,19 @@ export function WorkflowCanvas() {
           ].map(({ type, label, icon }) => (
             <button
               key={type}
-              className="w-full text-left px-3 py-1.5 text-[11px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
+              className="w-full text-left px-3 py-1 text-[10px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
               onClick={() => { addNode(type as any, contextMenu.flowPos); setContextMenu(null); }}
             >
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[#c084fc] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3.5 bg-[#c084fc] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
               <svg className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={icon} /></svg>
               {label}
             </button>
           ))}
 
-          <div className="mx-3 my-1.5 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-subtle), transparent)' }} />
+          <div className="mx-3 my-1 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-subtle), transparent)' }} />
 
           {/* Category: OUTPUT */}
-          <div className="px-3 pt-1 pb-1">
+          <div className="px-3 pt-0.5 pb-0.5">
             <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] font-['DM_Mono',monospace]">Output</span>
           </div>
           {[
@@ -1783,19 +1785,19 @@ export function WorkflowCanvas() {
           ].map(({ type, label, icon }) => (
             <button
               key={type}
-              className="w-full text-left px-3 py-1.5 text-[11px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
+              className="w-full text-left px-3 py-1 text-[10px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
               onClick={() => { addNode(type as any, contextMenu.flowPos); setContextMenu(null); }}
             >
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[#f5a623] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3.5 bg-[#f5a623] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
               <svg className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={icon} /></svg>
               {label}
             </button>
           ))}
 
-          <div className="mx-3 my-1.5 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-subtle), transparent)' }} />
+          <div className="mx-3 my-1 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-subtle), transparent)' }} />
 
           {/* Category: UTILITY */}
-          <div className="px-3 pt-1 pb-1">
+          <div className="px-3 pt-0.5 pb-0.5">
             <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] font-['DM_Mono',monospace]">Utility</span>
           </div>
           {[
@@ -1803,10 +1805,10 @@ export function WorkflowCanvas() {
           ].map(({ type, label, icon }) => (
             <button
               key={type}
-              className="w-full text-left px-3 py-1.5 text-[11px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
+              className="w-full text-left px-3 py-1 text-[10px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
               onClick={() => { addNode(type as any, contextMenu.flowPos); setContextMenu(null); }}
             >
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[#fbbf24] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3.5 bg-[#fbbf24] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
               <svg className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={icon} /></svg>
               {label}
             </button>

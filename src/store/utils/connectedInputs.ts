@@ -88,6 +88,10 @@ function getSourceOutput(sourceNode: WorkflowNode): { type: "image" | "text" | "
     return { type: "text", value: (sourceNode.data as LLMGenerateNodeData).outputText };
   } else if (sourceNode.type === "glbViewer") {
     return { type: "image", value: (sourceNode.data as GLBViewerNodeData).capturedImage };
+  } else if (sourceNode.type === "imageIterator") {
+    return { type: "image", value: (sourceNode.data as any).currentImage || null };
+  } else if (sourceNode.type === "textIterator") {
+    return { type: "text", value: (sourceNode.data as any).currentText || null };
   }
   return { type: "image", value: null };
 }
@@ -211,7 +215,7 @@ export function validateWorkflowPure(
     .forEach((node) => {
       const textConnected = edges.some(
         (e) => e.target === node.id &&
-               (e.targetHandle === "text" || e.targetHandle?.startsWith("text-"))
+          (e.targetHandle === "text" || e.targetHandle?.startsWith("text-"))
       );
       if (!textConnected) {
         errors.push(`Generate node "${node.id}" missing text input`);
@@ -224,7 +228,7 @@ export function validateWorkflowPure(
     .forEach((node) => {
       const textConnected = edges.some(
         (e) => e.target === node.id &&
-               (e.targetHandle === "text" || e.targetHandle?.startsWith("text-"))
+          (e.targetHandle === "text" || e.targetHandle?.startsWith("text-"))
       );
       if (!textConnected) {
         errors.push(`Video node "${node.id}" missing text input`);

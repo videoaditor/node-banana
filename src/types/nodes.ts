@@ -344,6 +344,7 @@ export interface ImageIteratorNodeData extends BaseNodeData {
   mode: "all" | "random";      // Process all images or random subset
   randomCount: number;         // When mode is random, how many to process
   imageInputHandles: number;   // Number of dynamic image input handles
+  currentImage?: string | null; // The currenly iterating image downstream nodes receives
   status: NodeStatus;
   error: string | null;
 }
@@ -355,6 +356,7 @@ export interface TextIteratorNodeData extends BaseNodeData {
   inputText: string | null;    // Text from upstream
   splitMode: "newline" | "period" | "hash" | "dash" | "custom";
   customSeparator: string;     // Used when splitMode is "custom"
+  currentText?: string | null; // The currenly iterating text downstream nodes receives
   status: NodeStatus;
   error: string | null;
 }

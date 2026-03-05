@@ -724,12 +724,12 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       nodes: state.nodes.map((node) =>
         node.groupId === groupId
           ? {
-              ...node,
-              position: {
-                x: node.position.x + delta.x,
-                y: node.position.y + delta.y,
-              },
-            }
+            ...node,
+            position: {
+              x: node.position.x + delta.x,
+              y: node.position.y + delta.y,
+            },
+          }
           : node
       ) as WorkflowNode[],
       hasUnsavedChanges: true,
@@ -869,116 +869,209 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       const executionCtx = get()._buildExecutionContext(node, signal);
 
       switch (node.type) {
-          case "imageInput":
-          case "audioInput":
-            // Data source nodes - no execution needed
-            break;
-          case "glbViewer":
-            await executeGlbViewer(executionCtx);
-            break;
-          case "annotation":
-            await executeAnnotation(executionCtx);
-            break;
-          case "prompt":
-            await executePrompt(executionCtx);
-            break;
-          case "promptConstructor":
-            await executePromptConstructor(executionCtx);
-            break;
-          case "promptConcatenator":
-            await executePromptConcatenator(executionCtx);
-            break;
-          case "nanoBanana":
-            await executeNanoBanana(executionCtx);
-            break;
-          case "generateVideo":
-            await executeGenerateVideo(executionCtx);
-            break;
-          case "soraBlueprint":
-            await executeSoraBlueprint(executionCtx);
-            break;
-          case "brollBatch":
-            await executeBrollBatch(executionCtx);
-            break;
-          case "generate3d":
-            await executeGenerate3D(executionCtx);
-            break;
-          case "llmGenerate":
-            await executeLlmGenerate(executionCtx);
-            break;
-          case "splitGrid":
-            await executeSplitGrid(executionCtx);
-            break;
-          case "output":
-            await executeOutput(executionCtx);
-            break;
-          case "outputGallery":
-            await executeOutputGallery(executionCtx);
-            break;
-          case "imageCompare":
-            await executeImageCompare(executionCtx);
-            break;
-          case "videoStitch":
-            await executeVideoStitch(executionCtx);
-            break;
-          case "easeCurve":
-            await executeEaseCurve(executionCtx);
-            break;
-        }
+        case "imageInput":
+        case "audioInput":
+          // Data source nodes - no execution needed
+          break;
+        case "glbViewer":
+          await executeGlbViewer(executionCtx);
+          break;
+        case "annotation":
+          await executeAnnotation(executionCtx);
+          break;
+        case "prompt":
+          await executePrompt(executionCtx);
+          break;
+        case "promptConstructor":
+          await executePromptConstructor(executionCtx);
+          break;
+        case "promptConcatenator":
+          await executePromptConcatenator(executionCtx);
+          break;
+        case "nanoBanana":
+          await executeNanoBanana(executionCtx);
+          break;
+        case "generateVideo":
+          await executeGenerateVideo(executionCtx);
+          break;
+        case "soraBlueprint":
+          await executeSoraBlueprint(executionCtx);
+          break;
+        case "brollBatch":
+          await executeBrollBatch(executionCtx);
+          break;
+        case "generate3d":
+          await executeGenerate3D(executionCtx);
+          break;
+        case "llmGenerate":
+          await executeLlmGenerate(executionCtx);
+          break;
+        case "splitGrid":
+          await executeSplitGrid(executionCtx);
+          break;
+        case "output":
+          await executeOutput(executionCtx);
+          break;
+        case "outputGallery":
+          await executeOutputGallery(executionCtx);
+          break;
+        case "imageCompare":
+          await executeImageCompare(executionCtx);
+          break;
+        case "videoStitch":
+          await executeVideoStitch(executionCtx);
+          break;
+        case "easeCurve":
+          await executeEaseCurve(executionCtx);
+          break;
+      }
     }; // End of executeSingleNode helper
 
     try {
-      // Execute levels sequentially, but nodes within each level in parallel
-      for (let levelIdx = startLevel; levelIdx < levels.length; levelIdx++) {
-        // Check if execution was stopped
-        if (abortController.signal.aborted || !get().isRunning) break;
-
-        const level = levels[levelIdx];
-        const levelNodes = level.nodeIds
-          .map((id) => nodes.find((n) => n.id === id))
-          .filter((n): n is WorkflowNode => n !== undefined);
-
-        if (levelNodes.length === 0) continue;
-
-        // Execute nodes in batches respecting concurrency limit
-        const batches = chunk(levelNodes, maxConcurrentCalls);
-
-        for (const batch of batches) {
+      // Inner function for recursive level execution to support iterator subgraphs
+      const executeLevelsSequentially = async (startIndex: number, endIndex: number) => {
+        for (let levelIdx = startIndex; levelIdx < endIndex; levelIdx++) {
           if (abortController.signal.aborted || !get().isRunning) break;
 
-          // Update currentNodeIds to show which nodes are executing
-          const batchIds = batch.map((n) => n.id);
-          set({ currentNodeIds: batchIds });
+          const level = levels[levelIdx];
+          const levelNodes = level.nodeIds
+            .map((id) => get().nodes.find((n) => n.id === id))
+            .filter((n): n is WorkflowNode => n !== undefined);
 
-          logger.info('node.execution', `Executing level ${levelIdx} batch`, {
-            level: levelIdx,
-            nodeCount: batch.length,
-            nodeIds: batchIds,
-          });
+          if (levelNodes.length === 0) continue;
 
-          // Execute batch in parallel
-          const results = await Promise.allSettled(
-            batch.map((node) => executeSingleNode(node, abortController.signal))
-          );
+          // Check for iterators in this level
+          const iterators = levelNodes.filter(n => n.type === "imageIterator" || n.type === "textIterator");
 
-          // Check for failures (fail-fast behavior)
-          const failed = results.find(
-            (r): r is PromiseRejectedResult =>
-              r.status === 'rejected' &&
-              !(r.reason instanceof DOMException && r.reason.name === 'AbortError')
-          );
+          if (iterators.length > 0) {
+            // Put iterator at the end, run normal nodes first
+            const normalNodes = levelNodes.filter(n => n.type !== "imageIterator" && n.type !== "textIterator");
+            if (normalNodes.length > 0) {
+              const normalBatches = chunk(normalNodes, maxConcurrentCalls);
+              for (const batch of normalBatches) {
+                if (abortController.signal.aborted || !get().isRunning) break;
+                set({ currentNodeIds: batch.map(n => n.id) });
+                const results = await Promise.allSettled(
+                  batch.map((node) => executeSingleNode(node, abortController.signal))
+                );
+                const failed = results.find((r): r is PromiseRejectedResult => r.status === 'rejected' && !(r.reason instanceof DOMException && r.reason.name === 'AbortError'));
+                if (failed) {
+                  abortController.abort();
+                  throw failed.reason;
+                }
+              }
+            }
 
-          if (failed) {
-            // Log the failure and abort remaining executions
-            logger.error('workflow.error', 'Node execution failed in parallel batch', {
+            // Execute the Iterator loop
+            if (abortController.signal.aborted || !get().isRunning) break;
+
+            // Only handle one iterator per level right now
+            const iterator = iterators[0];
+            const ctx = get()._buildExecutionContext(iterator, abortController.signal);
+
+            set({ currentNodeIds: [iterator.id] });
+
+            let items: string[] = [];
+
+            if (iterator.type === "imageIterator") {
+              const { images } = ctx.getConnectedInputs(iterator.id);
+              const data = iterator.data as any;
+
+              if (data.mode === "random" && data.randomCount > 0) {
+                const shuffled = [...images].sort(() => 0.5 - Math.random());
+                items = shuffled.slice(0, data.randomCount);
+              } else {
+                items = images;
+              }
+            } else if (iterator.type === "textIterator") {
+              const { text } = ctx.getConnectedInputs(iterator.id);
+              const data = iterator.data as any;
+
+              if (text) {
+                if (data.splitMode === "newline") items = text.split("\n").filter(t => t.trim());
+                else if (data.splitMode === "period") items = text.split(".").filter(t => t.trim());
+                else if (data.splitMode === "hash") items = text.split("#").filter(t => t.trim());
+                else if (data.splitMode === "dash") items = text.split("-").filter(t => t.trim());
+                else if (data.splitMode === "custom" && data.customSeparator) items = text.split(data.customSeparator).filter(t => t.trim());
+                else items = [text];
+              }
+            }
+
+            ctx.updateNodeData(iterator.id, { status: "complete" });
+
+            if (items.length === 0) {
+              logger.warn('node.execution', 'Iterator has no items to iterate over', { nodeId: iterator.id });
+              return; // Skip downstream if nothing to iterate
+            }
+
+            // For each item, set the output and run downstream
+            for (let i = 0; i < items.length; i++) {
+              if (abortController.signal.aborted || !get().isRunning) break;
+
+              // Slight pause to let UI render between heavy iterator loops
+              await new Promise(resolve => setTimeout(resolve, 50));
+
+              logger.info('node.execution', `Executing iteration ${i + 1}/${items.length}`, { nodeId: iterator.id });
+
+              // Set the current output for downstream connected nodes to consume
+              if (iterator.type === "imageIterator") {
+                ctx.updateNodeData(iterator.id, { currentImage: items[i], status: "loading" } as any);
+              } else {
+                ctx.updateNodeData(iterator.id, { currentText: items[i], status: "loading" } as any);
+              }
+
+              // Execute all downstream levels recursively
+              await executeLevelsSequentially(levelIdx + 1, endIndex);
+            }
+
+            ctx.updateNodeData(iterator.id, { status: "complete", currentImage: null, currentText: null } as any);
+            return; // We fully handled all downstream execution inside the loop above!
+          }
+
+          // Normal execution path for level Without Iterators
+          // Execute nodes in batches respecting concurrency limit
+          const batches = chunk(levelNodes, maxConcurrentCalls);
+
+          for (const batch of batches) {
+            if (abortController.signal.aborted || !get().isRunning) break;
+
+            // Update currentNodeIds to show which nodes are executing
+            const batchIds = batch.map((n) => n.id);
+            set({ currentNodeIds: batchIds });
+
+            logger.info('node.execution', `Executing level ${levelIdx} batch`, {
               level: levelIdx,
-              error: failed.reason instanceof Error ? failed.reason.message : String(failed.reason),
+              nodeCount: batch.length,
+              nodeIds: batchIds,
             });
-            abortController.abort();
-            throw failed.reason;
+
+            // Execute batch in parallel
+            const results = await Promise.allSettled(
+              batch.map((node) => executeSingleNode(node, abortController.signal))
+            );
+
+            // Check for failures (fail-fast behavior)
+            const failed = results.find(
+              (r): r is PromiseRejectedResult =>
+                r.status === 'rejected' &&
+                !(r.reason instanceof DOMException && r.reason.name === 'AbortError')
+            );
+
+            if (failed) {
+              // Log the failure and abort remaining executions
+              logger.error('workflow.error', 'Node execution failed in parallel batch', {
+                level: levelIdx,
+                error: failed.reason instanceof Error ? failed.reason.message : String(failed.reason),
+              });
+              abortController.abort();
+              throw failed.reason;
+            }
           }
         }
-      }
+      };
+
+      // Kick off execution using the recursive helper
+      await executeLevelsSequentially(startLevel, levels.length);
 
       // Check if we completed or were aborted
       if (!abortController.signal.aborted && get().isRunning) {

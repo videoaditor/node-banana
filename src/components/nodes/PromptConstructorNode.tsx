@@ -102,11 +102,8 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
   const handleStaticBlur = useCallback(() => {
     setIsEditing(false);
     if (localStaticText !== nodeData.staticText) {
-      // Sync staticText AND outputText so downstream nodes always have a live value
-      // even before the workflow has been explicitly run
       updateNodeData(id, {
         staticText: localStaticText,
-        outputText: localStaticText.trim() || null,
       });
     }
   }, [id, localStaticText, nodeData.staticText, updateNodeData]);
@@ -136,6 +133,61 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
     },
     [id, updateNodeData]
   );
+
+  // Dynamically compute outputText so downstream nodes have access immediately
+  useEffect(() => {
+    if (isEditing) return;
+
+    const inputTexts: string[] = [];
+    for (let i = 1; i <= inputCount; i++) {
+      const handleId = `text_input_${i}`;
+      const edge = edges.find(e => e.target === id && e.targetHandle === handleId);
+      if (edge) {
+        const sourceNode = nodes.find(n => n.id === edge.source);
+        const sourceText = sourceNode
+          ? ((sourceNode.data as Record<string, unknown>).outputText as string)
+          ?? ((sourceNode.data as Record<string, unknown>).prompt as string)
+          ?? null
+          : null;
+        if (sourceText && sourceText.trim()) {
+          inputTexts.push(sourceText.trim());
+        }
+      }
+    }
+
+    // Pass 2: fallback catch-all text edges
+    const seenSourceIds = new Set(
+      edges.filter(e => e.target === id && e.targetHandle?.startsWith('text_input_')).map(e => e.source)
+    );
+    const allIncomingEdges = edges.filter(e => e.target === id);
+    for (const edge of allIncomingEdges) {
+      if (seenSourceIds.has(edge.source)) continue;
+      const th = edge.targetHandle || "";
+      const isTextEdge = th === "text" || th.startsWith("text") || th.includes("prompt") || !th;
+      if (!isTextEdge) continue;
+      const sourceNode = nodes.find(n => n.id === edge.source);
+      if (!sourceNode) continue;
+      const text = ((sourceNode.data as Record<string, unknown>).outputText as string)
+        ?? ((sourceNode.data as Record<string, unknown>).prompt as string)
+        ?? null;
+      if (text && text.trim()) {
+        inputTexts.push(text.trim());
+        seenSourceIds.add(sourceNode.id);
+      }
+    }
+
+    const parts: string[] = [];
+    if (inputTexts.length > 0) parts.push(inputTexts.join("\n\n"));
+    if (localStaticText.trim()) parts.push(localStaticText.trim());
+
+    const assembledText = parts.join("\n\n") || null;
+
+    if (nodeData.outputText !== assembledText) {
+      setTimeout(() => {
+        updateNodeData(id, { outputText: assembledText });
+      }, 0);
+    }
+  }, [edges, nodes, id, inputCount, localStaticText, nodeData.outputText, updateNodeData, isEditing]);
 
   // Build handle style positions (evenly distributed vertically)
   const getHandleStyle = (index: number, total: number): React.CSSProperties => {
@@ -212,8 +264,8 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
                 <div
                   key={handleId}
                   className={`flex items-start gap-1.5 px-1.5 py-1 rounded text-[10px] border ${isConnected
-                      ? 'border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/5'
-                      : 'border-[var(--border-subtle)]/50 bg-transparent'
+                    ? 'border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/5'
+                    : 'border-[var(--border-subtle)]/50 bg-transparent'
                     }`}
                 >
                   <span className={`shrink-0 font-medium ${isConnected ? 'text-[var(--accent-primary)]' : 'text-[var(--text-muted)]'}`}>

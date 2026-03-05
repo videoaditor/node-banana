@@ -22,7 +22,9 @@ interface ProjectMeta {
   placeholderColor: string;
 }
 
-type FilterTab = "all" | "images" | "videos" | "ugc" | "templates";
+type FilterTab = "all" | "favorites" | "templates";
+
+const FAVORITES_STORAGE_KEY = "node-banana-favorites";
 
 export function QuickstartInitialView({
   onNewProject,
@@ -31,14 +33,39 @@ export function QuickstartInitialView({
   onSelectLoad,
   onWorkflowSelected,
 }: QuickstartInitialViewProps) {
-  const [recentProjects, setRecentProjects] = useState<ProjectMeta[]>([]);
   const [allProjects, setAllProjects] = useState<ProjectMeta[]>([]);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [loadingProjectId, setLoadingProjectId] = useState<string | null>(null);
 
   const presets = getAllPresets();
+
+  // Load favorites from local storage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(FAVORITES_STORAGE_KEY);
+      if (stored) {
+        setFavorites(new Set(JSON.parse(stored)));
+      }
+    } catch (e) {
+      console.error("Failed to parse favorites", e);
+    }
+  }, []);
+
+  const toggleFavorite = (e: React.MouseEvent, filename: string) => {
+    e.stopPropagation();
+    setFavorites((prev) => {
+      const newFavs = new Set(prev);
+      if (newFavs.has(filename)) {
+        newFavs.delete(filename);
+      } else {
+        newFavs.add(filename);
+      }
+      localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(Array.from(newFavs)));
+      return newFavs;
+    });
+  };
 
   // Fetch recent projects on mount
   useEffect(() => {
@@ -53,7 +80,6 @@ export function QuickstartInitialView({
 
         if (result.success && result.projects) {
           setAllProjects(result.projects);
-          setRecentProjects(result.projects.slice(0, 5));
         }
       } catch (error) {
         console.error("Failed to fetch projects:", error);
@@ -121,28 +147,6 @@ export function QuickstartInitialView({
     [onWorkflowSelected]
   );
 
-  // Filter projects based on active tab
-  const filteredProjects = allProjects.filter((project) => {
-    if (activeFilter === "all") return true;
-    if (activeFilter === "templates") return false; // Templates shown separately
-    if (activeFilter === "images") {
-      return project.name.toLowerCase().includes("image") ||
-        project.name.toLowerCase().includes("photo") ||
-        project.name.toLowerCase().includes("product");
-    }
-    if (activeFilter === "videos") {
-      return project.name.toLowerCase().includes("video") ||
-        project.name.toLowerCase().includes("sora") ||
-        project.name.toLowerCase().includes("kling");
-    }
-    if (activeFilter === "ugc") {
-      return project.name.toLowerCase().includes("ugc") ||
-        project.name.toLowerCase().includes("ad") ||
-        project.name.toLowerCase().includes("advertorial");
-    }
-    return true;
-  });
-
   const getRelativeTime = (isoDate: string): string => {
     const now = new Date();
     const date = new Date(isoDate);
@@ -157,437 +161,195 @@ export function QuickstartInitialView({
     return date.toLocaleDateString();
   };
 
-  const genWorkflows = [
-    {
-      id: "ugc-pipeline",
-      name: "UGC Pipeline",
-      description: "AI actor + product → full ad video",
-      icon: "M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z",
-      color: "#e85d04",
-      url: "https://gen.aditor.ai/#ugc",
-      tag: "VIDEO",
-      tagColor: "bg-orange-500/20 text-orange-400",
-    },
-    {
-      id: "image-gen",
-      name: "Image Gen",
-      description: "Nano Banana Pro — product & ad images",
-      icon: "M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z",
-      color: "#7c3aed",
-      url: "https://gen.aditor.ai/#image",
-      tag: "IMAGE",
-      tagColor: "bg-violet-500/20 text-violet-400",
-    },
-    {
-      id: "bulk-i2v",
-      name: "Bulk I2V",
-      description: "Batch image-to-video with Kling / Wan",
-      icon: "M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 19.5m9.75-9.75c0 .621-.504 1.125-1.125 1.125H12.75a1.125 1.125 0 01-1.125-1.125v-4.5c0-.621.504-1.125 1.125-1.125h9.75c.621 0 1.125.504 1.125 1.125v4.5z",
-      color: "#0891b2",
-      url: "https://gen.aditor.ai/#bulk",
-      tag: "VIDEO",
-      tagColor: "bg-cyan-500/20 text-cyan-400",
-    },
-    {
-      id: "brand-dna",
-      name: "Brand DNA",
-      description: "Store product refs, characters, brand voice",
-      icon: "M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L9.568 3z M6 6h.008v.008H6V6z",
-      color: "#059669",
-      url: "https://gen.aditor.ai/#brands",
-      tag: "CONFIG",
-      tagColor: "bg-emerald-500/20 text-emerald-400",
-    },
-    {
-      id: "scorecard",
-      name: "Brand Scorecard",
-      description: "Pipeline health, editor dispatch, brand status",
-      icon: "M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z",
-      color: "#d97706",
-      url: "https://scorecard.aditor.ai",
-      tag: "ADMIN",
-      tagColor: "bg-yellow-500/20 text-yellow-400",
-    },
-  ];
+  const filteredProjects = allProjects.filter((project) => {
+    if (activeFilter === "favorites") {
+      return favorites.has(project.filename);
+    }
+    return true;
+  });
 
   return (
-    <div className="min-h-screen flex flex-col p-8 md:p-12 lg:p-16" style={{ background: 'radial-gradient(ellipse at top left, rgba(74,144,217,0.06) 0%, transparent 50%)' }}>
-      {/* Section 1 — Hero Row */}
-      <div className="mb-12">
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
-          {/* Left: Hero Text + CTA */}
-          <div className="flex-1 flex flex-col gap-6">
-            <div>
-              <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 leading-tight">
-                What will you create today?
-              </h1>
-              <p className="text-lg text-[var(--text-secondary)]">
-                Build AI image workflows by connecting nodes
-              </p>
-            </div>
-
-            <button
-              onClick={onNewProject}
-              className="group inline-flex items-center gap-3 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 w-fit hover:-translate-y-[1px]"
-              style={{
-                background: 'var(--accent-primary)',
-                boxShadow: '0 4px 24px rgba(74, 144, 217, 0.3), 0 0 0 1px rgba(74, 144, 217, 0.2)',
-              }}
-            >
-              New Project
-              <svg
-                className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                />
-              </svg>
-            </button>
+    <div className="min-h-screen flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] font-mono p-6 md:p-10 selection:bg-[var(--accent-primary)] selection:text-white">
+      {/* Top Section - Welcome & Actions */}
+      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 bg-[var(--node-success)] rounded-full animate-pulse"></div>
+            <span className="text-xs text-[var(--node-success)] uppercase tracking-wider">System Ready</span>
           </div>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">
+            NODE_TERMINAL
+          </h1>
+          <p className="text-xs text-[var(--text-muted)] uppercase tracking-widest">
+            Awaiting Command Input // Select or Initialize Workflow
+          </p>
+        </div>
 
-          {/* Right: Recent Workflows Carousel */}
-          <div className="flex-1 w-full">
-            <h3 className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-[0.12em] mb-4 font-['DM_Mono',monospace]">
-              Recent Workflows
-            </h3>
-
-            {isLoadingProjects ? (
-              <div className="flex items-center justify-center py-12">
-                <svg
-                  className="w-6 h-6 text-[var(--text-muted)] animate-spin"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-              </div>
-            ) : (
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-[var(--bg-surface)] scrollbar-track-transparent">
-                {recentProjects.map((project) => (
-                  <button
-                    key={project.filename}
-                    onClick={() => handleLoadProject(project)}
-                    disabled={loadingProjectId !== null}
-                    className="group flex-shrink-0 w-48 border border-[var(--border-subtle)] rounded-lg overflow-hidden transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-[1px]"
-                    style={{
-                      background: 'rgba(28, 30, 36, 0.5)',
-                      backdropFilter: 'blur(12px)',
-                    }}
-                  >
-                    {/* Thumbnail */}
-                    <div className="w-full h-32 overflow-hidden bg-[var(--bg-base)]">
-                      {project.previewDataUrl ? (
-                        <img
-                          src={project.previewDataUrl!}
-                          alt={project.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div
-                          className="w-full h-full flex items-center justify-center text-white text-xs font-medium"
-                          style={{
-                            background: `linear-gradient(135deg, ${project.placeholderColor}, ${project.placeholderColor}99)`,
-                          }}
-                        >
-
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Info */}
-                    <div className="p-3 text-left">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="text-sm font-medium text-[var(--text-primary)] truncate group-hover:text-white transition-all duration-[120ms]">
-                          {project.name}
-                        </h4>
-                        <svg
-                          className="w-4 h-4 text-[var(--text-muted)] group-hover:text-white group-hover:translate-x-0.5 transition-all flex-shrink-0 ml-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                          />
-                        </svg>
-                      </div>
-                      <p className="text-xs text-[var(--text-muted)]">
-                        {getRelativeTime(project.modifiedAt)}
-                      </p>
-                    </div>
-                  </button>
-                ))}
-
-                {/* Browse All Card */}
-                {recentProjects.length < 5 && (
-                  <button
-                    onClick={() => setIsExpanded(true)}
-                    className="group flex-shrink-0 w-48 bg-[var(--bg-elevated)]/30 hover:bg-[var(--bg-elevated)]/50 border border-[var(--border-subtle)] border-dashed hover:border-[var(--border-subtle)] rounded-lg overflow-hidden transition-all flex flex-col items-center justify-center h-[180px]"
-                  >
-                    <svg
-                      className="w-8 h-8 text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] mb-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
-                      />
-                    </svg>
-                    <span className="text-sm font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-secondary)]">
-                      Browse all →
-                    </span>
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onNewProject}
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border border-[var(--accent-primary)]/50 rounded-sm text-sm font-medium transition-colors"
+          >
+            <span className="text-lg leading-none">+</span> [INIT] New Workflow
+          </button>
+          <button
+            onClick={onSelectVibe}
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-white border border-[var(--border-subtle)] rounded-sm text-sm font-medium transition-colors"
+          >
+            [PROMPT] AI Wizard
+          </button>
+          <button
+            onClick={onSelectLoad}
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-white border border-[var(--border-subtle)] rounded-sm text-sm font-medium transition-colors"
+          >
+            [LOAD] JSON
+          </button>
         </div>
       </div>
 
-      {/* Section 2 — Gen Workflows Row */}
-      <div className="mb-10">
-        <h3 className="text-sm font-medium text-neutral-400 uppercase tracking-wider mb-4">
-          Gen Workflows
-        </h3>
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent">
-          {genWorkflows.map((wf) => (
-            <a
-              key={wf.id}
-              href={wf.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex-shrink-0 w-48 bg-neutral-800/50 hover:bg-neutral-800 border border-neutral-700 hover:border-neutral-600 rounded-lg overflow-hidden transition-all"
-            >
-              {/* Color strip + icon */}
-              <div
-                className="w-full h-24 flex items-center justify-center"
-                style={{ background: `linear-gradient(135deg, ${wf.color}22, ${wf.color}44)` }}
-              >
-                <svg
-                  className="w-10 h-10 transition-transform group-hover:scale-110"
-                  style={{ color: wf.color }}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d={wf.icon} />
-                </svg>
-              </div>
+      {/* Main Content Area - Split Layout */}
+      <div className="flex-1 flex flex-col border border-[var(--border-subtle)] bg-[var(--bg-elevated)] rounded-sm overflow-hidden">
 
-              {/* Info */}
-              <div className="p-3">
-                <div className="flex items-center justify-between mb-1">
-                  <h4 className="text-sm font-medium text-neutral-200 truncate group-hover:text-white transition-colors">
-                    {wf.name}
-                  </h4>
-                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0 ml-1 ${wf.tagColor}`}>
-                    {wf.tag}
-                  </span>
-                </div>
-                <p className="text-xs text-neutral-500 line-clamp-2 group-hover:text-neutral-400 transition-colors">
-                  {wf.description}
-                </p>
-              </div>
-            </a>
+        {/* Directory Navigator (Tabs) */}
+        <div className="flex bg-[var(--bg-base)] border-b border-[var(--border-subtle)] px-2 pt-2 gap-1 overflow-x-auto shrink-0">
+          {(["all", "favorites", "templates"] as FilterTab[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveFilter(tab)}
+              className={`px-4 py-2 text-xs uppercase tracking-wider font-medium border-t border-x rounded-t transition-colors whitespace-nowrap ${activeFilter === tab
+                ? "bg-[var(--bg-elevated)] text-[var(--accent-primary)] border-[var(--border-subtle)]"
+                : "bg-transparent text-[var(--text-muted)] border-transparent hover:text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]/50"
+                }`}
+            >
+              /dir/{tab}
+            </button>
           ))}
         </div>
-      </div>
 
-      {/* Section 3 — Browse All Workflows (Expandable) */}
-      {isExpanded && (
-        <div className="border-t border-[var(--border-subtle)] pt-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-white">Browse All Workflows</h2>
-            <button
-              onClick={() => setIsExpanded(false)}
-              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms]"
-            >
-              Collapse ↑
-            </button>
-          </div>
+        {/* List Content */}
+        <div className="flex-1 p-4 overflow-y-auto">
+          {isLoadingProjects ? (
+            <div className="flex items-center gap-3 text-[var(--text-muted)] p-4 text-sm">
+              <span className="w-2 h-4 bg-[var(--text-muted)] animate-pulse"></span>
+              Scanning file system...
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[10px] text-[var(--text-muted)] uppercase tracking-widest border-b border-[var(--border-subtle)]/50 mb-2">
+                <div className="col-span-1 text-center">Fav</div>
+                <div className="col-span-1 text-center">Data</div>
+                <div className="col-span-5">Filename</div>
+                <div className="col-span-2 text-right">Nodes</div>
+                <div className="col-span-3 text-right">Last Modified</div>
+              </div>
 
-          {/* Filter Tabs */}
-          <div className="flex gap-2 mb-6 border-b border-[var(--border-subtle)] pb-2">
-            {(["all", "images", "videos", "ugc", "templates"] as FilterTab[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveFilter(tab)}
-                className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-all duration-[120ms] ${activeFilter === tab
-                    ? "bg-[var(--bg-elevated)] text-white border-b-2 border-[var(--accent-primary)]"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                  }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          {/* Content Grid */}
-          {activeFilter === "templates" ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {presets.map((preset) => (
-                <button
-                  key={preset.id}
-                  onClick={() => handleLoadTemplate(preset.id)}
-                  disabled={loadingProjectId !== null}
-                  className="group bg-[var(--bg-elevated)]/50 hover:bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-subtle)] rounded-lg overflow-hidden transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {/* Thumbnail Placeholder */}
-                  <div className="w-full h-40 bg-[var(--bg-base)] flex items-center justify-center">
-                    <svg
-                      className="w-12 h-12 text-[var(--text-muted)]"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d={preset.icon}
-                      />
-                    </svg>
-                  </div>
-
-                  {/* Info */}
-                  <div className="p-4">
-                    <h4 className="text-sm font-medium text-[var(--text-primary)] group-hover:text-white transition-all duration-[120ms] mb-1">
-                      {preset.name}
-                    </h4>
-                    <p className="text-xs text-[var(--text-muted)] line-clamp-2">
-                      {preset.description}
-                    </p>
-                    <div className="flex items-center gap-2 mt-2">
+              {activeFilter === "templates" ? (
+                presets.map((preset) => (
+                  <button
+                    key={preset.id}
+                    onClick={() => handleLoadTemplate(preset.id)}
+                    disabled={loadingProjectId !== null}
+                    className="group grid grid-cols-12 gap-4 items-center px-4 py-3 bg-[var(--bg-surface)]/30 hover:bg-[var(--bg-surface)] border border-transparent hover:border-[var(--border-subtle)] rounded transition-all text-left disabled:opacity-50"
+                  >
+                    <div className="col-span-1 flex justify-center text-[var(--text-muted)]">
+                      -
+                    </div>
+                    <div className="col-span-1 flex justify-center">
+                      <div className="w-8 h-8 flex items-center justify-center bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-sm text-[var(--text-secondary)] group-hover:text-[var(--accent-primary)] transition-colors">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d={preset.icon} />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="col-span-5 flex flex-col truncate pr-4">
+                      <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-primary)] transition-colors truncate">
+                        {preset.name}
+                      </span>
+                      <span className="text-[10px] text-[var(--text-muted)] truncate mt-0.5">
+                        {preset.description}
+                      </span>
+                    </div>
+                    <div className="col-span-2 flex items-center justify-end gap-1 flex-wrap">
                       {preset.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-0.5 text-[10px] font-medium bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] rounded"
-                        >
+                        <span key={tag} className="text-[9px] px-1.5 py-0.5 border border-[var(--border-subtle)] rounded-sm text-[var(--text-secondary)]">
                           {tag}
                         </span>
                       ))}
                     </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredProjects.map((project) => (
-                <button
-                  key={project.filename}
-                  onClick={() => handleLoadProject(project)}
-                  disabled={loadingProjectId !== null}
-                  className="group bg-[var(--bg-elevated)]/50 hover:bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-subtle)] rounded-lg overflow-hidden transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {/* Thumbnail */}
-                  <div className="w-full h-40 bg-[var(--bg-base)] overflow-hidden">
-                    {project.previewDataUrl ? (
-                      <img
-                        src={project.previewDataUrl!}
-                        alt={project.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div
-                        className="w-full h-full flex items-center justify-center text-white text-sm font-medium"
-                        style={{
-                          background: `linear-gradient(135deg, ${project.placeholderColor}, ${project.placeholderColor}99)`,
-                        }}
-                      >
-
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="p-4">
-                    <h4 className="text-sm font-medium text-[var(--text-primary)] group-hover:text-white transition-all duration-[120ms] mb-1 truncate">
-                      {project.name}
-                    </h4>
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-[var(--text-muted)]">
-                        {getRelativeTime(project.modifiedAt)}
-                      </p>
-                      <span className="text-xs text-[var(--text-muted)]">
-
-                      </span>
+                    <div className="col-span-3 text-right text-xs text-[var(--text-muted)]">
+                      Built-in
                     </div>
+                  </button>
+                ))
+              ) : (
+                filteredProjects.length === 0 ? (
+                  <div className="p-8 text-center text-sm text-[var(--text-muted)]">
+                    No workflows found in this directory.
                   </div>
-                </button>
-              ))}
+                ) : (
+                  filteredProjects.map((project) => {
+                    const isFav = favorites.has(project.filename);
+                    return (
+                      <button
+                        key={project.filename}
+                        onClick={() => handleLoadProject(project)}
+                        disabled={loadingProjectId !== null}
+                        className="group grid grid-cols-12 gap-4 items-center px-4 py-3 bg-[var(--bg-surface)]/30 hover:bg-[var(--bg-surface)] border border-transparent hover:border-[var(--border-subtle)] rounded transition-all text-left disabled:opacity-50"
+                      >
+                        {/* Fav Toggle */}
+                        <div
+                          className="col-span-1 flex justify-center cursor-pointer p-2"
+                          onClick={(e) => toggleFavorite(e, project.filename)}
+                        >
+                          <svg
+                            className={`w-4 h-4 transition-colors ${isFav ? "text-yellow-500" : "text-[var(--text-muted)] hover:text-yellow-500/50"}`}
+                            fill={isFav ? "currentColor" : "none"}
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={1.5}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                          </svg>
+                        </div>
+
+                        {/* Thumbnail */}
+                        <div className="col-span-1 flex justify-center">
+                          <div className="w-8 h-8 rounded-sm overflow-hidden bg-[var(--bg-base)] border border-[var(--border-subtle)]">
+                            {project.previewDataUrl ? (
+                              <img src={project.previewDataUrl!} alt="" className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all" />
+                            ) : (
+                              <div className="w-full h-full" style={{ backgroundColor: project.placeholderColor, opacity: 0.3 }} />
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Name */}
+                        <div className="col-span-5 flex flex-col truncate pr-4">
+                          <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-primary)] transition-colors truncate">
+                            {project.name}
+                          </span>
+                          <span className="text-[10px] text-[var(--text-muted)] truncate mt-0.5 font-mono">
+                            {project.filename}
+                          </span>
+                        </div>
+
+                        {/* Nodes count */}
+                        <div className="col-span-2 text-right text-xs text-[var(--text-muted)] font-mono">
+                          {project.nodeCount} <span className="text-[10px]">obj</span>
+                        </div>
+
+                        {/* Modified */}
+                        <div className="col-span-3 text-right text-xs text-[var(--text-muted)] font-mono flex flex-col justify-end items-end">
+                          <span>{getRelativeTime(project.modifiedAt)}</span>
+                        </div>
+                      </button>
+                    );
+                  })
+                )
+              )}
             </div>
           )}
         </div>
-      )}
-
-      {/* Bottom Row — Secondary Actions */}
-      <div className="mt-auto pt-12 flex items-center gap-6 text-sm">
-        <button
-          onClick={onSelectVibe}
-          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
-            />
-          </svg>
-          Prompt a workflow (Beta)
-        </button>
-
-        <button
-          onClick={onSelectLoad}
-          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-            />
-          </svg>
-          Import .json file
-        </button>
       </div>
     </div>
   );
