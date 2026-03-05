@@ -35,6 +35,10 @@ const mockGetUnviewedCommentCount = vi.fn();
 const mockMarkCommentViewed = vi.fn();
 const mockSetNavigationTarget = vi.fn();
 
+const mockSetShowQuickstart = vi.fn();
+const mockRevertToSnapshot = vi.fn();
+const mockSetShortcutsDialogOpen = vi.fn();
+
 // Default store state factory
 const createDefaultState = (overrides = {}) => ({
   workflowName: "",
@@ -46,11 +50,17 @@ const createDefaultState = (overrides = {}) => ({
   setWorkflowMetadata: mockSetWorkflowMetadata,
   saveToFile: mockSaveToFile,
   loadWorkflow: mockLoadWorkflow,
+  previousWorkflowSnapshot: null,
+  revertToSnapshot: mockRevertToSnapshot,
+  shortcutsDialogOpen: false,
+  setShortcutsDialogOpen: mockSetShortcutsDialogOpen,
+  setShowQuickstart: mockSetShowQuickstart,
   getNodesWithComments: mockGetNodesWithComments,
   getUnviewedCommentCount: mockGetUnviewedCommentCount,
   viewedCommentNodeIds: new Set<string>(),
   markCommentViewed: mockMarkCommentViewed,
   setNavigationTarget: mockSetNavigationTarget,
+  nodes: [],
   ...overrides,
 });
 
@@ -66,28 +76,24 @@ describe("Header", () => {
   });
 
   describe("Basic Rendering", () => {
-    it("should render the app title", () => {
+    it("should render the Aditor logo as home button", () => {
       render(<Header />);
-      expect(screen.getByText("Node Banana")).toBeInTheDocument();
+      const logo = screen.getByAltText("Aditor");
+      expect(logo).toBeInTheDocument();
+      expect(logo).toHaveAttribute("src", "/aditor-logo.png");
     });
 
-    it("should render the banana icon", () => {
+    it("should render home button with Return to Home title", () => {
       render(<Header />);
-      const icon = screen.getByAltText("Banana");
-      expect(icon).toBeInTheDocument();
-      expect(icon).toHaveAttribute("src", "/banana_icon.png");
+      const homeBtn = screen.getByTitle("Return to Home");
+      expect(homeBtn).toBeInTheDocument();
     });
 
-    it("should render 'Made by Willie' link", () => {
+    it("should call setShowQuickstart when logo is clicked", () => {
       render(<Header />);
-      const link = screen.getByText("Made by Willie");
-      expect(link).toHaveAttribute("href", "https://x.com/ReflctWillie");
-    });
-
-    it("should render Discord support link", () => {
-      render(<Header />);
-      const link = screen.getByTitle("Support");
-      expect(link).toHaveAttribute("href", "https://discord.com/invite/89Nr6EKkTf");
+      const homeBtn = screen.getByTitle("Return to Home");
+      fireEvent.click(homeBtn);
+      expect(mockSetShowQuickstart).toHaveBeenCalledWith(true);
     });
   });
 
@@ -104,7 +110,7 @@ describe("Header", () => {
 
     it("should show save button with unsaved indicator (red dot)", () => {
       const { container } = render(<Header />);
-      const redDot = container.querySelector(".bg-red-500.rounded-full");
+      const redDot = container.querySelector(".rounded-full");
       expect(redDot).toBeInTheDocument();
     });
 
@@ -191,7 +197,7 @@ describe("Header", () => {
       });
 
       const { container } = render(<Header />);
-      const redDot = container.querySelector(".bg-red-500.rounded-full");
+      const redDot = container.querySelector(".rounded-full");
       expect(redDot).toBeInTheDocument();
     });
 

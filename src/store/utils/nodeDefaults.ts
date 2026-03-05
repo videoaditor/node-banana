@@ -266,6 +266,8 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
     case "imageIterator":
       return {
         inputImages: [],
+        sourceMode: "files",
+        localImages: [],
         driveUrl: "",
         mode: "all",
         randomCount: 3,

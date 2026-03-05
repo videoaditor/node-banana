@@ -7,6 +7,7 @@ describe("QuickstartInitialView", () => {
   const mockOnSelectTemplates = vi.fn();
   const mockOnSelectVibe = vi.fn();
   const mockOnSelectLoad = vi.fn();
+  const mockOnWorkflowSelected = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -17,17 +18,19 @@ describe("QuickstartInitialView", () => {
   });
 
   describe("Basic Rendering", () => {
-    it("should render the Node Banana title and logo", () => {
+    it("should render the Aditors Gas Station headline and logo", () => {
       render(
         <QuickstartInitialView
           onNewProject={mockOnNewProject}
           onSelectTemplates={mockOnSelectTemplates}
           onSelectVibe={mockOnSelectVibe}
           onSelectLoad={mockOnSelectLoad}
+          onWorkflowSelected={mockOnWorkflowSelected}
         />
       );
 
-      expect(screen.getByText("Node Banana")).toBeInTheDocument();
+      expect(screen.getByText("Aditors Gas Station")).toBeInTheDocument();
+      expect(screen.getByText(/Welcome to/)).toBeInTheDocument();
       expect(screen.getByAltText("")).toBeInTheDocument(); // Logo image
     });
 
@@ -38,44 +41,29 @@ describe("QuickstartInitialView", () => {
           onSelectTemplates={mockOnSelectTemplates}
           onSelectVibe={mockOnSelectVibe}
           onSelectLoad={mockOnSelectLoad}
+          onWorkflowSelected={mockOnWorkflowSelected}
         />
       );
 
       expect(
-        screen.getByText(/node based workflow editor for AI image generation/i)
+        screen.getByText(/node.based workflow editor for AI image/i)
       ).toBeInTheDocument();
     });
 
-    it("should render all four option buttons", () => {
+    it("should render action buttons", () => {
       render(
         <QuickstartInitialView
           onNewProject={mockOnNewProject}
           onSelectTemplates={mockOnSelectTemplates}
           onSelectVibe={mockOnSelectVibe}
           onSelectLoad={mockOnSelectLoad}
+          onWorkflowSelected={mockOnWorkflowSelected}
         />
       );
 
-      expect(screen.getByText("New project")).toBeInTheDocument();
-      expect(screen.getByText("Load workflow")).toBeInTheDocument();
-      expect(screen.getByText("Templates")).toBeInTheDocument();
-      expect(screen.getByText("Prompt a workflow")).toBeInTheDocument();
-    });
-
-    it("should render option descriptions", () => {
-      render(
-        <QuickstartInitialView
-          onNewProject={mockOnNewProject}
-          onSelectTemplates={mockOnSelectTemplates}
-          onSelectVibe={mockOnSelectVibe}
-          onSelectLoad={mockOnSelectLoad}
-        />
-      );
-
-      expect(screen.getByText("Start a new workflow")).toBeInTheDocument();
-      expect(screen.getByText("Open existing file")).toBeInTheDocument();
-      expect(screen.getByText("Pre-built workflows")).toBeInTheDocument();
-      expect(screen.getByText("Prompt a workflow")).toBeInTheDocument();
+      expect(screen.getByText("New Workflow")).toBeInTheDocument();
+      expect(screen.getByText("AI Wizard")).toBeInTheDocument();
+      expect(screen.getByText("Load JSON")).toBeInTheDocument();
     });
   });
 
@@ -87,25 +75,13 @@ describe("QuickstartInitialView", () => {
           onSelectTemplates={mockOnSelectTemplates}
           onSelectVibe={mockOnSelectVibe}
           onSelectLoad={mockOnSelectLoad}
+          onWorkflowSelected={mockOnWorkflowSelected}
         />
       );
 
-      fireEvent.click(screen.getByText("New project"));
+      fireEvent.click(screen.getByText("New Workflow"));
 
       expect(mockOnNewProject).toHaveBeenCalledTimes(1);
-    });
-
-    it("should display correct description for new project", () => {
-      render(
-        <QuickstartInitialView
-          onNewProject={mockOnNewProject}
-          onSelectTemplates={mockOnSelectTemplates}
-          onSelectVibe={mockOnSelectVibe}
-          onSelectLoad={mockOnSelectLoad}
-        />
-      );
-
-      expect(screen.getByText("Start a new workflow")).toBeInTheDocument();
     });
   });
 
@@ -117,33 +93,17 @@ describe("QuickstartInitialView", () => {
           onSelectTemplates={mockOnSelectTemplates}
           onSelectVibe={mockOnSelectVibe}
           onSelectLoad={mockOnSelectLoad}
+          onWorkflowSelected={mockOnWorkflowSelected}
         />
       );
 
-      fireEvent.click(screen.getByText("Load workflow"));
+      fireEvent.click(screen.getByText("Load JSON"));
 
       expect(mockOnSelectLoad).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe("Templates Option", () => {
-    it("should call onSelectTemplates when clicked", () => {
-      render(
-        <QuickstartInitialView
-          onNewProject={mockOnNewProject}
-          onSelectTemplates={mockOnSelectTemplates}
-          onSelectVibe={mockOnSelectVibe}
-          onSelectLoad={mockOnSelectLoad}
-        />
-      );
-
-      fireEvent.click(screen.getByText("Templates"));
-
-      expect(mockOnSelectTemplates).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe("Prompt a Workflow Option", () => {
+  describe("AI Wizard Option", () => {
     it("should call onSelectVibe when clicked", () => {
       render(
         <QuickstartInitialView
@@ -151,95 +111,31 @@ describe("QuickstartInitialView", () => {
           onSelectTemplates={mockOnSelectTemplates}
           onSelectVibe={mockOnSelectVibe}
           onSelectLoad={mockOnSelectLoad}
+          onWorkflowSelected={mockOnWorkflowSelected}
         />
       );
 
-      fireEvent.click(screen.getByText("Prompt a workflow"));
+      fireEvent.click(screen.getByText("AI Wizard"));
 
       expect(mockOnSelectVibe).toHaveBeenCalledTimes(1);
     });
-
-    it("should display Beta badge on prompt option", () => {
-      render(
-        <QuickstartInitialView
-          onNewProject={mockOnNewProject}
-          onSelectTemplates={mockOnSelectTemplates}
-          onSelectVibe={mockOnSelectVibe}
-          onSelectLoad={mockOnSelectLoad}
-        />
-      );
-
-      expect(screen.getByText("Beta")).toBeInTheDocument();
-    });
   });
 
-  describe("External Links", () => {
-    it("should render Discord link with correct URL", () => {
+  describe("Tabs", () => {
+    it("should render tab navigation", () => {
       render(
         <QuickstartInitialView
           onNewProject={mockOnNewProject}
           onSelectTemplates={mockOnSelectTemplates}
           onSelectVibe={mockOnSelectVibe}
           onSelectLoad={mockOnSelectLoad}
+          onWorkflowSelected={mockOnWorkflowSelected}
         />
       );
 
-      const discordLink = screen.getByText("Discord").closest("a");
-      expect(discordLink).toHaveAttribute(
-        "href",
-        "https://discord.com/invite/89Nr6EKkTf"
-      );
-      expect(discordLink).toHaveAttribute("target", "_blank");
-      expect(discordLink).toHaveAttribute("rel", "noopener noreferrer");
-    });
-
-    it("should render Twitter/X link with correct URL", () => {
-      render(
-        <QuickstartInitialView
-          onNewProject={mockOnNewProject}
-          onSelectTemplates={mockOnSelectTemplates}
-          onSelectVibe={mockOnSelectVibe}
-          onSelectLoad={mockOnSelectLoad}
-        />
-      );
-
-      const twitterLink = screen.getByText("Willie").closest("a");
-      expect(twitterLink).toHaveAttribute("href", "https://x.com/ReflctWillie");
-      expect(twitterLink).toHaveAttribute("target", "_blank");
-      expect(twitterLink).toHaveAttribute("rel", "noopener noreferrer");
-    });
-
-    it("should render docs link", () => {
-      render(
-        <QuickstartInitialView
-          onNewProject={mockOnNewProject}
-          onSelectTemplates={mockOnSelectTemplates}
-          onSelectVibe={mockOnSelectVibe}
-          onSelectLoad={mockOnSelectLoad}
-        />
-      );
-
-      const docsLink = screen.getByText("Docs").closest("a");
-      expect(docsLink).toHaveAttribute("href", "https://node-banana-docs.vercel.app/");
-      expect(docsLink).toHaveAttribute("target", "_blank");
-      expect(docsLink).toHaveAttribute("rel", "noopener noreferrer");
-    });
-  });
-
-  describe("Accessibility", () => {
-    it("should have all buttons as interactive button elements", () => {
-      render(
-        <QuickstartInitialView
-          onNewProject={mockOnNewProject}
-          onSelectTemplates={mockOnSelectTemplates}
-          onSelectVibe={mockOnSelectVibe}
-          onSelectLoad={mockOnSelectLoad}
-        />
-      );
-
-      const buttons = screen.getAllByRole("button");
-      // Should have 4 option buttons
-      expect(buttons.length).toBe(4);
+      expect(screen.getByText("All Workflows")).toBeInTheDocument();
+      expect(screen.getByText("Favorites")).toBeInTheDocument();
+      expect(screen.getByText("Templates")).toBeInTheDocument();
     });
   });
 });

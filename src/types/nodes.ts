@@ -340,6 +340,8 @@ export interface GLBViewerNodeData extends BaseNodeData {
 export interface ImageIteratorNodeData extends BaseNodeData {
   inputImages: string[];       // Images from connected nodes
   inputImageRefs?: string[];   // External image references for storage optimization
+  sourceMode: "files" | "drive"; // Which source is active (default: files)
+  localImages: string[];       // Base64 data URLs for drag-and-dropped images  
   driveUrl: string;            // Google Drive folder link (not wired up yet)
   mode: "all" | "random";      // Process all images or random subset
   randomCount: number;         // When mode is random, how many to process
