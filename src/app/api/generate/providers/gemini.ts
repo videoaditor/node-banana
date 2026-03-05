@@ -15,12 +15,12 @@ import { GenerateResponse, ModelType } from "@/types";
 export const MODEL_MAP: Record<string, string> = {
   "nano-banana": "gemini-2.5-flash-image",                    // Flash-quality image generation
   "nano-banana-2": "gemini-3.1-flash-image-preview",          // Nano Banana 2 (Gemini 3.1 Flash)
-  "nano-banana-pro": "gemini-3-pro-image-preview",            // Pro-quality image generation
+  "nano-banana-pro": "gemini-3.1-flash-image-preview",         // Pro remapped to 3.1 Flash (Pro model times out behind Cloudflare)
   "veo-2.0-generate-video-001": "veo-2.0-generate-video-001",
   // Allow direct Gemini model IDs to pass through
   "gemini-2.5-flash-image": "gemini-2.5-flash-image",
   "gemini-2.5-flash-preview-image-generation": "gemini-2.5-flash-image", // Legacy alias
-  "gemini-2.0-flash-exp": "gemini-3-pro-image-preview",                  // Deprecated → Pro
+  "gemini-2.0-flash-exp": "gemini-3.1-flash-image-preview",               // Deprecated → 3.1 Flash
   "gemini-2.0-flash-exp-image-generation": "gemini-2.0-flash-exp-image-generation",
   "gemini-3-pro-image-preview": "gemini-3-pro-image-preview",
   "gemini-3.1-flash-image-preview": "gemini-3.1-flash-image-preview",
