@@ -242,7 +242,22 @@ export async function generateWithFalQueue(
 ): Promise<GenerationOutput> {
   console.log(`[API:${requestId}] fal.ai queue generation - Model: ${input.model.id}, Images: ${input.images?.length || 0}, Prompt: ${input.prompt.length} chars`);
 
-  const modelId = input.model.id;
+  // Auto-fallback: if model ends with /edit but no images are provided, strip /edit suffix
+  // This prevents 422 errors from fal.ai edit endpoints that require image_urls
+  const hasAnyImages = (input.images && input.images.length > 0) ||
+    (input.dynamicInputs && Object.keys(input.dynamicInputs).some(key =>
+      (key.includes('image') || key.includes('frame')) &&
+      input.dynamicInputs![key] !== null &&
+      input.dynamicInputs![key] !== undefined &&
+      input.dynamicInputs![key] !== ''
+    ));
+
+  let modelId = input.model.id;
+  if (modelId.endsWith('/edit') && !hasAnyImages) {
+    const baseModelId = modelId.replace(/\/edit$/, '');
+    console.log(`[API:${requestId}] No images provided for /edit model — falling back to base model: ${baseModelId}`);
+    modelId = baseModelId;
+  }
   const hasDynamicInputs = input.dynamicInputs && Object.keys(input.dynamicInputs).length > 0;
   console.log(`[API:${requestId}] Dynamic inputs: ${hasDynamicInputs ? Object.keys(input.dynamicInputs!).join(", ") : "none"}, API key: ${apiKey ? "yes" : "no"}`);
 
