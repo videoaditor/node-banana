@@ -1,5 +1,5 @@
 import { WorkflowFile } from "@/store/workflowStore";
-import { NodeType, WorkflowNodeData } from "@/types";
+import { NodeType, WorkflowNodeData, ImageIteratorNodeData } from "@/types";
 
 interface ValidationError {
   path: string;
@@ -355,13 +355,15 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
     case "imageIterator":
       return {
         inputImages: [],
+        sourceMode: "files",
+        localImages: [],
         driveUrl: "",
         mode: "all",
         randomCount: 3,
         imageInputHandles: 2,
         status: "idle",
         error: null,
-      };
+      } satisfies ImageIteratorNodeData;
     case "textIterator":
       return {
         inputText: null,
