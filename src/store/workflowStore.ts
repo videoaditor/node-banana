@@ -155,6 +155,8 @@ interface WorkflowStore {
   setViewMode: (mode: "edit" | "app") => void;
   openModalCount: number;
   isModalOpen: boolean;
+  isDrawingMode: boolean;
+  setDrawingMode: (mode: boolean) => void;
   showQuickstart: boolean;
   incrementModalCount: () => void;
   decrementModalCount: () => void;
@@ -324,6 +326,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   viewMode: "edit" as "edit" | "app",
   openModalCount: 0,
   isModalOpen: false,
+  isDrawingMode: false,
   showQuickstart: true,
   isRunning: false,
   currentNodeIds: [],  // Changed from currentNodeId for parallel execution
@@ -392,6 +395,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   setViewMode: (mode: "edit" | "app") => {
     set({ viewMode: mode });
+  },
+
+  setDrawingMode: (mode: boolean) => {
+    set({ isDrawingMode: mode });
   },
 
   setShowQuickstart: (show: boolean) => {

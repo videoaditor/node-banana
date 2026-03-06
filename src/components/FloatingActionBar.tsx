@@ -180,6 +180,8 @@ export function FloatingActionBar() {
     setModelSearchOpen,
     modelSearchOpen,
     modelSearchProvider,
+    isDrawingMode,
+    setDrawingMode,
   } = useWorkflowStore();
 
   // Get display text for running nodes
@@ -266,6 +268,21 @@ export function FloatingActionBar() {
         <GenerateComboButton />
         <NodeButton type="output" label="Output" />
 
+        {/* Draw mode toggle */}
+        <div className="w-px h-5 bg-[var(--border-subtle)] mx-1.5" />
+        <button
+          onClick={() => setDrawingMode(!isDrawingMode)}
+          title={isDrawingMode ? "Exit drawing mode (Esc)" : "Freehand pen & arrows"}
+          className={`p-1.5 rounded transition-all duration-[120ms] ${isDrawingMode
+            ? "bg-orange-500/15 text-orange-400"
+            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
+            }`}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z" />
+          </svg>
+        </button>
+
         {/* Browse models button */}
         <div className="w-px h-5 bg-[var(--border-subtle)] mx-1.5" />
         <button
@@ -304,10 +321,10 @@ export function FloatingActionBar() {
             disabled={!valid && !isRunning}
             title={!valid ? errors.join("\n") : isRunning ? "Stop" : "Run"}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium font-['DM_Mono',monospace] transition-all duration-[120ms] ${isRunning
-                ? "bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-primary)]/80 rounded"
-                : valid
-                  ? "bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-primary)]/80 rounded-l"
-                  : "bg-[var(--bg-surface)] text-[var(--text-muted)] cursor-not-allowed rounded"
+              ? "bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-primary)]/80 rounded"
+              : valid
+                ? "bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-primary)]/80 rounded-l"
+                : "bg-[var(--bg-surface)] text-[var(--text-muted)] cursor-not-allowed rounded"
               }`}
           >
             {isRunning ? (
@@ -387,8 +404,8 @@ export function FloatingActionBar() {
                 onClick={handleRunFromSelected}
                 disabled={!selectedNode}
                 className={`w-full px-3 py-2 text-left text-[11px] font-medium transition-all duration-[120ms] flex items-center gap-2 font-['DM_Mono',monospace] ${selectedNode
-                    ? "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
-                    : "text-[var(--text-muted)] cursor-not-allowed"
+                  ? "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
+                  : "text-[var(--text-muted)] cursor-not-allowed"
                   }`}
                 title={!selectedNode ? "Select a single node first" : undefined}
               >
@@ -401,8 +418,8 @@ export function FloatingActionBar() {
                 onClick={handleRunSelectedOnly}
                 disabled={!selectedNode}
                 className={`w-full px-3 py-2 text-left text-[11px] font-medium transition-all duration-[120ms] flex items-center gap-2 font-['DM_Mono',monospace] ${selectedNode
-                    ? "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
-                    : "text-[var(--text-muted)] cursor-not-allowed"
+                  ? "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
+                  : "text-[var(--text-muted)] cursor-not-allowed"
                   }`}
                 title={!selectedNode ? "Select a single node first" : undefined}
               >
@@ -415,8 +432,8 @@ export function FloatingActionBar() {
                 onClick={handleRunSelectedNodes}
                 disabled={selectedNodes.length === 0}
                 className={`w-full px-3 py-2 text-left text-[11px] font-medium transition-all duration-[120ms] flex items-center gap-2 font-['DM_Mono',monospace] ${selectedNodes.length > 0
-                    ? "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
-                    : "text-[var(--text-muted)] cursor-not-allowed"
+                  ? "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
+                  : "text-[var(--text-muted)] cursor-not-allowed"
                   }`}
                 title={selectedNodes.length === 0 ? "Select one or more nodes first" : `Run ${selectedNodes.length} selected node${selectedNodes.length > 1 ? 's' : ''}`}
               >

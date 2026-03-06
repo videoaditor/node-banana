@@ -60,6 +60,7 @@ import { detectAndSplitGrid } from "@/utils/gridSplitter";
 import { logger } from "@/utils/logger";
 import { WelcomeModal } from "./quickstart";
 import { ProjectSetupModal } from "./ProjectSetupModal";
+import { DrawingOverlay } from "./DrawingOverlay";
 import { ChatPanel } from "./ChatPanel";
 import { EditOperation } from "@/lib/chat/editOperations";
 import { stripBinaryData } from "@/lib/chat/contextBuilder";
@@ -247,7 +248,7 @@ const findScrollableAncestor = (target: HTMLElement, deltaX: number, deltaY: num
 };
 
 export function WorkflowCanvas() {
-  const { nodes, edges, groups, onNodesChange, onEdgesChange, onConnect, addNode, updateNodeData, loadWorkflow, getNodeById, addToGlobalHistory, setNodeGroupId, executeWorkflow, isModalOpen, showQuickstart, setShowQuickstart, navigationTarget, setNavigationTarget, captureSnapshot, applyEditOperations, setWorkflowMetadata, canvasNavigationSettings, setShortcutsDialogOpen } =
+  const { nodes, edges, groups, onNodesChange, onEdgesChange, onConnect, addNode, updateNodeData, loadWorkflow, getNodeById, addToGlobalHistory, setNodeGroupId, createGroup, executeWorkflow, isModalOpen, showQuickstart, setShowQuickstart, navigationTarget, setNavigationTarget, captureSnapshot, applyEditOperations, setWorkflowMetadata, canvasNavigationSettings, setShortcutsDialogOpen, isDrawingMode, setDrawingMode } =
     useWorkflowStore();
   const { screenToFlowPosition, getViewport, zoomIn, zoomOut, setViewport, setCenter } = useReactFlow();
   const { show: showToast } = useToast();
@@ -1799,6 +1800,30 @@ export function WorkflowCanvas() {
               {label}
             </button>
           ))}
+
+          {/* Group option when multiple nodes selected */}
+          {allNodes.filter(n => n.selected).length >= 2 && (
+            <>
+              <div className="mx-3 my-1 h-px" style={{ background: 'linear-gradient(to right, transparent, var(--border-subtle), transparent)' }} />
+              <div className="px-3 pt-0.5 pb-0.5">
+                <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] font-['DM_Mono',monospace]">Selection</span>
+              </div>
+              <button
+                className="w-full text-left px-3 py-1 text-[10px] text-[var(--text-secondary)] hover:bg-[var(--accent-primary)]/10 hover:text-[var(--text-primary)] transition-all duration-[120ms] flex items-center gap-2.5 relative group"
+                onClick={() => {
+                  const selectedIds = allNodes.filter(n => n.selected).map(n => n.id);
+                  createGroup(selectedIds);
+                  setContextMenu(null);
+                }}
+              >
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3.5 bg-[#60a5fa] rounded-r opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]" />
+                <svg className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z" />
+                </svg>
+                Group Selected Nodes
+              </button>
+            </>
+          )}
         </div>
       )}
 
@@ -1946,6 +1971,12 @@ export function WorkflowCanvas() {
           onClose={handleCloseDropMenu}
         />
       )}
+
+      {/* Drawing overlay */}
+      <DrawingOverlay
+        isActive={isDrawingMode}
+        onDeactivate={() => setDrawingMode(false)}
+      />
 
       {/* Multi-select toolbar */}
       <MultiSelectToolbar />
