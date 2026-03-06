@@ -696,74 +696,146 @@ async function fetchWaveSpeedModels(apiKey: string): Promise<ProviderModel[]> {
 
 // ============ Fal.ai Helpers ============
 
-function mapFalCategory(category: string): ModelCapability | null {
-  if (RELEVANT_CATEGORIES.includes(category)) {
-    return category as ModelCapability;
-  }
-  return null;
-}
-
-function isRelevantFalModel(model: FalModel): boolean {
-  return RELEVANT_CATEGORIES.includes(model.metadata.category);
-}
-
-function mapFalModel(model: FalModel): ProviderModel {
-  const capability = mapFalCategory(model.metadata.category);
-
-  return {
-    id: model.endpoint_id,
-    name: model.metadata.display_name,
-    description: model.metadata.description,
+// Curated list of reliable, popular fal.ai models that are proven to work
+const FAL_CURATED_MODELS: ProviderModel[] = [
+  // ============ Image Models ============
+  {
+    id: "fal-ai/flux/dev",
+    name: "FLUX.1 Dev",
+    description: "High-quality text-to-image model from Black Forest Labs. Great balance of speed and quality.",
     provider: "fal",
-    capabilities: capability ? [capability] : [],
-    coverImage: model.metadata.thumbnail_url,
-  };
-}
+    capabilities: ["text-to-image"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/flux/dev",
+  },
+  {
+    id: "fal-ai/flux/schnell",
+    name: "FLUX.1 Schnell",
+    description: "Ultra-fast text-to-image model from Black Forest Labs. Best for rapid iteration.",
+    provider: "fal",
+    capabilities: ["text-to-image"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/flux/schnell",
+  },
+  {
+    id: "fal-ai/flux-pro/v1.1-ultra",
+    name: "FLUX Pro 1.1 Ultra",
+    description: "Highest quality FLUX model. Premium image generation with ultra-high resolution output.",
+    provider: "fal",
+    capabilities: ["text-to-image"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/flux-pro/v1.1-ultra",
+  },
+  {
+    id: "fal-ai/recraft-v3",
+    name: "Recraft V3",
+    description: "State-of-the-art image generation with exceptional prompt following and typography support.",
+    provider: "fal",
+    capabilities: ["text-to-image"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/recraft-v3",
+  },
+  {
+    id: "fal-ai/ideogram/v3",
+    name: "Ideogram V3",
+    description: "High-quality text-to-image with excellent text rendering in images.",
+    provider: "fal",
+    capabilities: ["text-to-image"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/ideogram/v3",
+  },
+  {
+    id: "fal-ai/stable-diffusion-v35-large",
+    name: "Stable Diffusion 3.5 Large",
+    description: "Stability AI's latest large diffusion model for high-quality image generation.",
+    provider: "fal",
+    capabilities: ["text-to-image"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/stable-diffusion-v35-large",
+  },
+  // ============ Image-to-Image / Edit Models ============
+  {
+    id: "fal-ai/flux-pro/kontext/max",
+    name: "FLUX Kontext Max",
+    description: "Advanced image editing with FLUX Kontext. High-quality image-to-image transformation.",
+    provider: "fal",
+    capabilities: ["image-to-image"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/flux-pro/kontext/max",
+  },
+  {
+    id: "fal-ai/flux/dev/image-to-image",
+    name: "FLUX.1 Dev Image-to-Image",
+    description: "FLUX.1 Dev model adapted for image editing and transformation.",
+    provider: "fal",
+    capabilities: ["image-to-image"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/flux/dev/image-to-image",
+  },
+  {
+    id: "fal-ai/bria/product-shot",
+    name: "Bria Product Shot",
+    description: "Generate professional product photography with custom backgrounds.",
+    provider: "fal",
+    capabilities: ["image-to-image"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/bria/product-shot",
+  },
+  // ============ Video Models ============
+  {
+    id: "fal-ai/kling-video/v2.1/standard/text-to-video",
+    name: "Kling 2.1 Text-to-Video",
+    description: "Kling 2.1 high-quality text-to-video generation.",
+    provider: "fal",
+    capabilities: ["text-to-video"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/kling-video/v2.1/standard/text-to-video",
+  },
+  {
+    id: "fal-ai/kling-video/v2.1/standard/image-to-video",
+    name: "Kling 2.1 Image-to-Video",
+    description: "Kling 2.1 image-to-video generation with high fidelity.",
+    provider: "fal",
+    capabilities: ["image-to-video"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/kling-video/v2.1/standard/image-to-video",
+  },
+  {
+    id: "fal-ai/minimax-video/video-01-live",
+    name: "MiniMax Video 01 Live",
+    description: "MiniMax live video generation. Fast, high-quality results.",
+    provider: "fal",
+    capabilities: ["text-to-video"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/minimax-video/video-01-live",
+  },
+  {
+    id: "fal-ai/hunyuan-video",
+    name: "HunyuanVideo",
+    description: "Tencent's high-quality video generation model.",
+    provider: "fal",
+    capabilities: ["text-to-video"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/hunyuan-video",
+  },
+  // ============ 3D Models ============
+  {
+    id: "fal-ai/triposr",
+    name: "TripoSR",
+    description: "Fast single-image 3D mesh generation. Generate 3D models from a single photo.",
+    provider: "fal",
+    capabilities: ["image-to-3d"],
+    coverImage: undefined,
+    pageUrl: "https://fal.ai/models/fal-ai/triposr",
+  },
+];
 
-async function fetchFalModels(
-  apiKey: string | null,
-  searchQuery?: string
-): Promise<ProviderModel[]> {
-  const allModels: ProviderModel[] = [];
-  let cursor: string | null = null;
-  let hasMore = true;
-
-  const headers: HeadersInit = {};
-  if (apiKey) {
-    headers["Authorization"] = `Key ${apiKey}`;
-  }
-
-  // Paginate through results (limit to 15 pages to avoid timeout)
-  let pageCount = 0;
-  const maxPages = 15;
-
-  while (hasMore && pageCount < maxPages) {
-    let url = `${FAL_API_BASE}/models?status=active`;
-    if (searchQuery) {
-      url += `&q=${encodeURIComponent(searchQuery)}`;
-    }
-    if (cursor) {
-      url += `&cursor=${encodeURIComponent(cursor)}`;
-    }
-
-    const response = await fetch(url, { headers });
-
-    if (!response.ok) {
-      throw new Error(`fal.ai API error: ${response.status}`);
-    }
-
-    const data: FalModelsResponse = await response.json();
-    allModels.push(...data.models.filter(isRelevantFalModel).map(mapFalModel));
-
-    cursor = data.next_cursor;
-    hasMore = data.has_more;
-    pageCount++;
-  }
-
-  // Note: Pricing not fetched - external provider pricing is unreliable
-  // CostDialog shows model links instead of prices for fal.ai/Replicate
-
-  return allModels;
+/**
+ * Get curated fal.ai models, optionally filtered by search query
+ */
+function getCuratedFalModels(searchQuery?: string): ProviderModel[] {
+  if (!searchQuery) return FAL_CURATED_MODELS;
+  return filterModelsBySearch(FAL_CURATED_MODELS, searchQuery);
 }
 
 // ============ Main Handler ============
@@ -792,6 +864,7 @@ export async function GET(
   const providersToFetch: ProviderType[] = [];
   let includeGemini = false;
   let includeKie = false;
+  let includeFal = false;
 
   if (providerFilter) {
     if (providerFilter === "gemini") {
@@ -817,12 +890,14 @@ export async function GET(
       }
     } else if (providerFilter === "replicate" && replicateKey) {
       providersToFetch.push("replicate");
-    } else if (providerFilter === "fal" && falKey) {
-      providersToFetch.push("fal");
+    } else if (providerFilter === "fal") {
+      // Fal uses curated models — no API call needed, always available
+      includeFal = true;
     }
   } else {
     // Include all providers that have keys configured
     includeGemini = true; // Gemini always available
+    includeFal = true; // Fal curated models always available
     includeKie = kieKey ? true : false; // Kie only if API key is configured
     if (wavespeedKey) {
       providersToFetch.push("wavespeed"); // WaveSpeed if key is configured
@@ -830,13 +905,10 @@ export async function GET(
     if (replicateKey) {
       providersToFetch.push("replicate");
     }
-    if (falKey) {
-      providersToFetch.push("fal");
-    }
   }
 
   // Gemini and Kie are always available (with key for Kie), so we don't fail if no external providers
-  if (providersToFetch.length === 0 && !includeGemini && !includeKie) {
+  if (providersToFetch.length === 0 && !includeGemini && !includeKie && !includeFal) {
     return NextResponse.json<ModelsErrorResponse>(
       {
         success: false,
@@ -885,6 +957,18 @@ export async function GET(
     anyFromCache = true;
   }
 
+  // Add curated fal.ai models if included (hardcoded, no API call needed)
+  if (includeFal) {
+    const falModels = getCuratedFalModels(searchQuery);
+    allModels.push(...falModels);
+    providerResults["fal"] = {
+      success: true,
+      count: falModels.length,
+      cached: true,
+    };
+    anyFromCache = true;
+  }
+
   // Fetch from each provider (replicate, fal, wavespeed)
   for (const provider of providersToFetch) {
     // For Replicate and WaveSpeed, always use base cache key since we filter client-side
@@ -925,9 +1009,10 @@ export async function GET(
             ? filterModelsBySearch(allReplicateModels, searchQuery)
             : allReplicateModels;
         } else if (provider === "fal") {
-          models = await fetchFalModels(falKey, searchQuery);
-          // Cache the results (fal.ai handles search server-side)
-          setCachedModels(cacheKey, models);
+          // Use curated model list (no API call needed)
+          const curatedModels = getCuratedFalModels(searchQuery);
+          models = curatedModels;
+          setCachedModels(cacheKey, curatedModels);
         } else if (provider === "wavespeed") {
           // Fetch all models from WaveSpeed API
           const allWaveSpeedModels = await fetchWaveSpeedModels(wavespeedKey!);

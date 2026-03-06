@@ -5,7 +5,6 @@ import { useWorkflowStore, WorkflowFile } from "@/store/workflowStore";
 import { ProjectSetupModal } from "./ProjectSetupModal";
 import { CostIndicator } from "./CostIndicator";
 import { KeyboardShortcutsDialog } from "./KeyboardShortcutsDialog";
-import { AppModeModal } from "./AppModeModal";
 
 function AditorLogoButton({ onClick }: { onClick: () => void }) {
   return (
@@ -91,12 +90,16 @@ export function Header() {
     shortcutsDialogOpen,
     setShortcutsDialogOpen,
     setShowQuickstart,
+    viewMode,
+    setViewMode,
+    nodes,
   } = useWorkflowStore();
 
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [projectModalMode, setProjectModalMode] = useState<"new" | "settings">("new");
-  const [showAppMode, setShowAppMode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const hasNodes = nodes.length > 0;
 
   const isProjectConfigured = !!workflowName;
   const canSave = !!(workflowId && workflowName && saveDirectoryPath);
@@ -235,7 +238,7 @@ export function Header() {
         onChange={handleFileChange}
         className="hidden"
       />
-      <header className="h-11 border-b border-[var(--border-subtle)] flex items-center justify-between px-4 shrink-0 bg-[var(--bg-base)] font-mono">
+      <header className="h-11 border-b border-[var(--border-subtle)] flex items-center justify-between px-4 shrink-0 bg-[var(--bg-base)] font-mono relative">
         <div className="flex items-center gap-2">
           {/* Aditor logo - Home button */}
           <AditorLogoButton onClick={() => setShowQuickstart(true)} />
@@ -315,29 +318,6 @@ export function Header() {
                 </div>
 
                 {settingsButtons}
-
-                {/* App Mode button */}
-                <div className="flex items-center gap-0.5 ml-1 pl-1 border-l border-[var(--border-subtle)]/50">
-                  <button
-                    onClick={() => setShowAppMode(true)}
-                    className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] rounded transition-all duration-[120ms]"
-                    title="App Mode"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25"
-                      />
-                    </svg>
-                  </button>
-                </div>
               </>
             ) : (
               <>
@@ -387,29 +367,6 @@ export function Header() {
                 </div>
 
                 {settingsButtons}
-
-                {/* App Mode button (always visible) */}
-                <div className="flex items-center gap-0.5 ml-1 pl-1 border-l border-[var(--border-subtle)]/50">
-                  <button
-                    onClick={() => setShowAppMode(true)}
-                    className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] rounded transition-all duration-[120ms]"
-                    title="App Mode"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25"
-                      />
-                    </svg>
-                  </button>
-                </div>
               </>
             )}
           </div>
@@ -451,14 +408,36 @@ export function Header() {
             </svg>
           </button>
         </div>
+
+        {/* Central Edit / App Toggle — Absolute centered */}
+        {hasNodes && (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+            <div className="flex items-center h-8 rounded-[10px] bg-white/[0.05] border border-white/[0.08] p-[3px] backdrop-blur-sm shadow-[0_0_20px_rgba(0,0,0,0.3)]">
+              <button
+                onClick={() => setViewMode("edit")}
+                className={`px-4 h-[26px] rounded-[7px] text-[11px] font-semibold tracking-wide transition-all duration-200 ${viewMode === "edit"
+                  ? "bg-white/[0.12] text-white shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                  }`}
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => setViewMode("app")}
+                className={`px-4 h-[26px] rounded-[7px] text-[11px] font-semibold tracking-wide transition-all duration-200 ${viewMode === "app"
+                  ? "bg-gradient-to-r from-[#f97316]/80 to-[#ef4444]/80 text-white shadow-[0_1px_8px_rgba(249,115,22,0.3)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                  }`}
+              >
+                App
+              </button>
+            </div>
+          </div>
+        )}
       </header>
       <KeyboardShortcutsDialog
         isOpen={shortcutsDialogOpen}
         onClose={() => setShortcutsDialogOpen(false)}
-      />
-      <AppModeModal
-        isOpen={showAppMode}
-        onClose={() => setShowAppMode(false)}
       />
     </>
   );

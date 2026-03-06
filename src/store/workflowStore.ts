@@ -151,6 +151,8 @@ interface WorkflowStore {
   setNodeGroupId: (nodeId: string, groupId: string | undefined) => void;
 
   // UI State
+  viewMode: "edit" | "app";
+  setViewMode: (mode: "edit" | "app") => void;
   openModalCount: number;
   isModalOpen: boolean;
   showQuickstart: boolean;
@@ -319,6 +321,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   edgeStyle: "curved" as EdgeStyle,
   clipboard: null,
   groups: {},
+  viewMode: "edit" as "edit" | "app",
   openModalCount: 0,
   isModalOpen: false,
   showQuickstart: true,
@@ -385,6 +388,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       const newCount = Math.max(0, state.openModalCount - 1);
       return { openModalCount: newCount, isModalOpen: newCount > 0 };
     });
+  },
+
+  setViewMode: (mode: "edit" | "app") => {
+    set({ viewMode: mode });
   },
 
   setShowQuickstart: (show: boolean) => {

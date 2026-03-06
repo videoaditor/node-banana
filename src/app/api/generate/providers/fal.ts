@@ -492,6 +492,15 @@ export async function generateWithFalQueue(
     );
 
     if (!statusResponse.ok) {
+      const statusText = await statusResponse.text().catch(() => "");
+      // Detect Cloudflare HTML error pages (524 timeout, etc.)
+      if (statusText.trim().startsWith("<") || statusResponse.status === 524) {
+        console.error(`[API:${requestId}] Cloudflare timeout on status poll (${statusResponse.status})`);
+        return {
+          success: false,
+          error: `${input.model.name}: Request timed out — the model took too long. Try again or use a different model.`,
+        };
+      }
       console.error(`[API:${requestId}] Failed to poll status: ${statusResponse.status}`);
       return {
         success: false,
@@ -518,17 +527,22 @@ export async function generateWithFalQueue(
         let errStr = `Failed to fetch result: ${resultResponse.status}`;
         try {
           const errText = await resultResponse.text();
-          try {
-            const errJson = JSON.parse(errText);
-            if (errJson.detail) {
-              errStr += ` - ${JSON.stringify(errJson.detail)}`;
-            } else if (errJson.error) {
-              errStr += ` - ${JSON.stringify(errJson.error)}`;
-            } else {
-              errStr += ` - ${errText.substring(0, 200)}`;
+          // Detect HTML error pages (Cloudflare timeouts)
+          if (errText.trim().startsWith("<")) {
+            errStr = `${input.model.name}: Timed out fetching results. Try again.`;
+          } else {
+            try {
+              const errJson = JSON.parse(errText);
+              if (errJson.detail) {
+                errStr += ` - ${JSON.stringify(errJson.detail)}`;
+              } else if (errJson.error) {
+                errStr += ` - ${JSON.stringify(errJson.error)}`;
+              } else {
+                errStr += ` - ${errText.substring(0, 200)}`;
+              }
+            } catch {
+              if (errText) errStr += ` - ${errText.substring(0, 200)}`;
             }
-          } catch {
-            if (errText) errStr += ` - ${errText.substring(0, 200)}`;
           }
         } catch (e) {
           // ignore parsing errors

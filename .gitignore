@@ -48,3 +48,6 @@ logs/*.json
 
 # agents
 .agents/
+
+# shared workflows (local data)
+.shared-workflows/

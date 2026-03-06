@@ -347,6 +347,7 @@ export interface ImageIteratorNodeData extends BaseNodeData {
   randomCount: number;         // When mode is random, how many to process
   imageInputHandles: number;   // Number of dynamic image input handles
   currentImage?: string | null; // The currenly iterating image downstream nodes receives
+  isAppInput?: boolean;        // Whether this node appears as input in App Mode
   status: NodeStatus;
   error: string | null;
 }

@@ -107,7 +107,21 @@ export async function executeNanoBanana(
         const errorJson = JSON.parse(errorText);
         errorMessage = errorJson.error || errorMessage;
       } catch {
-        if (errorText) errorMessage += ` - ${errorText.substring(0, 200)}`;
+        // Check for HTML error pages (Cloudflare 524, etc.)
+        if (errorText && errorText.trim().startsWith("<")) {
+          // It's an HTML error page — don't show raw HTML to user
+          if (response.status === 524) {
+            errorMessage = "Request timed out — the model took too long to respond. Try again or use a different model.";
+          } else if (response.status === 522) {
+            errorMessage = "Connection timed out — the provider is unreachable. Try again later.";
+          } else if (response.status === 502 || response.status === 503) {
+            errorMessage = "Service temporarily unavailable. Try again in a moment.";
+          } else {
+            errorMessage = `Server error (${response.status}). Try a different model or try again later.`;
+          }
+        } else if (errorText) {
+          errorMessage += ` - ${errorText.substring(0, 200)}`;
+        }
       }
 
       updateNodeData(node.id, {

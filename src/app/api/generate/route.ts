@@ -542,6 +542,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Strip HTML error pages (e.g. Cloudflare 524 timeout pages)
+    if (errorMessage.includes("<!DOCTYPE") || errorMessage.includes("<html")) {
+      errorMessage = "Request timed out — the provider took too long to respond. Try again or use a different model.";
+      errorDetails = "";
+    }
+
     // Try to extract more details from API errors
     if (error && typeof error === "object") {
       const apiError = error as Record<string, unknown>;

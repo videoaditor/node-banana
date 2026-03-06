@@ -157,8 +157,8 @@ export function ImageIteratorNode({ id, data, selected }: NodeProps<ImageIterato
           <button
             onClick={() => handleSourceModeChange("files")}
             className={`flex-1 px-3 py-1.5 text-xs font-medium transition-colors ${sourceMode === "files"
-                ? "bg-emerald-600 text-white"
-                : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--border-subtle)]"
+              ? "bg-emerald-600 text-white"
+              : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--border-subtle)]"
               }`}
           >
             📁 Files
@@ -166,8 +166,8 @@ export function ImageIteratorNode({ id, data, selected }: NodeProps<ImageIterato
           <button
             onClick={() => handleSourceModeChange("drive")}
             className={`flex-1 px-3 py-1.5 text-xs font-medium transition-colors ${sourceMode === "drive"
-                ? "bg-emerald-600 text-white"
-                : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--border-subtle)]"
+              ? "bg-emerald-600 text-white"
+              : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--border-subtle)]"
               }`}
           >
             ☁️ Drive
@@ -184,8 +184,8 @@ export function ImageIteratorNode({ id, data, selected }: NodeProps<ImageIterato
               onDragLeave={handleDragLeave}
               onClick={() => fileInputRef.current?.click()}
               className={`w-full min-h-[80px] border-2 border-dashed rounded-md flex flex-col items-center justify-center gap-1 cursor-pointer transition-all ${isDragOver
-                  ? "border-emerald-500 bg-emerald-500/10"
-                  : "border-[var(--border-subtle)] hover:border-[var(--text-muted)] bg-[var(--bg-base)]/50"
+                ? "border-emerald-500 bg-emerald-500/10"
+                : "border-[var(--border-subtle)] hover:border-[var(--text-muted)] bg-[var(--bg-base)]/50"
                 }`}
             >
               {localImages.length === 0 ? (
@@ -277,8 +277,8 @@ export function ImageIteratorNode({ id, data, selected }: NodeProps<ImageIterato
             <button
               onClick={() => handleModeChange("all")}
               className={`px-3 py-1 text-xs rounded ${nodeData.mode === "all"
-                  ? "bg-orange-600 text-white"
-                  : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--border-subtle)]"
+                ? "bg-orange-600 text-white"
+                : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--border-subtle)]"
                 }`}
             >
               All images
@@ -286,8 +286,8 @@ export function ImageIteratorNode({ id, data, selected }: NodeProps<ImageIterato
             <button
               onClick={() => handleModeChange("random")}
               className={`px-3 py-1 text-xs rounded ${nodeData.mode === "random"
-                  ? "bg-orange-600 text-white"
-                  : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--border-subtle)]"
+                ? "bg-orange-600 text-white"
+                : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--border-subtle)]"
                 }`}
             >
               Random
@@ -308,6 +308,23 @@ export function ImageIteratorNode({ id, data, selected }: NodeProps<ImageIterato
             />
           </div>
         )}
+
+        {/* App Input toggle */}
+        <div className="flex items-center justify-between">
+          <label className="text-xs text-[var(--text-secondary)]">App Input</label>
+          <button
+            onClick={() => updateNodeData(id, { isAppInput: !nodeData.isAppInput })}
+            className={`w-8 h-[18px] rounded-full transition-all duration-200 relative ${nodeData.isAppInput
+                ? "bg-emerald-600"
+                : "bg-[var(--bg-surface)] border border-[var(--border-subtle)]"
+              }`}
+          >
+            <div
+              className={`absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-all duration-200 ${nodeData.isAppInput ? "left-[16px]" : "left-[2px]"
+                }`}
+            />
+          </button>
+        </div>
 
         {/* Status */}
         {nodeData.status === "loading" && (

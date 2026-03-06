@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { WorkflowCanvas } from "@/components/WorkflowCanvas";
 import { FloatingActionBar } from "@/components/FloatingActionBar";
 import { AnnotationModal } from "@/components/AnnotationModal";
+import { AppView } from "@/components/AppView";
 import { useWorkflowStore } from "@/store/workflowStore";
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
     (state) => state.initializeAutoSave
   );
   const cleanupAutoSave = useWorkflowStore((state) => state.cleanupAutoSave);
+  const viewMode = useWorkflowStore((state) => state.viewMode);
 
   useEffect(() => {
     initializeAutoSave();
@@ -23,9 +25,15 @@ export default function Home() {
     <ReactFlowProvider>
       <div className="h-screen flex flex-col">
         <Header />
-        <WorkflowCanvas />
-        <FloatingActionBar />
-        <AnnotationModal />
+        {viewMode === "edit" ? (
+          <>
+            <WorkflowCanvas />
+            <FloatingActionBar />
+            <AnnotationModal />
+          </>
+        ) : (
+          <AppView />
+        )}
       </div>
     </ReactFlowProvider>
   );
