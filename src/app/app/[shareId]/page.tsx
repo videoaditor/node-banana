@@ -144,7 +144,7 @@ export default function SharedAppPage({
         return (
             <div className="min-h-screen bg-gradient-to-b from-[#0f0f11] to-[#161618] flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-12 h-12 rounded-full border-2 border-white/[0.06] border-t-blue-500 animate-spin mx-auto mb-4" />
+                    <div className="w-12 h-12 rounded-full border-2 border-white/[0.06] border-t-orange-500 animate-spin mx-auto mb-4" />
                     <p className="text-sm text-[#666]">Loading workflow...</p>
                 </div>
             </div>
@@ -184,7 +184,7 @@ export default function SharedAppPage({
                 <div className="flex items-center justify-between mb-10">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
-                            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#f97316] to-[#ef4444] flex items-center justify-center">
                                 <span className="text-[10px] font-bold text-white">NB</span>
                             </div>
                             <span className="text-xs text-[#555]">Node Banana</span>
@@ -205,7 +205,7 @@ export default function SharedAppPage({
                     {appInputNodes.length > 0 ? (
                         <div className="p-8 border-b border-white/[0.04]">
                             <div className="flex items-center gap-2 mb-6">
-                                <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                                <div className="w-1.5 h-1.5 rounded-full bg-orange-400" />
                                 <span className="text-xs font-medium text-[#666] uppercase tracking-widest">Inputs</span>
                             </div>
                             <div className="space-y-6">
@@ -222,7 +222,7 @@ export default function SharedAppPage({
                                                     onChange={(e) => handleInputChange(node.id, e.target.value)}
                                                     placeholder="Enter your text..."
                                                     rows={3}
-                                                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white text-sm placeholder:text-[#444] focus:outline-none focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/20 resize-y transition-all duration-200"
+                                                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white text-sm placeholder:text-[#444] focus:outline-none focus:border-orange-500/40 focus:ring-1 focus:ring-orange-500/20 resize-y transition-all duration-200"
                                                 />
                                             ) : (
                                                 <div className="group">
@@ -245,8 +245,8 @@ export default function SharedAppPage({
                                                             </button>
                                                         </div>
                                                     ) : (
-                                                        <label className="flex flex-col items-center justify-center w-full h-32 rounded-xl border-2 border-dashed border-white/[0.08] hover:border-blue-500/30 hover:bg-blue-500/[0.02] cursor-pointer transition-all duration-300">
-                                                            <svg className="w-8 h-8 text-[#444] mb-2 group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                                                        <label className="flex flex-col items-center justify-center w-full h-32 rounded-xl border-2 border-dashed border-white/[0.08] hover:border-orange-500/30 hover:bg-orange-500/[0.02] cursor-pointer transition-all duration-300">
+                                                            <svg className="w-8 h-8 text-[#444] mb-2 group-hover:text-orange-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z" />
                                                             </svg>
                                                             <span className="text-xs text-[#555] group-hover:text-[#888] transition-colors">Drop image or click to upload</span>
@@ -284,11 +284,11 @@ export default function SharedAppPage({
                             className="w-full py-3.5 rounded-xl font-medium text-sm text-white relative overflow-hidden disabled:opacity-40 disabled:cursor-not-allowed group transition-all duration-300"
                             style={{
                                 background: isRunning
-                                    ? "linear-gradient(135deg, #1a1a2e, #16213e)"
-                                    : "linear-gradient(135deg, #2563eb, #7c3aed)",
+                                    ? "linear-gradient(135deg, #1a1a1a, #2a1a0e)"
+                                    : "linear-gradient(135deg, #f97316, #ef4444)",
                                 boxShadow: isRunning
                                     ? "none"
-                                    : "0 4px 20px rgba(37,99,235,0.25), 0 0 40px rgba(124,58,237,0.1)",
+                                    : "0 4px 20px rgba(249,115,22,0.25), 0 0 40px rgba(239,68,68,0.1)",
                             }}
                         >
                             {!isRunning && (
@@ -329,7 +329,7 @@ export default function SharedAppPage({
 
                             {isRunning && outputs.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-16">
-                                    <div className="w-12 h-12 rounded-full border-2 border-white/[0.06] border-t-blue-500 animate-spin mb-4" />
+                                    <div className="w-12 h-12 rounded-full border-2 border-white/[0.06] border-t-orange-500 animate-spin mb-4" />
                                     <p className="text-sm text-[#666]">Processing workflow...</p>
                                 </div>
                             ) : (
