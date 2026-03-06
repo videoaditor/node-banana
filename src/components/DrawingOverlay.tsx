@@ -22,10 +22,21 @@ export function DrawingOverlay({ isActive, onDeactivate }: DrawingOverlayProps) 
     const [currentPath, setCurrentPath] = useState<DrawingPath | null>(null);
     const [drawMode, setDrawMode] = useState<"freehand" | "arrow">("freehand");
     const [brushWidth, setBrushWidth] = useState(3);
-    const [arrowStart, setArrowStart] = useState<{ x: number; y: number } | null>(null);
     const svgRef = useRef<SVGSVGElement>(null);
     const isDrawing = useRef(false);
+    const arrowStartRef = useRef<{ x: number; y: number } | null>(null);
     const { getViewport } = useReactFlow();
+
+    // Refs for current state to avoid stale closures in native event listeners
+    const drawModeRef = useRef(drawMode);
+    const brushWidthRef = useRef(brushWidth);
+    const currentPathRef = useRef(currentPath);
+    const isActiveRef = useRef(isActive);
+
+    useEffect(() => { drawModeRef.current = drawMode; }, [drawMode]);
+    useEffect(() => { brushWidthRef.current = brushWidth; }, [brushWidth]);
+    useEffect(() => { currentPathRef.current = currentPath; }, [currentPath]);
+    useEffect(() => { isActiveRef.current = isActive; }, [isActive]);
 
     // Convert screen coords to flow coords (matching viewport transformations)
     const screenToFlow = useCallback(
@@ -41,90 +52,108 @@ export function DrawingOverlay({ isActive, onDeactivate }: DrawingOverlayProps) 
         [getViewport]
     );
 
-    const handleMouseDown = useCallback(
-        (e: React.MouseEvent) => {
-            if (!isActive || e.button !== 0) return;
+    // Use native pointer events to bypass React Flow's event interception
+    useEffect(() => {
+        const svg = svgRef.current;
+        if (!svg || !isActive) return;
+
+        const handlePointerDown = (e: PointerEvent) => {
+            if (!isActiveRef.current || e.button !== 0) return;
+
+            // Check if the click is on the floating toolbar (don't capture those)
+            const target = e.target as Element;
+            if (target.closest("[data-drawing-toolbar]")) return;
+
             e.preventDefault();
             e.stopPropagation();
+
+            // Capture pointer to get events even outside the SVG
+            svg.setPointerCapture(e.pointerId);
 
             const pos = screenToFlow(e.clientX, e.clientY);
             isDrawing.current = true;
 
-            if (drawMode === "arrow") {
-                setArrowStart(pos);
+            if (drawModeRef.current === "arrow") {
+                arrowStartRef.current = pos;
             } else {
                 const newPath: DrawingPath = {
                     id: `draw-${Date.now()}`,
                     points: [pos],
                     color: "rgba(249, 115, 22, 0.65)",
-                    width: brushWidth,
+                    width: brushWidthRef.current,
                     opacity: 1,
                     type: "freehand",
                 };
                 setCurrentPath(newPath);
             }
-        },
-        [isActive, drawMode, brushWidth, screenToFlow]
-    );
+        };
 
-    const handleMouseMove = useCallback(
-        (e: React.MouseEvent) => {
-            if (!isDrawing.current || !isActive) return;
+        const handlePointerMove = (e: PointerEvent) => {
+            if (!isDrawing.current || !isActiveRef.current) return;
             e.preventDefault();
             e.stopPropagation();
 
             const pos = screenToFlow(e.clientX, e.clientY);
 
-            if (drawMode === "arrow" && arrowStart) {
-                // Preview arrow
+            if (drawModeRef.current === "arrow" && arrowStartRef.current) {
                 const arrowPath: DrawingPath = {
                     id: `arrow-preview`,
-                    points: [arrowStart, pos],
+                    points: [arrowStartRef.current, pos],
                     color: "rgba(249, 115, 22, 0.65)",
-                    width: brushWidth,
+                    width: brushWidthRef.current,
                     opacity: 1,
                     type: "arrow",
                 };
                 setCurrentPath(arrowPath);
-            } else if (currentPath) {
+            } else {
                 setCurrentPath((prev) => {
                     if (!prev) return null;
                     return { ...prev, points: [...prev.points, pos] };
                 });
             }
-        },
-        [isActive, drawMode, arrowStart, currentPath, brushWidth, screenToFlow]
-    );
+        };
 
-    const handleMouseUp = useCallback(
-        (e: React.MouseEvent) => {
+        const handlePointerUp = (e: PointerEvent) => {
             if (!isDrawing.current) return;
             e.preventDefault();
             e.stopPropagation();
+
+            svg.releasePointerCapture(e.pointerId);
             isDrawing.current = false;
 
-            if (drawMode === "arrow" && arrowStart) {
+            if (drawModeRef.current === "arrow" && arrowStartRef.current) {
                 const pos = screenToFlow(e.clientX, e.clientY);
                 const arrowPath: DrawingPath = {
                     id: `arrow-${Date.now()}`,
-                    points: [arrowStart, pos],
+                    points: [arrowStartRef.current, pos],
                     color: "rgba(249, 115, 22, 0.65)",
-                    width: brushWidth,
+                    width: brushWidthRef.current,
                     opacity: 1,
                     type: "arrow",
                 };
                 setPaths((prev) => [...prev, arrowPath]);
-                setArrowStart(null);
-                setCurrentPath(null);
-            } else if (currentPath && currentPath.points.length > 1) {
-                setPaths((prev) => [...prev, currentPath]);
+                arrowStartRef.current = null;
                 setCurrentPath(null);
             } else {
-                setCurrentPath(null);
+                setCurrentPath((prev) => {
+                    if (prev && prev.points.length > 1) {
+                        setPaths((paths) => [...paths, prev]);
+                    }
+                    return null;
+                });
             }
-        },
-        [drawMode, arrowStart, currentPath, brushWidth, screenToFlow]
-    );
+        };
+
+        svg.addEventListener("pointerdown", handlePointerDown, { capture: true });
+        svg.addEventListener("pointermove", handlePointerMove, { capture: true });
+        svg.addEventListener("pointerup", handlePointerUp, { capture: true });
+
+        return () => {
+            svg.removeEventListener("pointerdown", handlePointerDown, { capture: true });
+            svg.removeEventListener("pointermove", handlePointerMove, { capture: true });
+            svg.removeEventListener("pointerup", handlePointerUp, { capture: true });
+        };
+    }, [isActive, screenToFlow]);
 
     const handleUndo = useCallback(() => {
         setPaths((prev) => prev.slice(0, -1));
@@ -154,14 +183,12 @@ export function DrawingOverlay({ isActive, onDeactivate }: DrawingOverlayProps) 
         if (points.length < 2) return "";
         let d = `M ${points[0].x} ${points[0].y}`;
         for (let i = 1; i < points.length; i++) {
-            // Quadratic bezier smoothing between points
             const prev = points[i - 1];
             const curr = points[i];
             const midX = (prev.x + curr.x) / 2;
             const midY = (prev.y + curr.y) / 2;
             d += ` Q ${prev.x} ${prev.y} ${midX} ${midY}`;
         }
-        // Last point
         const last = points[points.length - 1];
         d += ` L ${last.x} ${last.y}`;
         return d;
@@ -190,30 +217,19 @@ export function DrawingOverlay({ isActive, onDeactivate }: DrawingOverlayProps) 
 
     return (
         <>
-            {/* SVG drawing layer */}
+            {/* SVG drawing layer — z-index must be above React Flow's pane (z-index ~5) */}
             <svg
                 ref={svgRef}
-                className="absolute inset-0 z-[90]"
+                className="absolute inset-0"
                 style={{
+                    zIndex: 1000,
                     pointerEvents: isActive ? "all" : "none",
                     cursor: isActive
                         ? drawMode === "arrow"
                             ? "crosshair"
                             : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='3' fill='%23f97316' opacity='0.8'/%3E%3C/svg%3E") 10 10, crosshair`
                         : "default",
-                }}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={() => {
-                    if (isDrawing.current) {
-                        isDrawing.current = false;
-                        if (currentPath && currentPath.points.length > 1) {
-                            setPaths((prev) => [...prev, currentPath]);
-                        }
-                        setCurrentPath(null);
-                        setArrowStart(null);
-                    }
+                    touchAction: "none",
                 }}
             >
                 <g
@@ -262,8 +278,10 @@ export function DrawingOverlay({ isActive, onDeactivate }: DrawingOverlayProps) 
             {/* Floating toolbar when drawing mode is active */}
             {isActive && (
                 <div
-                    className="absolute top-4 left-1/2 -translate-x-1/2 z-[95] flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
+                    data-drawing-toolbar
+                    className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
                     style={{
+                        zIndex: 1001,
                         background: "rgba(28, 30, 36, 0.85)",
                         backdropFilter: "blur(16px) saturate(1.5)",
                         border: "1px solid rgba(249, 115, 22, 0.15)",
@@ -275,8 +293,8 @@ export function DrawingOverlay({ isActive, onDeactivate }: DrawingOverlayProps) 
                     <button
                         onClick={() => setDrawMode("freehand")}
                         className={`p-1.5 rounded-lg transition-all ${drawMode === "freehand"
-                                ? "bg-orange-500/20 text-orange-400"
-                                : "text-[#666] hover:text-[#999]"
+                            ? "bg-orange-500/20 text-orange-400"
+                            : "text-[#666] hover:text-[#999]"
                             }`}
                         title="Freehand pen"
                     >
@@ -289,8 +307,8 @@ export function DrawingOverlay({ isActive, onDeactivate }: DrawingOverlayProps) 
                     <button
                         onClick={() => setDrawMode("arrow")}
                         className={`p-1.5 rounded-lg transition-all ${drawMode === "arrow"
-                                ? "bg-orange-500/20 text-orange-400"
-                                : "text-[#666] hover:text-[#999]"
+                            ? "bg-orange-500/20 text-orange-400"
+                            : "text-[#666] hover:text-[#999]"
                             }`}
                         title="Arrow"
                     >
@@ -307,8 +325,8 @@ export function DrawingOverlay({ isActive, onDeactivate }: DrawingOverlayProps) 
                             key={w}
                             onClick={() => setBrushWidth(w)}
                             className={`p-1.5 rounded-lg transition-all ${brushWidth === w
-                                    ? "bg-orange-500/15 text-orange-400"
-                                    : "text-[#555] hover:text-[#888]"
+                                ? "bg-orange-500/15 text-orange-400"
+                                : "text-[#555] hover:text-[#888]"
                                 }`}
                             title={`Brush size ${w}`}
                         >

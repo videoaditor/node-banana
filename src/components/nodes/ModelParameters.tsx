@@ -258,7 +258,24 @@ function ParameterInput({ param, value, onChange }: ParameterInputProps) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
   // Determine input type and render accordingly
-  if (param.enum && param.enum.length > 0) {
+
+  // Inject well-known enum values for common parameters that should be dropdowns
+  // even when the schema doesn't explicitly include enum values
+  const WELL_KNOWN_ENUMS: Record<string, (string | number)[]> = {
+    aspect_ratio: ["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"],
+    resolution: ["1024x1024", "1280x720", "1920x1080", "512x512"],
+    image_size: ["square_hd", "square", "portrait_4_3", "portrait_16_9", "landscape_4_3", "landscape_16_9"],
+    output_format: ["png", "jpeg", "webp"],
+    scheduler: ["ddim", "dpmsolver++", "euler", "euler_a", "pndm", "k_euler", "k_euler_a"],
+    num_images: [1, 2, 3, 4],
+    num_inference_steps: [20, 25, 30, 40, 50],
+  };
+
+  const effectiveEnum = param.enum && param.enum.length > 0
+    ? param.enum
+    : WELL_KNOWN_ENUMS[param.name] || null;
+
+  if (effectiveEnum && effectiveEnum.length > 0) {
     // Enum: render as select
     return (
       <div className="flex flex-col gap-0.5">
@@ -287,7 +304,7 @@ function ParameterInput({ param, value, onChange }: ParameterInputProps) {
           className="nodrag nopan w-full text-[9px] py-0.5 px-1 border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-[var(--text-secondary)]"
         >
           <option value="">Default</option>
-          {param.enum.map((opt) => (
+          {effectiveEnum.map((opt) => (
             <option key={String(opt)} value={String(opt)}>
               {String(opt)}
             </option>
@@ -366,11 +383,10 @@ function ParameterInput({ param, value, onChange }: ParameterInputProps) {
             }
           }}
           placeholder={param.default !== undefined ? `Default: ${param.default}` : undefined}
-          className={`nodrag nopan w-full text-[9px] py-0.5 px-1 border rounded bg-[var(--bg-base)]/50 focus:outline-none focus:ring-1 text-[var(--text-secondary)] placeholder:text-[var(--text-muted)] ${
-            validationError
-              ? "border-[var(--node-error)] focus:ring-red-500"
-              : "border-[var(--border-subtle)] focus:ring-[var(--accent-primary)]"
-          }`}
+          className={`nodrag nopan w-full text-[9px] py-0.5 px-1 border rounded bg-[var(--bg-base)]/50 focus:outline-none focus:ring-1 text-[var(--text-secondary)] placeholder:text-[var(--text-muted)] ${validationError
+            ? "border-[var(--node-error)] focus:ring-red-500"
+            : "border-[var(--border-subtle)] focus:ring-[var(--accent-primary)]"
+            }`}
         />
         {validationError && (
           <span className="text-[8px] text-[var(--node-error)]">{validationError}</span>

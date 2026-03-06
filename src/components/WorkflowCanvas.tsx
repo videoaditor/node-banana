@@ -1959,6 +1959,12 @@ export function WorkflowCanvas() {
             }
           }}
         />
+
+        {/* Drawing overlay — inside ReactFlow so it positions correctly */}
+        <DrawingOverlay
+          isActive={isDrawingMode}
+          onDeactivate={() => setDrawingMode(false)}
+        />
       </ReactFlow>
 
       {/* Connection drop menu */}
@@ -1972,11 +1978,7 @@ export function WorkflowCanvas() {
         />
       )}
 
-      {/* Drawing overlay */}
-      <DrawingOverlay
-        isActive={isDrawingMode}
-        onDeactivate={() => setDrawingMode(false)}
-      />
+
 
       {/* Multi-select toolbar */}
       <MultiSelectToolbar />

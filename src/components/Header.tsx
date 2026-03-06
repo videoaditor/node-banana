@@ -243,7 +243,7 @@ export function Header() {
       <header className="h-11 border-b border-[var(--border-subtle)] flex items-center justify-between px-4 shrink-0 bg-[var(--bg-base)] font-mono relative">
         <div className="flex items-center gap-2">
           {/* Aditor logo - Home button */}
-          <AditorLogoButton onClick={() => setShowQuickstart(true)} />
+          <AditorLogoButton onClick={() => { window.location.href = "/"; }} />
           <span className="text-[var(--border-subtle)] ml-0.5">|</span>
           <div className="flex items-center gap-2">
             {isProjectConfigured ? (
@@ -447,6 +447,29 @@ export function Header() {
             )}
           </span>
           <span className="text-[var(--border-subtle)]">|</span>
+          {/* Restart / Deploy button */}
+          <button
+            onClick={async () => {
+              if (!window.confirm("Pull from git, rebuild, and restart the server?")) return;
+              try {
+                const resp = await fetch("/api/deploy", { method: "POST" });
+                const data = await resp.json();
+                if (data.success) {
+                  alert("Deploy complete — server is restarting.\n\n" + (data.git || ""));
+                } else {
+                  alert("Deploy failed: " + (data.error || "Unknown error"));
+                }
+              } catch {
+                alert("Deploy request failed — server may be offline.");
+              }
+            }}
+            className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-all duration-[120ms]"
+            title="Pull from git & restart server"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+            </svg>
+          </button>
           <button
             onClick={() => setShortcutsDialogOpen(true)}
             className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-all duration-[120ms]"
