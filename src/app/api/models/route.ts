@@ -304,6 +304,14 @@ const GEMINI_MODELS: ProviderModel[] = [
     capabilities: ["text-to-video", "image-to-video"],
     coverImage: undefined,
   },
+  {
+    id: "veo-3.1-fast-generate-001",
+    name: "Veo 3.1 Fast",
+    description: "Google Veo 3.1 Fast — speed-optimized video generation with native audio, up to 8s at 1080p. Supports text-to-video and image-to-video.",
+    provider: "gemini",
+    capabilities: ["text-to-video", "image-to-video"],
+    coverImage: undefined,
+  },
 ];
 
 // WaveSpeed models are now fetched dynamically from https://api.wavespeed.ai/api/v3/models

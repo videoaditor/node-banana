@@ -66,12 +66,14 @@ export function GenerateVideoNode({ id, data, selected }: NodeProps<GenerateVide
   const [isBrowseDialogOpen, setIsBrowseDialogOpen] = useState(false);
   const [isLoadingCarouselVideo, setIsLoadingCarouselVideo] = useState(false);
 
-  // Get the current selected provider (default to fal since Gemini doesn't do video)
+  // Get the current selected provider (default to fal since it has widest model variety)
   const currentProvider: ProviderType = nodeData.selectedModel?.provider || "fal";
 
-  // Get enabled providers (exclude Gemini since it doesn't do video)
+  // Get enabled providers
   const enabledProviders = useMemo(() => {
     const providers: { id: ProviderType; name: string }[] = [];
+    // Gemini / Veo is always available with API key
+    providers.push({ id: "gemini", name: "Veo (Google)" });
     // fal.ai is always available (works without key but rate limited)
     providers.push({ id: "fal", name: "fal.ai" });
     // Add Replicate if configured

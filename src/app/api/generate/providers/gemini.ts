@@ -17,6 +17,7 @@ export const MODEL_MAP: Record<string, string> = {
   "nano-banana-2": "gemini-3.1-flash-image-preview",          // Nano Banana 2 (Gemini 3.1 Flash)
   "nano-banana-pro": "gemini-3.1-flash-image-preview",         // Pro remapped to 3.1 Flash (Pro model times out behind Cloudflare)
   "veo-2.0-generate-video-001": "veo-2.0-generate-video-001",
+  "veo-3.1-fast-generate-001": "veo-3.1-fast-generate-001",
   // Allow direct Gemini model IDs to pass through
   "gemini-2.5-flash-image": "gemini-2.5-flash-image",
   "gemini-2.5-flash-preview-image-generation": "gemini-2.5-flash-image", // Legacy alias
@@ -74,12 +75,14 @@ export async function generateWithGemini(
     firstImageData = imageData[0];
   }
 
-  // Handle Veo 2 Video Generation
-  if (model === "veo-2.0-generate-video-001") {
-    console.log(`[API:${requestId}] Starting Veo 2 video generation`);
+  // Handle Veo Video Generation (Veo 2 and Veo 3.1 Fast)
+  const VEO_MODELS = ["veo-2.0-generate-video-001", "veo-3.1-fast-generate-001"];
+  if (VEO_MODELS.includes(model)) {
+    const resolvedModel = resolveGeminiModelId(model);
+    console.log(`[API:${requestId}] Starting ${resolvedModel} video generation`);
     try {
       const operation = await ai.models.generateVideos({
-        model: "veo-2.0-generate-video-001",
+        model: resolvedModel,
         prompt: prompt,
         // Wait, the new API has `image` as input
         ...(firstImageData && {

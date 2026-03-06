@@ -92,6 +92,7 @@ export async function POST(request: NextRequest) {
       "nano-banana-2",
       "nano-banana-pro",
       "veo-2.0-generate-video-001",
+      "veo-3.1-fast-generate-001",
       // Underlying Gemini API model IDs (in case selectedModel.modelId was set directly)
       "gemini-2.5-flash-image",
       "gemini-2.5-flash-preview-image-generation",
