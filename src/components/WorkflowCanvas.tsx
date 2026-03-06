@@ -17,7 +17,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
-import { useWorkflowStore, WorkflowFile } from "@/store/workflowStore";
+import { useWorkflowStore, WorkflowFile, generateWorkflowId } from "@/store/workflowStore";
 import { useToast } from "@/components/Toast";
 import dynamic from "next/dynamic";
 import {
@@ -1118,60 +1118,60 @@ export function WorkflowCanvas() {
         case "a":
           nodeType = "annotation";
           break;
-        switch (key) {
-          case "p":
-            nodeType = "prompt";
-            break;
-          case "i":
-            nodeType = "imageInput";
-            break;
-          case "g":
-            nodeType = "nanoBanana";
-            break;
-          case "v":
-            nodeType = "generateVideo";
-            break;
-          case "l":
-            nodeType = "llmGenerate";
-            break;
-          case "a":
-            nodeType = "annotation";
-            break;
-        }
+          switch (key) {
+            case "p":
+              nodeType = "prompt";
+              break;
+            case "i":
+              nodeType = "imageInput";
+              break;
+            case "g":
+              nodeType = "nanoBanana";
+              break;
+            case "v":
+              nodeType = "generateVideo";
+              break;
+            case "l":
+              nodeType = "llmGenerate";
+              break;
+            case "a":
+              nodeType = "annotation";
+              break;
+          }
 
-        if (nodeType !== null) {
-          event.preventDefault();
-          const { centerX, centerY } = getViewportCenter();
-          // Offset by half the default node dimensions to center it
-          const defaultDimensions: Record<NodeType, { width: number; height: number }> = {
-            imageInput: { width: 300, height: 280 },
-            audioInput: { width: 300, height: 200 },
-            annotation: { width: 300, height: 280 },
-            prompt: { width: 320, height: 220 },
-            promptConstructor: { width: 340, height: 280 },
-            promptConcatenator: { width: 320, height: 240 },
-            nanoBanana: { width: 300, height: 300 },
-            generateVideo: { width: 300, height: 300 },
-            generate3d: { width: 300, height: 300 },
-            llmGenerate: { width: 320, height: 360 },
-            splitGrid: { width: 300, height: 320 },
-            output: { width: 320, height: 320 },
-            outputGallery: { width: 320, height: 360 },
-            imageCompare: { width: 400, height: 360 },
-            videoStitch: { width: 400, height: 280 },
-            easeCurve: { width: 340, height: 480 },
-            glbViewer: { width: 360, height: 380 },
-            imageIterator: { width: 340, height: 300 },
-            textIterator: { width: 340, height: 280 },
-            webScraper: { width: 340, height: 320 },
-            stickyNote: { width: 200, height: 200 },
-            soraBlueprint: { width: 320, height: 360 },
-            brollBatch: { width: 380, height: 420 },
-          };
-          const dims = defaultDimensions[nodeType!];
-          addNode(nodeType!, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
-          return;
-        }
+          if (nodeType !== null) {
+            event.preventDefault();
+            const { centerX, centerY } = getViewportCenter();
+            // Offset by half the default node dimensions to center it
+            const defaultDimensions: Record<NodeType, { width: number; height: number }> = {
+              imageInput: { width: 300, height: 280 },
+              audioInput: { width: 300, height: 200 },
+              annotation: { width: 300, height: 280 },
+              prompt: { width: 320, height: 220 },
+              promptConstructor: { width: 340, height: 280 },
+              promptConcatenator: { width: 320, height: 240 },
+              nanoBanana: { width: 300, height: 300 },
+              generateVideo: { width: 300, height: 300 },
+              generate3d: { width: 300, height: 300 },
+              llmGenerate: { width: 320, height: 360 },
+              splitGrid: { width: 300, height: 320 },
+              output: { width: 320, height: 320 },
+              outputGallery: { width: 320, height: 360 },
+              imageCompare: { width: 400, height: 360 },
+              videoStitch: { width: 400, height: 280 },
+              easeCurve: { width: 340, height: 480 },
+              glbViewer: { width: 360, height: 380 },
+              imageIterator: { width: 340, height: 300 },
+              textIterator: { width: 340, height: 280 },
+              webScraper: { width: 340, height: 320 },
+              stickyNote: { width: 200, height: 200 },
+              soraBlueprint: { width: 320, height: 360 },
+              brollBatch: { width: 380, height: 420 },
+            };
+            const dims = defaultDimensions[nodeType!];
+            addNode(nodeType!, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
+            return;
+          }
 
       }
 
@@ -1664,24 +1664,10 @@ export function WorkflowCanvas() {
           }}
           onClose={() => setShowQuickstart(false)}
           onNewProject={() => {
+            // Skip the project setup modal — enter editor directly
+            const id = generateWorkflowId();
+            setWorkflowMetadata(id, "Untitled Workflow", "");
             setShowQuickstart(false);
-            setShowNewProjectSetup(true);
-          }}
-        />
-      )}
-
-      {/* New Project Setup Modal */}
-      {showNewProjectSetup && (
-        <ProjectSetupModal
-          isOpen={showNewProjectSetup}
-          mode="new"
-          onSave={(id, name, directoryPath) => {
-            setWorkflowMetadata(id, name, directoryPath);
-            setShowNewProjectSetup(false);
-          }}
-          onClose={() => {
-            setShowNewProjectSetup(false);
-            setShowQuickstart(true);
           }}
         />
       )}
@@ -1864,10 +1850,10 @@ export function WorkflowCanvas() {
               : canvasNavigationSettings.panMode === "middleMouse"
                 ? [2]
                 : !isMacOS
-            ? [1]          // left button only — never consume right-click
-            : (canvasNavigationSettings.panMode as string) === "middleMouse"
-            ? [2]
-            : false        // space/default: panning via panActivationKeyCode, not drag
+                  ? [1]          // left button only — never consume right-click
+                  : (canvasNavigationSettings.panMode as string) === "middleMouse"
+                    ? [2]
+                    : false        // space/default: panning via panActivationKeyCode, not drag
 
         }
         selectNodesOnDrag={false}
