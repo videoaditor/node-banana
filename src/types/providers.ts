@@ -36,7 +36,7 @@ export interface ProviderSettings {
 }
 
 // LLM Provider Options
-export type LLMProvider = "google" | "openai";
+export type LLMProvider = "google" | "openai" | "anthropic" | "groq";
 
 // LLM Model Options
 export type LLMModelType =
@@ -44,7 +44,12 @@ export type LLMModelType =
   | "gemini-3-flash-preview"
   | "gemini-3-pro-preview"
   | "gpt-4.1-mini"
-  | "gpt-4.1-nano";
+  | "gpt-4.1-nano"
+  | "claude-sonnet-4-20250514"
+  | "claude-3-5-haiku-20241022"
+  | "llama-3.3-70b-versatile"
+  | "llama-3.1-8b-instant"
+  | "deepseek-r1-distill-llama-70b";
 
 // Recently used models tracking
 export interface RecentModel {

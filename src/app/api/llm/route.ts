@@ -22,6 +22,17 @@ const OPENAI_MODEL_MAP: Record<string, string> = {
   "gpt-4.1-nano": "gpt-4.1-nano",
 };
 
+const ANTHROPIC_MODEL_MAP: Record<string, string> = {
+  "claude-sonnet-4-20250514": "claude-sonnet-4-20250514",
+  "claude-3-5-haiku-20241022": "claude-3-5-haiku-20241022",
+};
+
+const GROQ_MODEL_MAP: Record<string, string> = {
+  "llama-3.3-70b-versatile": "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant": "llama-3.1-8b-instant",
+  "deepseek-r1-distill-llama-70b": "deepseek-r1-distill-llama-70b",
+};
+
 async function generateWithGoogle(
   prompt: string,
   model: LLMModelType,
@@ -190,6 +201,147 @@ async function generateWithOpenAI(
   return text;
 }
 
+async function generateWithAnthropic(
+  prompt: string,
+  model: LLMModelType,
+  temperature: number,
+  maxTokens: number,
+  images?: string[],
+  requestId?: string,
+): Promise<string> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    logger.error('api.error', 'ANTHROPIC_API_KEY not configured', { requestId });
+    throw new Error("ANTHROPIC_API_KEY not configured. Add it to .env.local.");
+  }
+
+  const modelId = ANTHROPIC_MODEL_MAP[model] || model;
+
+  logger.info('api.llm', 'Calling Anthropic API', {
+    requestId, model: modelId, temperature, maxTokens,
+    imageCount: images?.length || 0, promptLength: prompt.length,
+  });
+
+  // Build content array for Anthropic Messages API
+  const content: Array<{ type: string; text?: string; source?: { type: string; media_type: string; data: string } }> = [];
+
+  if (images && images.length > 0) {
+    for (const img of images) {
+      const matches = img.match(/^data:(.+?);base64,(.+)$/);
+      if (matches) {
+        content.push({
+          type: "image",
+          source: {
+            type: "base64",
+            media_type: matches[1],
+            data: matches[2],
+          },
+        });
+      }
+    }
+  }
+
+  content.push({ type: "text", text: prompt });
+
+  const startTime = Date.now();
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: modelId,
+      max_tokens: maxTokens,
+      temperature,
+      messages: [{ role: "user", content }],
+    }),
+  });
+  const duration = Date.now() - startTime;
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    logger.error('api.error', 'Anthropic API request failed', {
+      requestId, status: response.status, error: (error as { error?: { message?: string } }).error?.message,
+    });
+    throw new Error((error as { error?: { message?: string } }).error?.message || `Anthropic API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = (data as { content?: Array<{ text?: string }> }).content?.[0]?.text;
+
+  if (!text) {
+    throw new Error("No text in Anthropic response");
+  }
+
+  logger.info('api.llm', 'Anthropic API response received', {
+    requestId, duration, responseLength: text.length,
+  });
+
+  return text;
+}
+
+async function generateWithGroq(
+  prompt: string,
+  model: LLMModelType,
+  temperature: number,
+  maxTokens: number,
+  _images?: string[],
+  requestId?: string,
+): Promise<string> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    logger.error('api.error', 'GROQ_API_KEY not configured', { requestId });
+    throw new Error("GROQ_API_KEY not configured. Add it to .env.local.");
+  }
+
+  const modelId = GROQ_MODEL_MAP[model] || model;
+
+  logger.info('api.llm', 'Calling Groq API', {
+    requestId, model: modelId, temperature, maxTokens,
+    promptLength: prompt.length,
+  });
+
+  // Groq uses OpenAI-compatible chat completions API
+  const startTime = Date.now();
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: modelId,
+      messages: [{ role: "user", content: prompt }],
+      temperature,
+      max_tokens: maxTokens,
+    }),
+  });
+  const duration = Date.now() - startTime;
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    logger.error('api.error', 'Groq API request failed', {
+      requestId, status: response.status, error: (error as { error?: { message?: string } }).error?.message,
+    });
+    throw new Error((error as { error?: { message?: string } }).error?.message || `Groq API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = (data as { choices?: Array<{ message?: { content?: string } }> }).choices?.[0]?.message?.content;
+
+  if (!text) {
+    throw new Error("No text in Groq response");
+  }
+
+  logger.info('api.llm', 'Groq API response received', {
+    requestId, duration, responseLength: text.length,
+  });
+
+  return text;
+}
+
 export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
 
@@ -233,6 +385,10 @@ export async function POST(request: NextRequest) {
       text = await generateWithGoogle(prompt, model, temperature, maxTokens, images, requestId, geminiApiKey);
     } else if (provider === "openai") {
       text = await generateWithOpenAI(prompt, model, temperature, maxTokens, images, requestId, openaiApiKey);
+    } else if (provider === "anthropic") {
+      text = await generateWithAnthropic(prompt, model, temperature, maxTokens, images, requestId);
+    } else if (provider === "groq") {
+      text = await generateWithGroq(prompt, model, temperature, maxTokens, images, requestId);
     } else {
       logger.warn('api.llm', 'Unknown provider requested', { requestId, provider });
       return NextResponse.json<LLMGenerateResponse>(

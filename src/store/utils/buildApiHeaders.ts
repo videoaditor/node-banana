@@ -66,6 +66,7 @@ export function buildLlmHeaders(
       headers["X-OpenAI-API-Key"] = openaiConfig.apiKey;
     }
   }
+  // Anthropic and Groq use env vars only for now (no user-settable keys yet)
 
   return headers;
 }

@@ -157,6 +157,25 @@ export function getConnectedInputsPure(
       if (!sourceNode) return;
 
       const handleId = edge.targetHandle;
+
+      // Special case: webScraper has multi-image output
+      if (sourceNode.type === "webScraper") {
+        const wsData = sourceNode.data as WebScraperNodeData;
+        if (edge.sourceHandle === "text") {
+          // Text output
+          if (wsData.outputText) text = wsData.outputText;
+        } else {
+          // Image output — push ALL scraped images
+          const allImages = wsData.outputImages || [];
+          if (allImages.length > 0) {
+            allImages.forEach(img => images.push(img));
+          } else if (wsData.outputImage) {
+            images.push(wsData.outputImage);
+          }
+        }
+        return;
+      }
+
       const { type, value } = getSourceOutput(sourceNode, edge.sourceHandle);
 
       if (!value) return;
