@@ -14,6 +14,7 @@ import type {
   PromptNodeData,
   OutputNodeData,
   OutputGalleryNodeData,
+  WebScraperNodeData,
   WorkflowNode,
   LLMGenerateNodeData,
 } from "@/types";
@@ -350,5 +351,81 @@ export async function executeGlbViewer(ctx: NodeExecutionContext): Promise<void>
       console.error(`[Workflow] GLB Viewer node ${node.id} failed:`, message);
       updateNodeData(node.id, { error: message });
     }
+  }
+}
+
+/**
+ * Web Scraper node: fetches a URL and extracts images + text.
+ * URL can come from upstream text connection or from the node's own URL field.
+ */
+export async function executeWebScraper(ctx: NodeExecutionContext): Promise<void> {
+  const { node, getConnectedInputs, updateNodeData, signal } = ctx;
+  const nodeData = node.data as WebScraperNodeData;
+
+  try {
+    // Get URL from connected input or use the node's own URL field
+    const { text: connectedText } = getConnectedInputs(node.id);
+    const url = connectedText || nodeData.url;
+
+    if (!url) {
+      updateNodeData(node.id, {
+        status: "error",
+        error: "No URL provided. Connect a text node or enter a URL.",
+      });
+      return;
+    }
+
+    // If URL came from upstream, store it
+    if (connectedText && connectedText !== nodeData.url) {
+      updateNodeData(node.id, { url: connectedText });
+    }
+
+    updateNodeData(node.id, {
+      status: "loading",
+      error: null,
+      outputImage: null,
+      outputImages: [],
+      outputText: null,
+      pageTitle: null,
+      imageCount: 0,
+    });
+
+    const response = await fetch("/api/scrape", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        url,
+        maxImages: nodeData.maxImages || 4,
+        minImageSize: nodeData.minImageSize || 100,
+      }),
+      ...(signal ? { signal } : {}),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+      throw new Error(err.error || `Failed to scrape: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    updateNodeData(node.id, {
+      status: "complete",
+      outputImage: result.images?.[0] || null,
+      outputImages: result.images || [],
+      outputText: result.text || null,
+      pageTitle: result.pageTitle || null,
+      imageCount: result.imageCount || 0,
+    });
+  } catch (error) {
+    // Don't set error state on abort
+    if ((error instanceof DOMException && error.name === "AbortError") || signal?.aborted) {
+      return;
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[Workflow] WebScraper node ${node.id} failed:`, message);
+    updateNodeData(node.id, {
+      status: "error",
+      error: message,
+    });
   }
 }

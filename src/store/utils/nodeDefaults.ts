@@ -286,12 +286,17 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
     case "webScraper":
       return {
         url: "",
-        scrapeMode: "best-image",
+        scrapeMode: "all-images",
+        maxImages: 4,
+        minImageSize: 100,
         outputImage: null,
+        outputImages: [],
         outputText: null,
+        pageTitle: null,
+        imageCount: 0,
         status: "idle",
         error: null,
-      };
+      } as WebScraperNodeData;
     case "stickyNote":
       return {
         text: "",

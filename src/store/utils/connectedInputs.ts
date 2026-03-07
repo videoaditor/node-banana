@@ -21,6 +21,7 @@ import {
   PromptConcatenatorNodeData,
   LLMGenerateNodeData,
   GLBViewerNodeData,
+  WebScraperNodeData,
 } from "@/types";
 
 /**
@@ -55,7 +56,7 @@ function isTextHandle(handleId: string | null | undefined): boolean {
 /**
  * Extract output data and type from a source node
  */
-function getSourceOutput(sourceNode: WorkflowNode): { type: "image" | "text" | "video" | "audio" | "3d"; value: string | null } {
+function getSourceOutput(sourceNode: WorkflowNode, sourceHandle?: string | null): { type: "image" | "text" | "video" | "audio" | "3d"; value: string | null } {
   if (sourceNode.type === "imageInput") {
     return { type: "image", value: (sourceNode.data as ImageInputNodeData).image };
   } else if (sourceNode.type === "audioInput") {
@@ -95,6 +96,15 @@ function getSourceOutput(sourceNode: WorkflowNode): { type: "image" | "text" | "
     return { type: "image", value };
   } else if (sourceNode.type === "textIterator") {
     return { type: "text", value: (sourceNode.data as any).currentText || null };
+  } else if (sourceNode.type === "webScraper") {
+    const wsData = sourceNode.data as WebScraperNodeData;
+    // Dual output: resolve based on source handle
+    if (sourceHandle === "text") {
+      return { type: "text", value: wsData.outputText };
+    } else {
+      // "image" handle or default — return first image
+      return { type: "image", value: wsData.outputImage || (wsData.outputImages?.[0] || null) };
+    }
   }
   return { type: "image", value: null };
 }
@@ -147,7 +157,7 @@ export function getConnectedInputsPure(
       if (!sourceNode) return;
 
       const handleId = edge.targetHandle;
-      const { type, value } = getSourceOutput(sourceNode);
+      const { type, value } = getSourceOutput(sourceNode, edge.sourceHandle);
 
       if (!value) return;
 

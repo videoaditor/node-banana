@@ -368,10 +368,15 @@ export interface TextIteratorNodeData extends BaseNodeData {
  * Web Scraper node - fetches and extracts data from URLs
  */
 export interface WebScraperNodeData extends BaseNodeData {
-  url: string;                 // URL to scrape (or from connected text handle)
-  scrapeMode: "best-image" | "all-images" | "page-text";
-  outputImage: string | null;  // For best-image mode
-  outputText: string | null;   // For all-images (JSON) or page-text mode
+  url: string;                    // URL to scrape (or from connected text handle)
+  scrapeMode: "best-image" | "all-images" | "page-text"; // Legacy — kept for compatibility
+  maxImages: number;              // Max number of images to extract (default 4)
+  minImageSize: number;           // Min width/height to filter tiny icons (default 100)
+  outputImage: string | null;     // Best/first image (for single-image consumers)
+  outputImages: string[];         // All extracted images as base64 data URIs
+  outputText: string | null;      // Cleaned page text
+  pageTitle: string | null;       // Page <title>
+  imageCount: number;             // How many images were found on the page
   status: NodeStatus;
   error: string | null;
 }
