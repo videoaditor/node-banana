@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
-import { Handle, Position, NodeProps, Node } from "@xyflow/react";
+import React, { useCallback, useState, useMemo } from "react";
+import { Handle, Position, NodeProps, Node, useEdges, useNodes } from "@xyflow/react";
 import { BaseNode } from "./BaseNode";
 import { useWorkflowStore } from "@/store/workflowStore";
-import { WebScraperNodeData } from "@/types";
+import { WebScraperNodeData, PromptNodeData, PromptConstructorNodeData, LLMGenerateNodeData } from "@/types";
 
 type WebScraperNodeType = Node<WebScraperNodeData, "webScraper">;
 
@@ -12,6 +12,22 @@ export function WebScraperNode({ id, data, selected }: NodeProps<WebScraperNodeT
   const nodeData = data;
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
   const [isScraping, setIsScraping] = useState(false);
+
+  // Resolve URL from connected text input (upstream Prompt/LLM/etc.)
+  const edges = useEdges();
+  const nodes = useNodes();
+  const connectedUrl = useMemo(() => {
+    const incomingEdge = edges.find(e => e.target === id && (e.targetHandle === "text" || !e.targetHandle));
+    if (!incomingEdge) return null;
+    const sourceNode = nodes.find(n => n.id === incomingEdge.source);
+    if (!sourceNode) return null;
+    const d = sourceNode.data as Record<string, unknown>;
+    const text = (d.outputText as string) ?? (d.prompt as string) ?? null;
+    return text?.trim() || null;
+  }, [id, edges, nodes]);
+
+  // Effective URL: connected input takes priority
+  const effectiveUrl = connectedUrl || nodeData.url;
 
   const handleUrlChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,7 +44,11 @@ export function WebScraperNode({ id, data, selected }: NodeProps<WebScraperNodeT
   );
 
   const handleScrape = useCallback(async () => {
-    if (!nodeData.url) return;
+    const urlToScrape = connectedUrl || nodeData.url;
+    if (!urlToScrape) return;
+
+    // Normalize: add https:// if missing
+    const normalizedUrl = urlToScrape.startsWith("http") ? urlToScrape : `https://${urlToScrape}`;
 
     setIsScraping(true);
     updateNodeData(id, {
@@ -46,7 +66,7 @@ export function WebScraperNode({ id, data, selected }: NodeProps<WebScraperNodeT
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          url: nodeData.url,
+          url: normalizedUrl,
           maxImages: nodeData.maxImages || 4,
           minImageSize: nodeData.minImageSize || 100,
         }),
@@ -75,7 +95,7 @@ export function WebScraperNode({ id, data, selected }: NodeProps<WebScraperNodeT
     } finally {
       setIsScraping(false);
     }
-  }, [id, nodeData.url, nodeData.maxImages, nodeData.minImageSize, updateNodeData]);
+  }, [id, connectedUrl, nodeData.url, nodeData.maxImages, nodeData.minImageSize, updateNodeData]);
 
   const hasImages = nodeData.outputImages && nodeData.outputImages.length > 0;
   const hasText = !!nodeData.outputText;
@@ -113,18 +133,24 @@ export function WebScraperNode({ id, data, selected }: NodeProps<WebScraperNodeT
       />
 
       <div className="space-y-2.5 p-3">
-        {/* URL input */}
+        {/* URL input — shows connected URL or manual entry */}
         <div>
           <label className="block text-[10px] text-[var(--text-muted)] mb-0.5 font-medium uppercase tracking-wider">
-            URL
+            URL {connectedUrl && <span className="text-emerald-400 normal-case">← from input</span>}
           </label>
-          <input
-            type="text"
-            value={nodeData.url}
-            onChange={handleUrlChange}
-            placeholder="https://store.example.com/product"
-            className="nodrag nopan w-full px-2 py-1.5 text-xs bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-md focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
-          />
+          {connectedUrl ? (
+            <div className="w-full px-2 py-1.5 text-xs bg-emerald-500/5 border border-emerald-500/20 rounded-md text-[var(--text-secondary)] truncate" title={connectedUrl}>
+              {connectedUrl}
+            </div>
+          ) : (
+            <input
+              type="text"
+              value={nodeData.url}
+              onChange={handleUrlChange}
+              placeholder="https://store.example.com"
+              className="nodrag nopan w-full px-2 py-1.5 text-xs bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-md focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+            />
+          )}
         </div>
 
         {/* Settings row */}
@@ -160,7 +186,7 @@ export function WebScraperNode({ id, data, selected }: NodeProps<WebScraperNodeT
         {/* Scrape button */}
         <button
           onClick={handleScrape}
-          disabled={!nodeData.url || isScraping}
+          disabled={!effectiveUrl || isScraping}
           className="w-full px-3 py-2 text-xs font-semibold rounded-md transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
             background: isScraping
@@ -223,7 +249,7 @@ export function WebScraperNode({ id, data, selected }: NodeProps<WebScraperNodeT
               Images ({nodeData.outputImages.length} / {nodeData.imageCount} found)
             </div>
             <div className={`grid gap-1 rounded overflow-hidden ${nodeData.outputImages.length === 1 ? "grid-cols-1" :
-                nodeData.outputImages.length <= 4 ? "grid-cols-2" : "grid-cols-3"
+              nodeData.outputImages.length <= 4 ? "grid-cols-2" : "grid-cols-3"
               }`}>
               {nodeData.outputImages.map((img, i) => (
                 <img

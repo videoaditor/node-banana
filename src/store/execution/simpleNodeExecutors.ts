@@ -365,7 +365,9 @@ export async function executeWebScraper(ctx: NodeExecutionContext): Promise<void
   try {
     // Get URL from connected input or use the node's own URL field
     const { text: connectedText } = getConnectedInputs(node.id);
-    const url = connectedText || nodeData.url;
+    const rawUrl = connectedText || nodeData.url;
+    // Normalize: add https:// if missing
+    const url = rawUrl ? (rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`) : "";
 
     if (!url) {
       updateNodeData(node.id, {
