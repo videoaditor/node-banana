@@ -22,7 +22,7 @@ interface ProjectMeta {
   placeholderColor: string;
 }
 
-type FilterTab = "all" | "favorites" | "templates";
+type FilterTab = "all" | "team" | "favorites" | "templates";
 
 const FAVORITES_STORAGE_KEY = "node-banana-favorites";
 
@@ -34,9 +34,11 @@ export function QuickstartInitialView({
   onWorkflowSelected,
 }: QuickstartInitialViewProps) {
   const [allProjects, setAllProjects] = useState<ProjectMeta[]>([]);
+  const [teamWorkflows, setTeamWorkflows] = useState<ProjectMeta[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
+  const [isLoadingTeam, setIsLoadingTeam] = useState(true);
   const [loadingProjectId, setLoadingProjectId] = useState<string | null>(null);
 
   const presets = getAllPresets();
@@ -89,6 +91,24 @@ export function QuickstartInitialView({
     }
 
     fetchProjects();
+  }, []);
+
+  // Fetch team workflows from .shared-workflows/
+  useEffect(() => {
+    async function fetchTeamWorkflows() {
+      try {
+        const response = await fetch("/api/team-workflows");
+        const result = await response.json();
+        if (result.success && result.workflows) {
+          setTeamWorkflows(result.workflows);
+        }
+      } catch (error) {
+        console.error("Failed to fetch team workflows:", error);
+      } finally {
+        setIsLoadingTeam(false);
+      }
+    }
+    fetchTeamWorkflows();
   }, []);
 
   // Load a workflow from file path
@@ -286,7 +306,7 @@ export function QuickstartInitialView({
         <div className="max-w-[1400px] mx-auto">
           {/* Tabs */}
           <div className="flex items-center gap-1 mb-5 border-b border-[var(--border-subtle)]">
-            {(["all", "favorites", "templates"] as FilterTab[]).map((tab) => (
+            {(["all", "team", "favorites", "templates"] as FilterTab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveFilter(tab)}
@@ -295,7 +315,17 @@ export function QuickstartInitialView({
                   : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                   }`}
               >
-                {tab === "all" ? "All Workflows" : tab === "favorites" ? "Favorites" : "Templates"}
+                {tab === "all" ? "All Workflows" : tab === "team" ? (
+                  <span className="flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                    </svg>
+                    Team
+                    {teamWorkflows.length > 0 && (
+                      <span className="px-1.5 py-0.5 rounded text-[9px] bg-blue-500/20 text-blue-400 font-medium">{teamWorkflows.length}</span>
+                    )}
+                  </span>
+                ) : tab === "favorites" ? "Favorites" : "Templates"}
                 {activeFilter === tab && (
                   <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#f97316] to-[#ef4444] rounded-full" />
                 )}
@@ -303,17 +333,63 @@ export function QuickstartInitialView({
             ))}
             {/* Project count */}
             <span className="ml-auto text-xs text-[var(--text-muted)]">
-              {activeFilter === "templates" ? `${presets.length} templates` : `${filteredProjects.length} workflows`}
+              {activeFilter === "templates" ? `${presets.length} templates` : activeFilter === "team" ? `${teamWorkflows.length} shared` : `${filteredProjects.length} workflows`}
             </span>
           </div>
 
           {/* Content */}
-          {isLoadingProjects ? (
+          {(isLoadingProjects && activeFilter !== "team") || (isLoadingTeam && activeFilter === "team") ? (
             <div className="flex items-center justify-center py-16">
               <div className="flex items-center gap-3 text-[var(--text-muted)]">
                 <div className="w-5 h-5 border-2 border-[var(--text-muted)] border-t-transparent rounded-full animate-spin" />
                 <span className="text-sm">Loading workflows...</span>
               </div>
+            </div>
+          ) : activeFilter === "team" ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {teamWorkflows.length === 0 ? (
+                <div className="col-span-full py-16 text-center">
+                  <svg className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                  </svg>
+                  <p className="text-sm text-[var(--text-muted)]">No team workflows yet. Save a workflow to share it.</p>
+                </div>
+              ) : (
+                teamWorkflows.map((project) => (
+                  <button
+                    key={project.filename}
+                    onClick={() => handleLoadProject(project)}
+                    disabled={loadingProjectId !== null}
+                    className="group bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-blue-500/30 rounded-xl overflow-hidden transition-all duration-200 text-left disabled:opacity-50 hover:shadow-lg hover:shadow-blue-500/5"
+                  >
+                    <div className="w-full h-32 bg-[var(--bg-base)] relative overflow-hidden">
+                      {project.previewDataUrl ? (
+                        <img src={project.previewDataUrl!} alt="" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: project.placeholderColor, opacity: 0.1 }}>
+                          <svg className="w-10 h-10 text-[var(--text-muted)] opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25l-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3l2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75l2.25-1.313M12 21.75V15m0 6.75l-2.25-1.313M12 15l2.25 1.313M12 15l-2.25 1.313" />
+                          </svg>
+                        </div>
+                      )}
+                      <div className="absolute top-2 left-2">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] bg-blue-500/30 text-blue-300 font-medium border border-blue-500/20">Team</span>
+                      </div>
+                      <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/50 backdrop-blur-sm rounded text-[10px] text-white/70">
+                        {project.nodeCount} nodes
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <div className="text-sm font-medium text-[var(--text-primary)] group-hover:text-blue-300 transition-colors truncate">
+                        {project.name}
+                      </div>
+                      <div className="text-[11px] text-[var(--text-muted)] mt-1">
+                        {getRelativeTime(project.modifiedAt)}
+                      </div>
+                    </div>
+                  </button>
+                ))
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -422,3 +498,4 @@ export function QuickstartInitialView({
     </div>
   );
 }
+

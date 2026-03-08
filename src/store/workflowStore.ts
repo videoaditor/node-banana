@@ -1810,6 +1810,15 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           useExternalImageStorage,
         });
 
+        // Also push a copy to team-workflows (fire-and-forget, don't block on it)
+        fetch("/api/team-workflows", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workflow: { ...workflow, name: workflowName } }),
+        }).catch((err) => {
+          console.warn("[workflowStore] Failed to sync to team-workflows:", err);
+        });
+
         return true;
       } else {
         useToast.getState().show(`Auto-save failed: ${result.error}`, "error");
