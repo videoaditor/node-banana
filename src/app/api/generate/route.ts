@@ -505,8 +505,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Default: Use Gemini
-    // User-provided key (from settings) takes precedence over env variable
-    const geminiApiKey = request.headers.get("X-Gemini-API-Key") || process.env.GEMINI_API_KEY;
+    // User-provided key (from settings) takes precedence, but fall back to env key on auth error.
+    const userGeminiKey = request.headers.get("X-Gemini-API-Key") || null;
+    const envGeminiKey = process.env.GEMINI_API_KEY || null;
+    const geminiApiKey = userGeminiKey || envGeminiKey;
 
     if (!geminiApiKey) {
       return NextResponse.json<GenerateResponse>(
@@ -521,7 +523,7 @@ export async function POST(request: NextRequest) {
     // Use selectedModel.modelId if available (new format), fallback to legacy model field
     const geminiModel = (selectedModel?.modelId as ModelType) || model;
 
-    return await generateWithGemini(
+    const geminiResult = await generateWithGemini(
       requestId,
       geminiApiKey,
       prompt,
@@ -531,6 +533,18 @@ export async function POST(request: NextRequest) {
       resolution,
       useGoogleSearch
     );
+
+    // If user key caused auth error, retry transparently with env key
+    if (userGeminiKey && envGeminiKey && userGeminiKey !== envGeminiKey) {
+      const cloned = geminiResult.clone();
+      const body = await cloned.json() as GenerateResponse;
+      if (!body.success && body.error && /expired|invalid.*key|api.*key|INVALID_ARGUMENT/i.test(body.error)) {
+        console.log(`[API:${requestId}] User Gemini key auth error, retrying with env key`);
+        return await generateWithGemini(requestId, envGeminiKey, prompt, images || [], geminiModel, aspectRatio, resolution, useGoogleSearch);
+      }
+    }
+
+    return geminiResult;
   } catch (error) {
     // Extract error information
     let errorMessage = "Generation failed";

@@ -28,14 +28,12 @@ export function AppView() {
     const isRunning = useWorkflowStore((state) => state.isRunning);
 
     const [latestOutputs, setLatestOutputs] = useState<AppOutput[]>([]);
-    const [mediaArchive, setMediaArchive] = useState<AppOutput[]>([]);
     const [showApiDocs, setShowApiDocs] = useState(false);
     const [shareUrl, setShareUrl] = useState<string | null>(null);
     const [isSharing, setIsSharing] = useState(false);
     const [lightboxImage, setLightboxImage] = useState<string | null>(null);
     const [inputValues, setInputValues] = useState<Record<string, string>>({});
     const [multiImageInputs, setMultiImageInputs] = useState<Record<string, string[]>>({});
-    const [showArchive, setShowArchive] = useState(false);
 
     const appInputNodes = useMemo(() => {
         return nodes.filter((node) => {
@@ -163,8 +161,6 @@ export function AppView() {
             }
 
             setLatestOutputs(collectedOutputs);
-            // Prepend to archive
-            setMediaArchive((prev) => [...collectedOutputs, ...prev]);
         } catch (error) {
             console.error("Workflow execution failed:", error);
         }
@@ -209,11 +205,6 @@ export function AppView() {
 ${apiSchema.inputs.map((i) => `      "${i.nodeId}": ${i.type === "text" ? '"your text here"' : '"data:image/png;base64,..."'}`).join(",\n")}
     }
   }'`;
-
-    const formatTime = (ts: number) => {
-        const d = new Date(ts);
-        return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-    };
 
     return (
         <div className="flex-1 overflow-hidden relative" style={{ background: "linear-gradient(170deg, #0c0c0f 0%, #111115 40%, #0e0f13 100%)" }}>
@@ -411,25 +402,11 @@ ${apiSchema.inputs.map((i) => `      "${i.nodeId}": ${i.type === "text" ? '"your
 
                         {/* Output Area — Always visible */}
                         <div className="rounded-[20px] border border-white/[0.06] overflow-hidden" style={{ background: "rgba(255,255,255,0.015)" }}>
-                            <div className="px-7 pt-6 pb-2 flex items-center justify-between">
+                            <div className="px-7 pt-6 pb-2">
                                 <div className="flex items-center gap-2">
                                     <div className="w-[5px] h-[5px] rounded-full bg-emerald-400/80" />
                                     <span className="text-[10px] font-semibold text-[#555] uppercase tracking-[0.15em]">Output</span>
                                 </div>
-                                {mediaArchive.length > 0 && (
-                                    <button
-                                        onClick={() => setShowArchive(!showArchive)}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-medium transition-all duration-200 border ${showArchive
-                                                ? "bg-white/[0.06] text-[#aaa] border-white/[0.1]"
-                                                : "text-[#555] border-white/[0.04] hover:bg-white/[0.03] hover:text-[#888]"
-                                            }`}
-                                    >
-                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                                        </svg>
-                                        Archive ({mediaArchive.length})
-                                    </button>
-                                )}
                             </div>
                             <div className="px-7 pb-7">
                                 {/* Running state */}
@@ -490,55 +467,6 @@ ${apiSchema.inputs.map((i) => `      "${i.nodeId}": ${i.type === "text" ? '"your
                                 )}
                             </div>
                         </div>
-
-                        {/* Media Archive */}
-                        {showArchive && mediaArchive.length > 0 && (
-                            <div className="rounded-[20px] border border-white/[0.06] overflow-hidden" style={{ background: "rgba(255,255,255,0.015)" }}>
-                                <div className="px-7 pt-6 pb-2">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-[5px] h-[5px] rounded-full bg-amber-400/80" />
-                                        <span className="text-[10px] font-semibold text-[#555] uppercase tracking-[0.15em]">Past Generations</span>
-                                    </div>
-                                </div>
-                                <div className="px-7 pb-7">
-                                    <div className="grid grid-cols-4 gap-2">
-                                        {mediaArchive
-                                            .filter((o) => o.type === "image" || o.type === "video")
-                                            .map((item, idx) => (
-                                                <div
-                                                    key={idx}
-                                                    className="relative group aspect-square rounded-xl overflow-hidden border border-white/[0.04] bg-black cursor-pointer hover:border-orange-500/20 transition-all duration-300"
-                                                    onClick={() => item.type === "image" && setLightboxImage(item.data)}
-                                                >
-                                                    {item.type === "video" ? (
-                                                        <video src={item.data} className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <img src={item.data} alt={item.label} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
-                                                    )}
-                                                    <div className="absolute bottom-0 inset-x-0 p-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <span className="text-[9px] text-white/70">{formatTime(item.timestamp)}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                    </div>
-                                    {mediaArchive.filter((o) => o.type === "text").length > 0 && (
-                                        <div className="mt-3 space-y-2">
-                                            {mediaArchive
-                                                .filter((o) => o.type === "text")
-                                                .map((item, idx) => (
-                                                    <div key={`arch-text-${idx}`} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-                                                        <div className="flex items-center justify-between mb-1">
-                                                            <span className="text-[9px] text-[#555] font-medium">{item.label}</span>
-                                                            <span className="text-[9px] text-[#444]">{formatTime(item.timestamp)}</span>
-                                                        </div>
-                                                        <div className="text-[11px] text-[#999] line-clamp-2">{item.data}</div>
-                                                    </div>
-                                                ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
 
                         {/* API Documentation */}
                         {showApiDocs && (

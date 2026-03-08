@@ -382,7 +382,19 @@ export async function POST(request: NextRequest) {
     let text: string;
 
     if (provider === "google") {
-      text = await generateWithGoogle(prompt, model, temperature, maxTokens, images, requestId, geminiApiKey);
+      try {
+        text = await generateWithGoogle(prompt, model, temperature, maxTokens, images, requestId, geminiApiKey);
+      } catch (err) {
+        // If user key caused auth error, retry with env key
+        const errMsg = err instanceof Error ? err.message : String(err);
+        if (geminiApiKey && process.env.GEMINI_API_KEY && geminiApiKey !== process.env.GEMINI_API_KEY &&
+            /expired|invalid.*key|api.*key|INVALID_ARGUMENT/i.test(errMsg)) {
+          logger.info('api.llm', 'User Gemini key auth error, retrying with env key', { requestId });
+          text = await generateWithGoogle(prompt, model, temperature, maxTokens, images, requestId, null);
+        } else {
+          throw err;
+        }
+      }
     } else if (provider === "openai") {
       text = await generateWithOpenAI(prompt, model, temperature, maxTokens, images, requestId, openaiApiKey);
     } else if (provider === "anthropic") {
