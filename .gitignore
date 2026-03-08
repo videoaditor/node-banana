@@ -50,4 +50,5 @@ logs/*.json
 .agents/
 
 # shared workflows (local data)
+.shared-workflows/logs/
 .shared-workflows/

@@ -523,6 +523,7 @@ export async function POST(request: NextRequest) {
     // Use selectedModel.modelId if available (new format), fallback to legacy model field
     const geminiModel = (selectedModel?.modelId as ModelType) || model;
 
+    // Try with the resolved key first
     const geminiResult = await generateWithGemini(
       requestId,
       geminiApiKey,
@@ -534,14 +535,15 @@ export async function POST(request: NextRequest) {
       useGoogleSearch
     );
 
-    // If user key caused auth error, retry transparently with env key
+    // If user key was used and it failed with auth error, retry with env key
     if (userGeminiKey && envGeminiKey && userGeminiKey !== envGeminiKey) {
-      const cloned = geminiResult.clone();
-      const body = await cloned.json() as GenerateResponse;
+      const body = await geminiResult.json() as GenerateResponse;
       if (!body.success && body.error && /expired|invalid.*key|api.*key|INVALID_ARGUMENT/i.test(body.error)) {
-        console.log(`[API:${requestId}] User Gemini key auth error, retrying with env key`);
+        console.log(`[API:${requestId}] User Gemini key auth error, falling back to server key`);
         return await generateWithGemini(requestId, envGeminiKey, prompt, images || [], geminiModel, aspectRatio, resolution, useGoogleSearch);
       }
+      // Key was fine, return the parsed body as a new response
+      return NextResponse.json(body, { status: body.success ? 200 : 500 });
     }
 
     return geminiResult;

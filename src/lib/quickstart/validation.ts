@@ -50,6 +50,7 @@ const DEFAULT_DIMENSIONS: Record<NodeType, { width: number; height: number }> = 
   stickyNote: { width: 200, height: 160 },
   soraBlueprint: { width: 320, height: 360 },
   brollBatch: { width: 380, height: 420 },
+  subWorkflow: { width: 300, height: 260 },
 
 };
 
@@ -380,7 +381,7 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
         outputText: null,
         status: "idle",
         error: null,
-      };
+      } as WorkflowNodeData;
     case "stickyNote":
       return {
         text: "",
@@ -407,7 +408,15 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
         shots: [],
         status: "idle",
         error: null,
-
+      };
+    case "subWorkflow":
+      return {
+        selectedWorkflowFilename: null,
+        selectedWorkflowName: null,
+        outputText: null,
+        outputImage: null,
+        status: "idle",
+        error: null,
       };
   }
 }

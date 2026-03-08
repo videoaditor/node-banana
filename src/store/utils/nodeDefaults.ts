@@ -22,6 +22,7 @@ import {
   StickyNoteNodeData,
   SoraBlueprintNodeData,
   BrollBatchNodeData,
+  SubWorkflowNodeData,
 
   WorkflowNodeData,
   GroupColor,
@@ -57,6 +58,7 @@ export const defaultNodeDimensions: Record<NodeType, { width: number; height: nu
   stickyNote: { width: 200, height: 160 },
   soraBlueprint: { width: 320, height: 360 },
   brollBatch: { width: 380, height: 420 },
+  subWorkflow: { width: 300, height: 260 },
 
 };
 
@@ -324,6 +326,15 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         status: "idle",
         error: null,
       } as BrollBatchNodeData;
+    case "subWorkflow":
+      return {
+        selectedWorkflowFilename: null,
+        selectedWorkflowName: null,
+        outputText: null,
+        outputImage: null,
+        status: "idle",
+        error: null,
+      } as SubWorkflowNodeData;
 
   }
 };

@@ -43,6 +43,7 @@ import {
   StickyNoteNode,
   SoraBlueprintNode,
   BrollBatchNode,
+  SubWorkflowNode,
 
 } from "./nodes";
 
@@ -89,6 +90,7 @@ const nodeTypes: NodeTypes = {
   stickyNote: StickyNoteNode,
   soraBlueprint: SoraBlueprintNode,
   brollBatch: BrollBatchNode,
+  subWorkflow: SubWorkflowNode,
 
 };
 
@@ -1168,6 +1170,7 @@ export function WorkflowCanvas() {
               stickyNote: { width: 200, height: 200 },
               soraBlueprint: { width: 320, height: 360 },
               brollBatch: { width: 380, height: 420 },
+              subWorkflow: { width: 300, height: 260 },
             };
             const dims = defaultDimensions[nodeType!];
             addNode(nodeType!, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
@@ -1204,6 +1207,7 @@ export function WorkflowCanvas() {
           stickyNote: { width: 200, height: 160 },
           soraBlueprint: { width: 320, height: 360 },
           brollBatch: { width: 380, height: 420 },
+          subWorkflow: { width: 300, height: 260 },
         };
         const dims = defaultDimensions[nodeType];
         addNode(nodeType, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
@@ -1788,6 +1792,7 @@ export function WorkflowCanvas() {
           </div>
           {[
             { type: "stickyNote", label: "Sticky Note", icon: "M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75h9z" },
+            { type: "subWorkflow", label: "Sub-Workflow", icon: "M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z" },
           ].map(({ type, label, icon }) => (
             <button
               key={type}
@@ -1953,6 +1958,8 @@ export function WorkflowCanvas() {
                 return "#0ea5e9"; // sky-500 (text iteration)
               case "webScraper":
                 return "#f59e0b"; // amber-500 (web)
+              case "subWorkflow":
+                return "#818cf8"; // indigo-400 (nested workflow)
               default:
                 return "#94a3b8";
             }

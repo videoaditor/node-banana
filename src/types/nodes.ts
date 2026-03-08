@@ -45,7 +45,8 @@ export type NodeType =
   | "webScraper"
   | "stickyNote"
   | "soraBlueprint"
-  | "brollBatch";
+  | "brollBatch"
+  | "subWorkflow";
 
 
 /**
@@ -460,7 +461,8 @@ export type WorkflowNodeData =
   | WebScraperNodeData
   | StickyNoteNodeData
   | SoraBlueprintNodeData
-  | BrollBatchNodeData;
+  | BrollBatchNodeData
+  | SubWorkflowNodeData;
 
 
 /**
@@ -517,4 +519,18 @@ export interface NodeDefaultsConfig {
   generateVideo?: GenerateVideoNodeDefaults;
   generate3d?: Generate3DNodeDefaults;
   llm?: LLMNodeDefaults;
+}
+
+/**
+ * Sub-workflow node — calls another saved workflow as a step.
+ * Inputs: text (optional), image (optional)
+ * Outputs: text (optional), image (optional)
+ */
+export interface SubWorkflowNodeData extends BaseNodeData {
+  selectedWorkflowFilename: string | null;
+  selectedWorkflowName: string | null;
+  outputText: string | null;
+  outputImage: string | null;
+  status: "idle" | "loading" | "complete" | "error";
+  error: string | null;
 }

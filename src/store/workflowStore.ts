@@ -75,6 +75,7 @@ import {
   executeEaseCurve,
   executeGlbViewer,
   executeWebScraper,
+  executeSubWorkflowNode,
 } from "./execution";
 import type { NodeExecutionContext } from "./execution";
 export type { LevelGroup } from "./utils/executionUtils";
@@ -942,6 +943,9 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         case "webScraper":
           await executeWebScraper(executionCtx);
           break;
+        case "subWorkflow":
+          await executeSubWorkflowNode(executionCtx);
+          break;
       }
     }; // End of executeSingleNode helper
 
@@ -1343,6 +1347,9 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           break;
         case "webScraper":
           await executeWebScraper(executionCtx);
+          break;
+        case "subWorkflow":
+          await executeSubWorkflowNode(executionCtx);
           break;
       }
     };
