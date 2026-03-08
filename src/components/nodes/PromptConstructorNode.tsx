@@ -134,6 +134,24 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
     [id, updateNodeData]
   );
 
+  // Helper: read the current user-facing text from a source node.
+  // For prompt/promptConstructor/promptConcatenator nodes, prefer the live editable
+  // value (prompt / outputText computed from inputs) over stale execution artifacts.
+  // For all other nodes (LLM, scraper, etc.), prefer outputText (the execution result).
+  const getSourceNodeText = useCallback((sourceNode: typeof nodes[0]): string | null => {
+    const d = sourceNode.data as Record<string, unknown>;
+    if (sourceNode.type === "prompt") {
+      // Prompt nodes: the user-edited value is in `prompt`, always prefer it
+      return (d.prompt as string | null) || null;
+    }
+    if (sourceNode.type === "promptConstructor" || sourceNode.type === "promptConcatenator") {
+      // These dynamically compute outputText from their inputs — use it
+      return (d.outputText as string | null) || null;
+    }
+    // All other nodes: prefer outputText (execution result), fallback to prompt
+    return (d.outputText as string | null) ?? (d.prompt as string | null) ?? null;
+  }, []);
+
   // Dynamically compute outputText so downstream nodes have access immediately
   useEffect(() => {
     if (isEditing) return;
@@ -144,11 +162,7 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
       const edge = edges.find(e => e.target === id && e.targetHandle === handleId);
       if (edge) {
         const sourceNode = nodes.find(n => n.id === edge.source);
-        const sourceText = sourceNode
-          ? ((sourceNode.data as Record<string, unknown>).outputText as string)
-          ?? ((sourceNode.data as Record<string, unknown>).prompt as string)
-          ?? null
-          : null;
+        const sourceText = sourceNode ? getSourceNodeText(sourceNode) : null;
         if (sourceText && sourceText.trim()) {
           inputTexts.push(sourceText.trim());
         }
@@ -167,9 +181,7 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
       if (!isTextEdge) continue;
       const sourceNode = nodes.find(n => n.id === edge.source);
       if (!sourceNode) continue;
-      const text = ((sourceNode.data as Record<string, unknown>).outputText as string)
-        ?? ((sourceNode.data as Record<string, unknown>).prompt as string)
-        ?? null;
+      const text = getSourceNodeText(sourceNode);
       if (text && text.trim()) {
         inputTexts.push(text.trim());
         seenSourceIds.add(sourceNode.id);
@@ -187,7 +199,7 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
         updateNodeData(id, { outputText: assembledText });
       }, 0);
     }
-  }, [edges, nodes, id, inputCount, localStaticText, nodeData.outputText, updateNodeData, isEditing]);
+  }, [edges, nodes, id, inputCount, localStaticText, nodeData.outputText, updateNodeData, isEditing, getSourceNodeText]);
 
   // Build handle style positions (evenly distributed vertically)
   const getHandleStyle = (index: number, total: number): React.CSSProperties => {
@@ -253,11 +265,7 @@ export function PromptConstructorNode({ id, data, selected }: NodeProps<PromptCo
               const handleId = `text_input_${inputNum}`;
               const edge = edges.find(e => e.target === id && e.targetHandle === handleId);
               const sourceNode = edge ? nodes.find(n => n.id === edge.source) : null;
-              const sourceText = sourceNode
-                ? ((sourceNode.data as Record<string, unknown>).outputText as string)
-                ?? ((sourceNode.data as Record<string, unknown>).prompt as string)
-                ?? null
-                : null;
+              const sourceText = sourceNode ? getSourceNodeText(sourceNode) : null;
               const isConnected = !!edge;
 
               return (

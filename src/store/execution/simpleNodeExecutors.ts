@@ -89,10 +89,17 @@ export async function executePromptConstructor(ctx: NodeExecutionContext): Promi
     const seenSourceIds = new Set<string>();
     const inputTexts: string[] = [];
 
-    // Helper: extract text output from any source node
+    // Helper: extract text output from any source node.
+    // For prompt nodes, prefer `prompt` (user-editable value) over any stale execution outputText.
+    // For other nodes, prefer `outputText` (execution result).
     function extractSourceText(sourceNode: WorkflowNode): string | null {
       const d = sourceNode.data as Record<string, unknown>;
-      const val = (d.outputText as string | null) ?? (d.prompt as string | null) ?? null;
+      let val: string | null;
+      if (sourceNode.type === "prompt") {
+        val = (d.prompt as string | null) ?? null;
+      } else {
+        val = (d.outputText as string | null) ?? (d.prompt as string | null) ?? null;
+      }
       return val && String(val).trim() ? String(val).trim() : null;
     }
 
@@ -166,21 +173,23 @@ export async function executePromptConcatenator(ctx: NodeExecutionContext): Prom
       i === 0 ? "text" : `text-${i}`
     );
 
-    // Helper: extract text output from any node type
+    // Helper: extract text output from any node type.
+    // Prompt nodes: always read `prompt` (user-editable value).
+    // Other nodes: prefer `outputText` (execution result).
     const extractText = (n: ReturnType<typeof getNodes>[0]): string | null => {
       const d = n.data as Record<string, unknown>;
-      // Most nodes expose outputText or prompt
-      if (typeof d.outputText === "string" && d.outputText) return d.outputText;
-      if (typeof d.prompt === "string" && d.prompt) return d.prompt;
-      // webScraper page-text mode
-      if (n.type === "webScraper" && typeof d.outputText === "string") return d.outputText;
-      // llmGenerate
-      if (n.type === "llmGenerate" && typeof d.outputText === "string") return d.outputText;
+      // Prompt nodes: user-editable value is `prompt`
+      if (n.type === "prompt") {
+        return typeof d.prompt === "string" && d.prompt ? d.prompt : null;
+      }
       // promptConstructor
       if (n.type === "promptConstructor") {
         const pc = d as PromptConstructorNodeData;
         return pc.outputText ?? pc.template ?? null;
       }
+      // All other nodes: prefer outputText, fallback to prompt
+      if (typeof d.outputText === "string" && d.outputText) return d.outputText;
+      if (typeof d.prompt === "string" && d.prompt) return d.prompt;
       return null;
     };
 
