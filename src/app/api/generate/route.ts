@@ -523,30 +523,121 @@ export async function POST(request: NextRequest) {
     // Use selectedModel.modelId if available (new format), fallback to legacy model field
     const geminiModel = (selectedModel?.modelId as ModelType) || model;
 
-    // Try with the resolved key first
-    const geminiResult = await generateWithGemini(
-      requestId,
-      geminiApiKey,
-      prompt,
-      images || [],
-      geminiModel,
-      aspectRatio,
-      resolution,
-      useGoogleSearch
-    );
+    // Helper: check if an error is a transient Gemini failure (503, overloaded, rate limit)
+    const isTransientGeminiError = (err: string) =>
+      /503|UNAVAILABLE|overloaded|high demand|capacity|temporarily|RESOURCE_EXHAUSTED/i.test(err);
 
-    // If user key was used and it failed with auth error, retry with env key
-    if (userGeminiKey && envGeminiKey && userGeminiKey !== envGeminiKey) {
-      const body = await geminiResult.json() as GenerateResponse;
-      if (!body.success && body.error && /expired|invalid.*key|api.*key|INVALID_ARGUMENT/i.test(body.error)) {
-        console.log(`[API:${requestId}] User Gemini key auth error, falling back to server key`);
-        return await generateWithGemini(requestId, envGeminiKey, prompt, images || [], geminiModel, aspectRatio, resolution, useGoogleSearch);
+    // Helper: attempt fal.ai fallback for image generation
+    const tryFalFallback = async (fallbackPrompt: string, fallbackImages: string[]): Promise<NextResponse<GenerateResponse> | null> => {
+      const falApiKey = process.env.FAL_API_KEY || null;
+      if (!falApiKey) {
+        console.log(`[API:${requestId}] No FAL_API_KEY configured, cannot fallback`);
+        return null;
       }
-      // Key was fine, return the parsed body as a new response
-      return NextResponse.json(body, { status: body.success ? 200 : 500 });
-    }
 
-    return geminiResult;
+      // Only fallback for image generation, not video/3d
+      if (mediaType === "video" || mediaType === "3d") {
+        console.log(`[API:${requestId}] Skipping fal.ai fallback for ${mediaType} (image-only)`);
+        return null;
+      }
+
+      console.log(`[API:${requestId}] ⚡ Gemini overloaded — falling back to fal.ai (flux-schnell)`);
+
+      try {
+        const genInput: GenerationInput = {
+          model: {
+            id: "fal-ai/flux/schnell",
+            name: "Flux Schnell (fallback)",
+            provider: "fal",
+            capabilities: ["text-to-image"],
+            description: null,
+          },
+          prompt: fallbackPrompt || "",
+          images: fallbackImages,
+          parameters: {
+            image_size: aspectRatio === "16:9" ? "landscape_16_9"
+              : aspectRatio === "9:16" ? "portrait_16_9"
+              : aspectRatio === "4:3" ? "landscape_4_3"
+              : aspectRatio === "3:4" ? "portrait_4_3"
+              : "square",
+            num_images: 1,
+          },
+        };
+
+        const result = await generateWithFalQueue(requestId, falApiKey, genInput);
+
+        if (!result.success) {
+          console.log(`[API:${requestId}] fal.ai fallback also failed: ${result.error}`);
+          return null;
+        }
+
+        const output = result.outputs?.[0];
+        if (!output?.data) {
+          console.log(`[API:${requestId}] fal.ai fallback returned no output`);
+          return null;
+        }
+
+        console.log(`[API:${requestId}] ✅ fal.ai fallback succeeded`);
+        return NextResponse.json<GenerateResponse>({
+          success: true,
+          image: output.data,
+          contentType: "image",
+        });
+      } catch (falErr) {
+        console.error(`[API:${requestId}] fal.ai fallback error:`, falErr);
+        return null;
+      }
+    };
+
+    // Try Gemini (with fal.ai fallback on transient errors)
+    try {
+      // Try with the resolved key first
+      const geminiResult = await generateWithGemini(
+        requestId,
+        geminiApiKey,
+        prompt,
+        images || [],
+        geminiModel,
+        aspectRatio,
+        resolution,
+        useGoogleSearch
+      );
+
+      // If user key was used and it failed with auth error, retry with env key
+      if (userGeminiKey && envGeminiKey && userGeminiKey !== envGeminiKey) {
+        const body = await geminiResult.json() as GenerateResponse;
+        if (!body.success && body.error && /expired|invalid.*key|api.*key|INVALID_ARGUMENT/i.test(body.error)) {
+          console.log(`[API:${requestId}] User Gemini key auth error, falling back to server key`);
+          return await generateWithGemini(requestId, envGeminiKey, prompt, images || [], geminiModel, aspectRatio, resolution, useGoogleSearch);
+        }
+        // Check for transient Gemini errors → fal.ai fallback
+        if (!body.success && body.error && isTransientGeminiError(body.error)) {
+          const falResult = await tryFalFallback(prompt || "", images || []);
+          if (falResult) return falResult;
+        }
+        // Key was fine (or fallback failed), return the parsed body as a new response
+        return NextResponse.json(body, { status: body.success ? 200 : 500 });
+      }
+
+      // No user key path — check response for transient errors
+      const cloned = geminiResult.clone();
+      const body = await cloned.json() as GenerateResponse;
+      if (!body.success && body.error && isTransientGeminiError(body.error)) {
+        const falResult = await tryFalFallback(prompt || "", images || []);
+        if (falResult) return falResult;
+      }
+
+      return geminiResult;
+    } catch (geminiErr) {
+      // Gemini threw an exception (e.g. 503 from SDK) — try fal.ai fallback
+      const errMsg = geminiErr instanceof Error ? geminiErr.message : String(geminiErr);
+      if (isTransientGeminiError(errMsg)) {
+        const falResult = await tryFalFallback(prompt || "", images || []);
+        if (falResult) return falResult;
+      }
+      // Re-throw to be caught by outer catch
+      throw geminiErr;
+    }
   } catch (error) {
     // Extract error information
     let errorMessage = "Generation failed";
