@@ -43,6 +43,7 @@ import {
   StickyNoteNode,
   SoraBlueprintNode,
   BrollBatchNode,
+  BrandDnaNode,
   SubWorkflowNode,
 
 } from "./nodes";
@@ -90,6 +91,7 @@ const nodeTypes: NodeTypes = {
   stickyNote: StickyNoteNode,
   soraBlueprint: SoraBlueprintNode,
   brollBatch: BrollBatchNode,
+  brandDna: BrandDnaNode,
   subWorkflow: SubWorkflowNode,
 
 };
@@ -165,6 +167,8 @@ const getNodeHandles = (nodeType: string): { inputs: string[]; outputs: string[]
       return { inputs: ["text"], outputs: ["text"] };
     case "webScraper":
       return { inputs: ["text"], outputs: ["image", "text"] };
+    case "brandDna":
+      return { inputs: [], outputs: ["text"] };
     default:
       return { inputs: [], outputs: [] };
   }
@@ -1089,6 +1093,16 @@ export function WorkflowCanvas() {
       return;
     }
 
+    // Handle group selected nodes (Ctrl/Cmd + G)
+    if ((event.ctrlKey || event.metaKey) && event.key === "g") {
+      event.preventDefault();
+      const selectedNodeIds = nodes.filter((n) => n.selected).map((n) => n.id);
+      if (selectedNodeIds.length >= 1) {
+        createGroup(selectedNodeIds);
+      }
+      return;
+    }
+
     // Helper to get viewport center position in flow coordinates
     const getViewportCenter = () => {
       const viewport = getViewport();
@@ -1170,6 +1184,7 @@ export function WorkflowCanvas() {
               stickyNote: { width: 200, height: 200 },
               soraBlueprint: { width: 320, height: 360 },
               brollBatch: { width: 380, height: 420 },
+              brandDna: { width: 340, height: 400 },
               subWorkflow: { width: 300, height: 260 },
             };
             const dims = defaultDimensions[nodeType!];
@@ -1207,6 +1222,7 @@ export function WorkflowCanvas() {
           stickyNote: { width: 200, height: 160 },
           soraBlueprint: { width: 320, height: 360 },
           brollBatch: { width: 380, height: 420 },
+          brandDna: { width: 340, height: 400 },
           subWorkflow: { width: 300, height: 260 },
         };
         const dims = defaultDimensions[nodeType];
@@ -1385,7 +1401,7 @@ export function WorkflowCanvas() {
         ]);
       });
     }
-  }, [nodes, onNodesChange, copySelectedNodes, pasteNodes, clearClipboard, clipboard, getViewport, addNode, updateNodeData, executeWorkflow, setShortcutsDialogOpen]);
+  }, [nodes, onNodesChange, copySelectedNodes, pasteNodes, clearClipboard, clipboard, getViewport, addNode, updateNodeData, executeWorkflow, setShortcutsDialogOpen, createGroup]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -1960,6 +1976,8 @@ export function WorkflowCanvas() {
                 return "#f59e0b"; // amber-500 (web)
               case "subWorkflow":
                 return "#818cf8"; // indigo-400 (nested workflow)
+              case "brandDna":
+                return "#3b82f6"; // blue-500 (brand identity)
               default:
                 return "#94a3b8";
             }

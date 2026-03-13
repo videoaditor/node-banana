@@ -46,6 +46,7 @@ export type NodeType =
   | "stickyNote"
   | "soraBlueprint"
   | "brollBatch"
+  | "brandDna"
   | "subWorkflow";
 
 
@@ -84,6 +85,7 @@ export interface PromptNodeData extends BaseNodeData {
   activePromptIndex?: number; // Which one is active (default 0)
   variableName?: string; // Optional variable name for use in PromptConstructor templates
   isAppInput?: boolean; // Mark as flexible input for App Mode
+  jsonMode?: boolean; // When true, prompt is validated and formatted as JSON
 }
 
 /**
@@ -436,6 +438,24 @@ export interface BrollBatchNodeData extends BaseNodeData {
 }
 
 /**
+ * Brand DNA trait - a single JSON key-value entry with toggle
+ */
+export interface BrandDnaTrait {
+  id: string;
+  label: string;
+  value: string; // JSON string
+  enabled: boolean;
+}
+
+/**
+ * Brand DNA node - holds multiple JSON trait entries merged into text output
+ */
+export interface BrandDnaNodeData extends BaseNodeData {
+  traits: BrandDnaTrait[];
+  outputJson: string | null;
+}
+
+/**
  * Union of all node data types
  */
 export type WorkflowNodeData =
@@ -462,6 +482,7 @@ export type WorkflowNodeData =
   | StickyNoteNodeData
   | SoraBlueprintNodeData
   | BrollBatchNodeData
+  | BrandDnaNodeData
   | SubWorkflowNodeData;
 
 
