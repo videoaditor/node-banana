@@ -67,6 +67,7 @@ interface QuickstartRequest {
   description: string;
   contentLevel: ContentLevel;
   templateId?: string;
+  screenshotImage?: string; // base64 data URL of a reference screenshot
 }
 
 interface QuickstartResponse {
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body: QuickstartRequest = await request.json();
-    const { description, contentLevel, templateId } = body;
+    const { description, contentLevel, templateId, screenshotImage } = body;
 
     console.log(`[Quickstart:${requestId}] Parameters:`, {
       hasDescription: !!description,
@@ -140,17 +141,38 @@ export async function POST(request: NextRequest) {
     }
 
     // Build the prompt
-    const prompt = buildQuickstartPrompt(description.trim(), contentLevel);
-    console.log(`[Quickstart:${requestId}] Prompt built, length: ${prompt.length}`);
+    const prompt = buildQuickstartPrompt(description.trim(), contentLevel, !!screenshotImage);
+    console.log(`[Quickstart:${requestId}] Prompt built, length: ${prompt.length}, hasScreenshot: ${!!screenshotImage}`);
 
     // Call Gemini API
     console.log(`[Quickstart:${requestId}] Calling Gemini API...`);
     const ai = new GoogleGenAI({ apiKey });
     const startTime = Date.now();
 
+    // Build multimodal content if screenshot is provided
+    let contents: string | Array<{ inlineData: { mimeType: string; data: string } } | { text: string }>;
+    if (screenshotImage) {
+      const matches = screenshotImage.match(/^data:(.+?);base64,(.+)$/);
+      if (matches) {
+        contents = [
+          {
+            inlineData: {
+              mimeType: matches[1],
+              data: matches[2],
+            },
+          },
+          { text: prompt },
+        ];
+      } else {
+        contents = prompt;
+      }
+    } else {
+      contents = prompt;
+    }
+
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: prompt,
+      contents,
       config: {
         temperature: 0.3, // Lower for more consistent JSON output
         maxOutputTokens: 16384, // Increased for complex workflows with many nodes
