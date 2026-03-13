@@ -47,7 +47,8 @@ export type NodeType =
   | "soraBlueprint"
   | "brollBatch"
   | "brandDna"
-  | "subWorkflow";
+  | "subWorkflow"
+  | "skill";
 
 
 /**
@@ -483,7 +484,8 @@ export type WorkflowNodeData =
   | SoraBlueprintNodeData
   | BrollBatchNodeData
   | BrandDnaNodeData
-  | SubWorkflowNodeData;
+  | SubWorkflowNodeData
+  | SkillNodeData;
 
 
 /**
@@ -540,6 +542,17 @@ export interface NodeDefaultsConfig {
   generateVideo?: GenerateVideoNodeDefaults;
   generate3d?: Generate3DNodeDefaults;
   llm?: LLMNodeDefaults;
+}
+
+/**
+ * Skill node — defines a workflow capability that the Agent Mode can invoke.
+ * Connects to input nodes (imageInput, prompt) and describes what the connected workflow does.
+ */
+export interface SkillNodeData extends BaseNodeData {
+  skillName: string;        // Human-readable name e.g. "Animate Scene"
+  skillDescription: string; // What this skill does, for the agent
+  inputDescriptions: { handleId: string; description: string }[]; // Describe each input
+  outputDescription: string; // What the skill outputs
 }
 
 /**
