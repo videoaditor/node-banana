@@ -338,3 +338,30 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
 
   }
 };
+
+/**
+ * Hydrate a node's data by merging AI-generated/imported data on top of defaults.
+ * This ensures all required fields exist even when the AI omits them.
+ * Imported values take precedence over defaults.
+ */
+export function hydrateNodeData(
+  type: string,
+  importedData: Record<string, unknown>
+): Record<string, unknown> {
+  // Get defaults for known node types, otherwise return imported data as-is
+  const knownTypes = [
+    "imageInput", "audioInput", "annotation", "prompt", "promptConstructor",
+    "promptConcatenator", "nanoBanana", "generateVideo", "generate3d",
+    "llmGenerate", "splitGrid", "output", "outputGallery", "imageCompare",
+    "videoStitch", "easeCurve", "glbViewer", "imageIterator", "textIterator",
+    "webScraper", "stickyNote", "soraBlueprint", "brollBatch", "subWorkflow",
+  ];
+
+  if (!knownTypes.includes(type)) {
+    return importedData;
+  }
+
+  const defaults = createDefaultNodeData(type as NodeType) as Record<string, unknown>;
+  // Merge: defaults first, then overlay with imported data (imported wins)
+  return { ...defaults, ...importedData };
+}

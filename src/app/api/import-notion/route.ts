@@ -12,28 +12,14 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { hydrateNodeData } from "@/store/utils/nodeDefaults";
 
 export const maxDuration = 120;
 export const dynamic = "force-dynamic";
 
 // ---- Notion Page Scraping ----
 
-async function fetchNotionPageContent(url: string): Promise<string> {
-    // Fetch the public Notion page HTML
-    const response = await fetch(url, {
-        headers: {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        },
-        redirect: "follow",
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to fetch Notion page: ${response.status}`);
-    }
-
-    const html = await response.text();
-
+function extractTextFromHtml(html: string): string {
     // Extract readable text from the HTML
     // Notion pages render content in data attributes and text nodes
     let text = "";
@@ -250,9 +236,15 @@ const NODE_CATALOG = `
 - **textIterator**: Split and process text segments. Use for "for each line", "process each item".
   Handles: input "text" (left), output "text" (right).
 
+- **annotation**: Draw/paint on images. Use for "annotate", "mark up", "circle the area", "add overlay".
+  Handles: input "image" (left), output "image" (right).
+
 ### Processing Nodes
 - **promptConstructor**: Template builder with @variable interpolation. Use for assembling complex prompts from multiple inputs.
   Handles: inputs "text-0","text-1",... (left, up to 6), output "text" (right).
+
+- **promptConcatenator**: Join multiple text inputs with a separator. Use for combining descriptions, merging text.
+  Handles: inputs "text-0","text-1",... (left), output "text" (right).
 
 - **llmGenerate**: AI text generation (Gemini). Use for "write description", "analyze", "summarize", "review".
   Handles: input "text" (left), input "image" (left), output "text" (right).
@@ -266,6 +258,9 @@ const NODE_CATALOG = `
 
 - **generateVideo**: AI video generation. Use for "create video", "generate clip".
   Handles: input "image" (left), input "text" (left), output "video" (right).
+
+- **generate3d**: AI 3D model generation. Use for "create 3D model", "generate 3D".
+  Handles: input "image" (left), input "text" (left), output "3d" (right).
 
 ### Output Nodes
 - **output**: Display final result. Use for "save", "export", "final output".
@@ -289,6 +284,8 @@ ${NODE_CATALOG}
 3. Steps about writing text/copy/descriptions → prompt nodes (with the text filled in if visible) or llmGenerate.
 4. Steps about generating images/visuals → nanoBanana nodes.
 5. Steps about generating video → generateVideo nodes.
+5b. Steps about generating 3D models → generate3d nodes.
+5c. Steps about marking up/annotating images → annotation nodes.
 6. Steps about reviewing/approving → outputGallery or output nodes.
 7. Steps that are purely informational → stickyNote nodes (colored by importance: orange=critical, yellow=info, blue=context).
 8. Steps about iterating/repeating → imageIterator or textIterator.
@@ -369,8 +366,8 @@ export async function POST(request: NextRequest) {
         // Step 1: Fetch Notion page content
         console.log(`[ImportNotion:${requestId}] Fetching Notion page: ${url}`);
 
-        let pageContent: string;
         let rawHtml: string;
+        let pageContent: string;
 
         try {
             const response = await fetch(url, {
@@ -386,7 +383,8 @@ export async function POST(request: NextRequest) {
             }
 
             rawHtml = await response.text();
-            pageContent = await fetchNotionPageContent(url);
+            // Extract text content from the already-fetched HTML
+            pageContent = extractTextFromHtml(rawHtml);
         } catch (err) {
             console.error(`[ImportNotion:${requestId}] Fetch error:`, err);
             return NextResponse.json(
@@ -501,12 +499,27 @@ export async function POST(request: NextRequest) {
         workflow.edgeStyle = workflow.edgeStyle || "smoothstep";
         workflow.edges = workflow.edges || [];
 
-        workflow.nodes = workflow.nodes.map((node: Record<string, unknown>, idx: number) => ({
-            ...node,
-            id: node.id || `sop_${idx}`,
-            position: node.position || { x: idx * 300, y: 0 },
-            data: node.data || {},
-        }));
+        workflow.nodes = workflow.nodes.map((node: Record<string, unknown>, idx: number) => {
+            const type = (node.type as string) || "stickyNote";
+            const rawData = (node.data || {}) as Record<string, unknown>;
+
+            // Hydrate with defaults so all required fields exist
+            const data = hydrateNodeData(type, rawData);
+
+            // Auto-mark input nodes as app inputs so the workflow
+            // can be used as an API endpoint right away
+            if (type === "prompt" || type === "imageInput" || type === "imageIterator") {
+                data.isAppInput = true;
+            }
+
+            return {
+                ...node,
+                id: node.id || `sop_${idx}`,
+                type,
+                position: node.position || { x: idx * 300, y: 0 },
+                data,
+            };
+        });
 
         workflow.edges = workflow.edges.map((edge: Record<string, unknown>, idx: number) => ({
             ...edge,
