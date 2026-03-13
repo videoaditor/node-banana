@@ -13,6 +13,17 @@ interface MenuOption {
   isAction?: boolean; // true if this is an action, not a node type
 }
 
+// Shared skill option (used in multiple lists)
+const SKILL_OPTION: MenuOption = {
+  type: "skill",
+  label: "Skill (Agent)",
+  icon: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+    </svg>
+  ),
+};
+
 // Define which nodes can accept which handle types as inputs
 const IMAGE_TARGET_OPTIONS: MenuOption[] = [
   {
@@ -106,6 +117,7 @@ const IMAGE_TARGET_OPTIONS: MenuOption[] = [
       </svg>
     ),
   },
+  SKILL_OPTION,
 ];
 
 const TEXT_TARGET_OPTIONS: MenuOption[] = [
@@ -172,6 +184,7 @@ const TEXT_TARGET_OPTIONS: MenuOption[] = [
       </svg>
     ),
   },
+  SKILL_OPTION,
 ];
 
 // Define which nodes can provide sources for handle types (when dragging to a target handle)
@@ -212,6 +225,7 @@ const IMAGE_SOURCE_OPTIONS: MenuOption[] = [
       </svg>
     ),
   },
+  SKILL_OPTION,
 ];
 
 const TEXT_SOURCE_OPTIONS: MenuOption[] = [
@@ -251,6 +265,7 @@ const TEXT_SOURCE_OPTIONS: MenuOption[] = [
       </svg>
     ),
   },
+  SKILL_OPTION,
 ];
 
 // Video can only connect to videoStitch, generateVideo (video-to-video), or output nodes

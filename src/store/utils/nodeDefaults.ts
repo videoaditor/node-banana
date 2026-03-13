@@ -24,6 +24,7 @@ import {
   BrollBatchNodeData,
   BrandDnaNodeData,
   SubWorkflowNodeData,
+  SkillNodeData,
 
   WorkflowNodeData,
   GroupColor,
@@ -61,6 +62,7 @@ export const defaultNodeDimensions: Record<NodeType, { width: number; height: nu
   brollBatch: { width: 380, height: 420 },
   brandDna: { width: 340, height: 400 },
   subWorkflow: { width: 300, height: 260 },
+  skill: { width: 340, height: 320 },
 
 };
 
@@ -344,6 +346,16 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         status: "idle",
         error: null,
       } as SubWorkflowNodeData;
+    case "skill":
+      return {
+        skillName: "New Skill",
+        skillDescription: "",
+        inputDescriptions: [
+          { handleId: "text", description: "Text input" },
+          { handleId: "image", description: "Image input" },
+        ],
+        outputDescription: "",
+      } as SkillNodeData;
 
   }
 };
@@ -363,7 +375,7 @@ export function hydrateNodeData(
     "promptConcatenator", "nanoBanana", "generateVideo", "generate3d",
     "llmGenerate", "splitGrid", "output", "outputGallery", "imageCompare",
     "videoStitch", "easeCurve", "glbViewer", "imageIterator", "textIterator",
-    "webScraper", "stickyNote", "soraBlueprint", "brollBatch", "brandDna", "subWorkflow",
+    "webScraper", "stickyNote", "soraBlueprint", "brollBatch", "brandDna", "subWorkflow", "skill",
   ];
 
   if (!knownTypes.includes(type)) {

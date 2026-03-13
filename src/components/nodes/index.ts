@@ -23,4 +23,5 @@ export { SoraBlueprintNode } from "./SoraBlueprintNode";
 export { BrollBatchNode } from "./BrollBatchNode";
 export { BrandDnaNode } from "./BrandDnaNode";
 export { SubWorkflowNode } from "./SubWorkflowNode";
+export { SkillNode } from "./SkillNode";
 
