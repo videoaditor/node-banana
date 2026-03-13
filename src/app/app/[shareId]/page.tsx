@@ -23,7 +23,7 @@ interface SharedWorkflow {
 
 interface AppOutput {
     nodeId: string;
-    type: "image" | "video" | "text";
+    type: "image" | "video" | "text" | "3d";
     data: string;
     label: string;
 }
@@ -76,6 +76,7 @@ export default function SharedAppPage({
         return workflow.nodes.filter((node) => {
             if (node.type === "prompt") return node.data.isAppInput === true;
             if (node.type === "imageInput") return node.data.isAppInput === true;
+            if (node.type === "imageIterator") return node.data.isAppInput === true;
             return false;
         });
     }, [workflow]);
@@ -211,7 +212,8 @@ export default function SharedAppPage({
                             <div className="space-y-6">
                                 {appInputNodes.map((node) => {
                                     const isPrompt = node.type === "prompt";
-                                    const label = (node.data.customTitle as string) || (isPrompt ? "Text Prompt" : "Image");
+                                    const isIterator = node.type === "imageIterator";
+                                    const label = (node.data.customTitle as string) || (isPrompt ? "Text Prompt" : isIterator ? "Image Collection" : "Image");
 
                                     return (
                                         <div key={node.id}>
@@ -334,6 +336,23 @@ export default function SharedAppPage({
                                 </div>
                             ) : (
                                 <div className="space-y-4">
+                                    {outputs.filter((o) => o.type === "3d").map((output, idx) => (
+                                        <div key={`3d-${idx}`} className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                                            <div className="text-xs text-[#666] mb-2">{output.label}</div>
+                                            <a
+                                                href={output.data}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-orange-400 hover:bg-white/[0.06] transition-colors"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                                                </svg>
+                                                Download 3D Model
+                                            </a>
+                                        </div>
+                                    ))}
+
                                     {outputs.filter((o) => o.type === "image" || o.type === "video").length > 0 && (
                                         <div className="grid grid-cols-2 gap-3">
                                             {outputs

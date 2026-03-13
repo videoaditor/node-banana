@@ -232,20 +232,52 @@ POST /api/run
 Content-Type: application/json
 
 {
+  "shareId": "<shareId>",
   "inputs": {
     "<nodeId>": "text value or base64 image"
+  },
+  "apiKeys": {
+    "gemini": "optional-key",
+    "openai": "optional-key",
+    "fal": "optional-key"
   }
 }
 \`\`\`
 
-### Get schema for a workflow
+You can provide either \`shareId\` (for published workflows) or \`workflow\` (inline JSON). The \`apiKeys\` field is optional — the server falls back to env variables.
+
+**Response:**
 \`\`\`
-GET /api/run/schema
+{
+  "success": true,
+  "outputs": {
+    "output-1": { "type": "image", "data": "base64...", "label": "Output" }
+  },
+  "executionTimeMs": 12345,
+  "cost": 0.05
+}
 \`\`\`
 
-Returns the input/output schema based on app-input and output nodes.
+Output types: \`image\`, \`video\`, \`text\`, \`3d\`
+
+### Get workflow schema
+
+\`\`\`
+GET /api/run/schema?shareId=<shareId>
+\`\`\`
+
+Returns input/output schema, an OpenAPI-compatible request schema, example request body, and a curl command.
+
+### Discover published apps
+
+\`\`\`
+GET /api/apps
+\`\`\`
+
+Lists all published workflow apps with their schemas, share IDs, and API endpoints. Use this to discover available workflows for automation.
 
 ### Share a workflow
+
 \`\`\`
 POST /api/share
 Content-Type: application/json
@@ -255,7 +287,15 @@ Content-Type: application/json
 }
 \`\`\`
 
-Returns \`{ shareId }\` — accessible at \`/app/<shareId>\`.
+Returns \`{ shareId }\` — accessible at \`/app/<shareId>\` (UI) and \`POST /api/run\` with \`{ shareId }\` (API).
+
+### Workflow as API: Quick Start
+
+1. Build your workflow in the editor
+2. Mark input nodes as "App Input" (toggle in prompt/imageInput nodes)
+3. Share via \`POST /api/share\` or the Share button
+4. Get the schema: \`GET /api/run/schema?shareId=<id>\`
+5. Call it: \`POST /api/run\` with \`{ shareId, inputs }\`
 `,
   },
 ];
