@@ -16,6 +16,9 @@ import type {
     OutputNodeData,
     OutputGalleryNodeData,
     LLMGenerateNodeData,
+    GenerateVideoNodeData,
+    Generate3DNodeData,
+    WebScraperNodeData,
     ImageHistoryItem,
     ProviderSettings,
 } from "@/types";
@@ -35,6 +38,8 @@ import {
     executeLlmGenerate,
     executeSplitGrid,
     executeGlbViewer,
+    executeWebScraper,
+    executeSubWorkflowNode,
 } from "@/store/execution";
 
 export interface HeadlessInput {
@@ -182,6 +187,12 @@ export async function executeWorkflowHeadless(
             case "imageCompare":
                 await executeImageCompare(ctx);
                 break;
+            case "webScraper":
+                await executeWebScraper(ctx);
+                break;
+            case "subWorkflow":
+                await executeSubWorkflowNode(ctx);
+                break;
             // videoStitch, easeCurve, soraBlueprint, brollBatch — skipped in headless
             // (they require browser APIs like Canvas/MediaEncoder)
             default:
@@ -293,16 +304,16 @@ export async function executeWorkflowHeadless(
             }
         }
 
-        // Collect outputs
+        // Collect outputs from all output-producing node types
         const outputs: HeadlessOutput[] = [];
         for (const node of nodes) {
             if (node.type === "output") {
                 const data = node.data as OutputNodeData;
-                if (data.image) {
+                if (data.video || data.image) {
                     outputs.push({
                         nodeId: node.id,
                         type: data.contentType === "video" ? "video" : "image",
-                        data: data.video || data.image,
+                        data: data.video || data.image || "",
                         label: data.customTitle || "Output",
                     });
                 }
@@ -325,6 +336,46 @@ export async function executeWorkflowHeadless(
                         data: data.outputText,
                         label: data.customTitle || "Text Output",
                     });
+                }
+            } else if (node.type === "generateVideo") {
+                const data = node.data as GenerateVideoNodeData;
+                if (data.outputVideo) {
+                    outputs.push({
+                        nodeId: node.id,
+                        type: "video",
+                        data: data.outputVideo,
+                        label: data.customTitle || "Video Output",
+                    });
+                }
+            } else if (node.type === "generate3d") {
+                const data = node.data as Generate3DNodeData;
+                if (data.output3dUrl) {
+                    outputs.push({
+                        nodeId: node.id,
+                        type: "3d",
+                        data: data.output3dUrl,
+                        label: data.customTitle || "3D Model Output",
+                    });
+                }
+            } else if (node.type === "webScraper") {
+                const data = node.data as WebScraperNodeData;
+                if (data.outputText) {
+                    outputs.push({
+                        nodeId: node.id,
+                        type: "text",
+                        data: data.outputText,
+                        label: data.customTitle || "Scraped Text",
+                    });
+                }
+                if (data.outputImages.length > 0) {
+                    for (const img of data.outputImages) {
+                        outputs.push({
+                            nodeId: node.id,
+                            type: "image",
+                            data: img,
+                            label: data.customTitle || "Scraped Image",
+                        });
+                    }
                 }
             }
         }
@@ -371,13 +422,32 @@ export function extractWorkflowSchema(workflow: WorkflowFileInput) {
             required: true,
         }));
 
+    const outputNodeTypes = ["output", "outputGallery", "llmGenerate", "generateVideo", "generate3d"];
     const outputs = workflow.nodes
-        .filter((n) => n.type === "output" || n.type === "outputGallery" || n.type === "llmGenerate")
-        .map((node) => ({
-            nodeId: node.id,
-            type: node.type === "llmGenerate" ? ("text" as const) : ("image" as const),
-            label: node.data.customTitle || (node.type === "llmGenerate" ? "Text Output" : "Image Output"),
-        }));
+        .filter((n) => outputNodeTypes.includes(n.type!))
+        .map((node) => {
+            let type: "image" | "text" | "video" | "3d" = "image";
+            let label = node.data.customTitle || "Output";
+
+            switch (node.type) {
+                case "llmGenerate":
+                    type = "text";
+                    label = node.data.customTitle || "Text Output";
+                    break;
+                case "generateVideo":
+                    type = "video";
+                    label = node.data.customTitle || "Video Output";
+                    break;
+                case "generate3d":
+                    type = "3d";
+                    label = node.data.customTitle || "3D Model Output";
+                    break;
+                default:
+                    label = node.data.customTitle || "Image Output";
+            }
+
+            return { nodeId: node.id, type, label };
+        });
 
     return { inputs, outputs };
 }

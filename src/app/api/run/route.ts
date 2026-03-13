@@ -25,6 +25,7 @@ interface RunRequest {
     inputs: Record<string, string>;
     apiKeys?: {
         gemini?: string;
+        openai?: string;
         fal?: string;
         replicate?: string;
         kie?: string;
@@ -81,6 +82,13 @@ export async function POST(request: NextRequest) {
             providerSettings.providers.gemini = {
                 ...providerSettings.providers.gemini,
                 apiKey: apiKeys?.gemini || process.env.GEMINI_API_KEY || null,
+                enabled: true,
+            };
+        }
+        if (apiKeys?.openai || process.env.OPENAI_API_KEY) {
+            providerSettings.providers.openai = {
+                ...providerSettings.providers.openai,
+                apiKey: apiKeys?.openai || process.env.OPENAI_API_KEY || null,
                 enabled: true,
             };
         }
@@ -169,29 +177,54 @@ export async function GET() {
     return NextResponse.json({
         name: "Node Banana Workflow API",
         version: "1.0",
-        endpoint: "POST /api/run",
-        description: "Execute a workflow with provided inputs and receive outputs.",
-        request: {
-            workflow: "WorkflowFile JSON (required if no shareId)",
-            shareId: "Share ID to load workflow from (alternative to inline workflow)",
-            inputs: {
-                description: "Map of nodeId → value. Text prompts as strings, images as base64 data URLs.",
-                example: {
-                    "prompt-1": "A beautiful sunset over Tokyo",
-                    "imageInput-2": "data:image/png;base64,...",
+        description: "Execute AI workflows as API endpoints. Discover available apps, get their schemas, and run them with custom inputs.",
+        endpoints: {
+            run: {
+                method: "POST",
+                path: "/api/run",
+                description: "Execute a workflow with provided inputs and receive outputs.",
+                request: {
+                    workflow: "WorkflowFile JSON (required if no shareId)",
+                    shareId: "Share ID to load workflow from (alternative to inline workflow)",
+                    inputs: {
+                        description: "Map of nodeId → value. Text prompts as strings, images as base64 data URLs.",
+                        example: {
+                            "prompt-1": "A beautiful sunset over Tokyo",
+                            "imageInput-2": "data:image/png;base64,...",
+                        },
+                    },
+                    apiKeys: {
+                        description: "Optional provider API keys. Falls back to server env variables.",
+                        fields: ["gemini", "openai", "fal", "replicate", "kie", "wavespeed"],
+                    },
+                },
+                response: {
+                    success: "boolean",
+                    outputs: "Map of nodeId → { type: 'image'|'video'|'text'|'3d', data: string, label: string }",
+                    executionTimeMs: "number",
+                    cost: "number",
                 },
             },
-            apiKeys: {
-                description: "Optional provider API keys. Falls back to server env variables.",
-                fields: ["gemini", "fal", "replicate", "kie", "wavespeed"],
+            schema: {
+                method: "GET",
+                path: "/api/run/schema?shareId=<id>",
+                description: "Get input/output schema for a workflow, including OpenAPI-compatible request schema and curl example.",
+            },
+            apps: {
+                method: "GET",
+                path: "/api/apps",
+                description: "List all published workflow apps with schemas and share IDs.",
+            },
+            share: {
+                method: "POST",
+                path: "/api/share",
+                description: "Publish a workflow. Returns a shareId for use in /api/run and /app/<shareId>.",
             },
         },
-        response: {
-            success: "boolean",
-            outputs: "Map of nodeId → { type, data, label }",
-            executionTimeMs: "number",
-            cost: "number",
-        },
-        schemaEndpoint: "GET /api/run/schema?shareId=<id> — Get input/output schema for a workflow",
+        quickstart: [
+            "1. GET /api/apps → discover available workflows",
+            "2. GET /api/run/schema?shareId=<id> → get input/output schema + curl example",
+            "3. POST /api/run { shareId, inputs } → execute and get results",
+        ],
     });
 }
