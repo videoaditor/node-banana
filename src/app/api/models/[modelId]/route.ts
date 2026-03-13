@@ -772,6 +772,62 @@ function getKieSchema(modelId: string): ExtractedSchema {
         { name: "imageUrls", type: "image", required: true, label: "Image", isArray: true },
       ],
     },
+    // ============ Sora 2 models ============
+    "sora-2-text-to-video": {
+      parameters: [
+        { name: "aspect_ratio", type: "string", description: "Output aspect ratio", enum: ["landscape", "portrait"], default: "landscape" },
+        { name: "n_frames", type: "string", description: "Video duration in seconds", enum: ["5", "10"], default: "10" },
+        { name: "quality", type: "string", description: "Output quality", enum: ["standard", "hd"], default: "standard" },
+        { name: "remove_watermark", type: "boolean", description: "Remove watermark from output", default: true },
+      ],
+      inputs: [{ name: "prompt", type: "text", required: true, label: "Prompt" }],
+    },
+    "sora-2-image-to-video": {
+      parameters: [
+        { name: "aspect_ratio", type: "string", description: "Output aspect ratio", enum: ["landscape", "portrait"], default: "landscape" },
+        { name: "n_frames", type: "string", description: "Video duration in seconds", enum: ["5", "10"], default: "10" },
+        { name: "quality", type: "string", description: "Output quality", enum: ["standard", "hd"], default: "standard" },
+        { name: "remove_watermark", type: "boolean", description: "Remove watermark from output", default: true },
+      ],
+      inputs: [
+        { name: "prompt", type: "text", required: true, label: "Prompt" },
+        { name: "image_urls", type: "image", required: true, label: "Image", isArray: true },
+      ],
+    },
+    "sora-2-pro-text-to-video": {
+      parameters: [
+        { name: "aspect_ratio", type: "string", description: "Output aspect ratio", enum: ["landscape", "portrait"], default: "landscape" },
+        { name: "n_frames", type: "string", description: "Video duration in seconds", enum: ["10", "15"], default: "10" },
+        { name: "remove_watermark", type: "boolean", description: "Remove watermark from output", default: true },
+      ],
+      inputs: [{ name: "prompt", type: "text", required: true, label: "Prompt" }],
+    },
+    "sora-2-pro-image-to-video": {
+      parameters: [
+        { name: "aspect_ratio", type: "string", description: "Output aspect ratio", enum: ["landscape", "portrait"], default: "landscape" },
+        { name: "n_frames", type: "string", description: "Video duration in seconds", enum: ["10", "15"], default: "10" },
+        { name: "remove_watermark", type: "boolean", description: "Remove watermark from output", default: true },
+      ],
+      inputs: [
+        { name: "prompt", type: "text", required: true, label: "Prompt" },
+        { name: "image_urls", type: "image", required: true, label: "Image", isArray: true },
+      ],
+    },
+    "sora-2-characters": {
+      parameters: [
+        { name: "safety_instruction", type: "string", description: "Safety guidelines for the animation (max 5000 chars)" },
+      ],
+      inputs: [
+        { name: "character_prompt", type: "text", required: true, label: "Character Prompt" },
+        { name: "character_file_url", type: "image", required: true, label: "Character Video (1-4s clip)", isArray: true },
+      ],
+    },
+    "sora-watermark-remover": {
+      parameters: [],
+      inputs: [
+        { name: "video_url", type: "image", required: true, label: "Video" },
+      ],
+    },
   };
 
   return schemas[modelId] || { parameters: [], inputs: [] };

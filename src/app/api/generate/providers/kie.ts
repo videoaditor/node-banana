@@ -133,6 +133,30 @@ export function getKieModelDefaults(modelId: string): Record<string, unknown> {
         aspect_ratio: "16:9",
       };
 
+    // Sora 2 models
+    case "sora-2-text-to-video":
+    case "sora-2-image-to-video":
+      return {
+        aspect_ratio: "landscape",
+        n_frames: "10",
+        quality: "standard",
+        remove_watermark: true,
+      };
+
+    case "sora-2-pro-text-to-video":
+    case "sora-2-pro-image-to-video":
+      return {
+        aspect_ratio: "landscape",
+        n_frames: "10",
+        remove_watermark: true,
+      };
+
+    case "sora-2-characters":
+      return {};
+
+    case "sora-watermark-remover":
+      return {};
+
     default:
       return {};
   }
@@ -156,7 +180,11 @@ export function getKieImageInputKey(modelId: string): string {
   if (modelId === "topaz/video-upscale") return "video_url";
   // Veo 3 models use imageUrls
   if (modelId.startsWith("veo3")) return "imageUrls";
-  // Default for most models
+  // Sora 2 characters uses character_file_url
+  if (modelId === "sora-2-characters") return "character_file_url";
+  // Sora watermark remover uses video_url (singular)
+  if (modelId === "sora-watermark-remover") return "video_url";
+  // Default for most models (including sora-2 i2v variants which use image_urls)
   return "image_urls";
 }
 
