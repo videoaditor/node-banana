@@ -43,7 +43,9 @@ import {
   StickyNoteNode,
   SoraBlueprintNode,
   BrollBatchNode,
+  BrandDnaNode,
   SubWorkflowNode,
+  SkillNode,
 
 } from "./nodes";
 
@@ -63,6 +65,7 @@ import { WelcomeModal } from "./quickstart";
 import { ProjectSetupModal } from "./ProjectSetupModal";
 import { DrawingOverlay } from "./DrawingOverlay";
 import { ChatPanel } from "./ChatPanel";
+import { AgentModePanel } from "./AgentModePanel";
 import { EditOperation } from "@/lib/chat/editOperations";
 import { stripBinaryData } from "@/lib/chat/contextBuilder";
 
@@ -90,7 +93,9 @@ const nodeTypes: NodeTypes = {
   stickyNote: StickyNoteNode,
   soraBlueprint: SoraBlueprintNode,
   brollBatch: BrollBatchNode,
+  brandDna: BrandDnaNode,
   subWorkflow: SubWorkflowNode,
+  skill: SkillNode,
 
 };
 
@@ -165,6 +170,10 @@ const getNodeHandles = (nodeType: string): { inputs: string[]; outputs: string[]
       return { inputs: ["text"], outputs: ["text"] };
     case "webScraper":
       return { inputs: ["text"], outputs: ["image", "text"] };
+    case "brandDna":
+      return { inputs: [], outputs: ["text"] };
+    case "skill":
+      return { inputs: ["text", "image"], outputs: ["text", "image"] };
     default:
       return { inputs: [], outputs: [] };
   }
@@ -259,6 +268,7 @@ export function WorkflowCanvas() {
   const [connectionDrop, setConnectionDrop] = useState<ConnectionDropState | null>(null);
   const [isSplitting, setIsSplitting] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isAgentOpen, setIsAgentOpen] = useState(false);
   const [isBuildingWorkflow, setIsBuildingWorkflow] = useState(false);
   const [showNewProjectSetup, setShowNewProjectSetup] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; flowPos: { x: number; y: number } } | null>(null);
@@ -1089,6 +1099,16 @@ export function WorkflowCanvas() {
       return;
     }
 
+    // Handle group selected nodes (Ctrl/Cmd + G)
+    if ((event.ctrlKey || event.metaKey) && event.key === "g") {
+      event.preventDefault();
+      const selectedNodeIds = nodes.filter((n) => n.selected).map((n) => n.id);
+      if (selectedNodeIds.length >= 1) {
+        createGroup(selectedNodeIds);
+      }
+      return;
+    }
+
     // Helper to get viewport center position in flow coordinates
     const getViewportCenter = () => {
       const viewport = getViewport();
@@ -1170,7 +1190,9 @@ export function WorkflowCanvas() {
               stickyNote: { width: 200, height: 200 },
               soraBlueprint: { width: 320, height: 360 },
               brollBatch: { width: 380, height: 420 },
+              brandDna: { width: 340, height: 400 },
               subWorkflow: { width: 300, height: 260 },
+              skill: { width: 340, height: 320 },
             };
             const dims = defaultDimensions[nodeType!];
             addNode(nodeType!, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
@@ -1207,7 +1229,9 @@ export function WorkflowCanvas() {
           stickyNote: { width: 200, height: 160 },
           soraBlueprint: { width: 320, height: 360 },
           brollBatch: { width: 380, height: 420 },
+          brandDna: { width: 340, height: 400 },
           subWorkflow: { width: 300, height: 260 },
+          skill: { width: 340, height: 320 },
         };
         const dims = defaultDimensions[nodeType];
         addNode(nodeType, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
@@ -1385,7 +1409,7 @@ export function WorkflowCanvas() {
         ]);
       });
     }
-  }, [nodes, onNodesChange, copySelectedNodes, pasteNodes, clearClipboard, clipboard, getViewport, addNode, updateNodeData, executeWorkflow, setShortcutsDialogOpen]);
+  }, [nodes, onNodesChange, copySelectedNodes, pasteNodes, clearClipboard, clipboard, getViewport, addNode, updateNodeData, executeWorkflow, setShortcutsDialogOpen, createGroup]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -1793,6 +1817,7 @@ export function WorkflowCanvas() {
           {[
             { type: "stickyNote", label: "Sticky Note", icon: "M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75h9z" },
             { type: "subWorkflow", label: "Sub-Workflow", icon: "M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z" },
+            { type: "skill", label: "Skill (Agent)", icon: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" },
           ].map(({ type, label, icon }) => (
             <button
               key={type}
@@ -1960,6 +1985,10 @@ export function WorkflowCanvas() {
                 return "#f59e0b"; // amber-500 (web)
               case "subWorkflow":
                 return "#818cf8"; // indigo-400 (nested workflow)
+              case "brandDna":
+                return "#3b82f6"; // blue-500 (brand identity)
+              case "skill":
+                return "#22d3ee"; // cyan-400 (agent skill)
               default:
                 return "#94a3b8";
             }
@@ -1996,6 +2025,28 @@ export function WorkflowCanvas() {
       <GlobalImageHistory />
 
       {/* Chat toggle button - hidden for now */}
+
+      {/* Agent mode toggle button */}
+      <button
+        onClick={() => setIsAgentOpen(!isAgentOpen)}
+        className={`fixed top-4 right-4 z-[70] px-3 py-2 rounded-lg text-[10px] font-semibold uppercase tracking-[0.08em] transition-all duration-200 flex items-center gap-2 font-['DM_Mono',monospace] ${
+          isAgentOpen
+            ? "bg-[#22d3ee]/15 text-[#22d3ee] border border-[#22d3ee]/30 shadow-lg shadow-[#22d3ee]/10"
+            : "bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)]"
+        }`}
+        style={{
+          backdropFilter: "blur(12px)",
+        }}
+        title="Toggle Agent Mode"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+        </svg>
+        Agent
+      </button>
+
+      {/* Agent mode panel */}
+      <AgentModePanel isOpen={isAgentOpen} onClose={() => setIsAgentOpen(false)} />
 
       {/* Chat panel */}
       <ChatPanel

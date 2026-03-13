@@ -50,6 +50,7 @@ const DEFAULT_DIMENSIONS: Record<NodeType, { width: number; height: number }> = 
   stickyNote: { width: 200, height: 160 },
   soraBlueprint: { width: 320, height: 360 },
   brollBatch: { width: 380, height: 420 },
+  brandDna: { width: 340, height: 400 },
   subWorkflow: { width: 300, height: 260 },
 
 };
@@ -408,6 +409,13 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
         shots: [],
         status: "idle",
         error: null,
+      };
+    case "brandDna":
+      return {
+        traits: [
+          { id: `trait-${Date.now()}`, label: "Brand Colors", value: '{\n  "primary": "#000000",\n  "secondary": "#ffffff"\n}', enabled: true },
+        ],
+        outputJson: null,
       };
     case "subWorkflow":
       return {

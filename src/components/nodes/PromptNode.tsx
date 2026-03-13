@@ -39,6 +39,37 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
   const [showVarDialog, setShowVarDialog] = useState(false);
   const [varNameInput, setVarNameInput] = useState(nodeData.variableName || "");
 
+  // JSON mode validation
+  const jsonMode = nodeData.jsonMode ?? false;
+  const jsonValid = useMemo(() => {
+    if (!jsonMode || !localPrompt.trim()) return true;
+    try {
+      JSON.parse(localPrompt);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [jsonMode, localPrompt]);
+
+  const handleToggleJsonMode = useCallback(() => {
+    const newMode = !jsonMode;
+    if (newMode && localPrompt.trim()) {
+      // Try to auto-format as JSON when switching to JSON mode
+      try {
+        const parsed = JSON.parse(localPrompt);
+        const formatted = JSON.stringify(parsed, null, 2);
+        setLocalPrompt(formatted);
+        const newPrompts = [...prompts];
+        newPrompts[safeIndex] = formatted;
+        updateNodeData(id, { jsonMode: newMode, prompt: formatted, prompts: newPrompts });
+        return;
+      } catch {
+        // Not valid JSON yet, switch anyway
+      }
+    }
+    updateNodeData(id, { jsonMode: newMode });
+  }, [jsonMode, localPrompt, prompts, safeIndex, id, updateNodeData]);
+
   // Check if this node has any incoming text connections
   const hasIncomingTextConnection = useMemo(() => {
     return edges.some((edge) => edge.target === id && edge.targetHandle === "text");
@@ -188,6 +219,24 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
         }
         headerButtons={
           <>
+            {/* JSON Mode Toggle */}
+            <div className="relative ml-2 shrink-0 group">
+              <button
+                onClick={handleToggleJsonMode}
+                className={`nodrag nopan p-0.5 rounded transition-all duration-200 ease-in-out flex items-center overflow-hidden group-hover:pr-2 ${jsonMode
+                    ? "text-[var(--accent-primary)] hover:text-blue-200 border border-[var(--accent-primary)]/50"
+                    : "text-[var(--text-muted)] group-hover:text-[var(--text-primary)] border border-[var(--border-subtle)]"
+                  }`}
+                title={jsonMode ? "JSON mode (click to switch to text)" : "Text mode (click to switch to JSON)"}
+              >
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                </svg>
+                <span className="max-w-0 opacity-0 whitespace-nowrap text-[10px] transition-all duration-200 ease-in-out overflow-hidden group-hover:max-w-[60px] group-hover:opacity-100 group-hover:ml-1">
+                  {jsonMode ? "JSON" : "Text"}
+                </span>
+              </button>
+            </div>
             <div className="relative ml-2 shrink-0 group">
               <button
                 onClick={handleToggleAppInput}
@@ -239,9 +288,24 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
             onChange={handleChange}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            placeholder={hasIncomingTextConnection ? "Text from connected node (editable)..." : "Describe what to generate..."}
-            className="nodrag nopan nowheel w-full flex-1 min-h-[70px] p-2 text-xs leading-relaxed text-[var(--text-primary)] border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/50 resize-none focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] focus:border-[var(--border-subtle)] placeholder:text-[var(--text-muted)]"
+            placeholder={jsonMode
+              ? '{\n  "key": "value"\n}'
+              : hasIncomingTextConnection ? "Text from connected node (editable)..." : "Describe what to generate..."
+            }
+            className={`nodrag nopan nowheel w-full flex-1 min-h-[70px] p-2 text-xs leading-relaxed text-[var(--text-primary)] border rounded bg-[var(--bg-base)]/50 resize-none focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] placeholder:text-[var(--text-muted)] ${
+              jsonMode ? "font-['DM_Mono',monospace] tabular-nums" : ""
+            } ${
+              jsonMode && localPrompt.trim() && !jsonValid
+                ? "border-[var(--node-error)]/60"
+                : "border-[var(--border-subtle)] focus:border-[var(--border-subtle)]"
+            }`}
           />
+          {/* JSON validation indicator */}
+          {jsonMode && localPrompt.trim() && (
+            <div className={`text-[10px] px-0.5 ${jsonValid ? "text-[var(--node-success)]" : "text-[var(--node-error)]"}`}>
+              {jsonValid ? "Valid JSON" : "Invalid JSON"}
+            </div>
+          )}
           {nodeData.variableName && (
             <div className="text-[10px] text-[var(--accent-primary)] px-0.5">
               @{nodeData.variableName}

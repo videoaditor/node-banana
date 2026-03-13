@@ -22,7 +22,9 @@ import {
   StickyNoteNodeData,
   SoraBlueprintNodeData,
   BrollBatchNodeData,
+  BrandDnaNodeData,
   SubWorkflowNodeData,
+  SkillNodeData,
 
   WorkflowNodeData,
   GroupColor,
@@ -58,7 +60,9 @@ export const defaultNodeDimensions: Record<NodeType, { width: number; height: nu
   stickyNote: { width: 200, height: 160 },
   soraBlueprint: { width: 320, height: 360 },
   brollBatch: { width: 380, height: 420 },
+  brandDna: { width: 340, height: 400 },
   subWorkflow: { width: 300, height: 260 },
+  skill: { width: 340, height: 320 },
 
 };
 
@@ -326,6 +330,13 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         status: "idle",
         error: null,
       } as BrollBatchNodeData;
+    case "brandDna":
+      return {
+        traits: [
+          { id: `trait-${Date.now()}`, label: "Brand Colors", value: '{\n  "primary": "#000000",\n  "secondary": "#ffffff"\n}', enabled: true },
+        ],
+        outputJson: null,
+      } as BrandDnaNodeData;
     case "subWorkflow":
       return {
         selectedWorkflowFilename: null,
@@ -335,6 +346,16 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         status: "idle",
         error: null,
       } as SubWorkflowNodeData;
+    case "skill":
+      return {
+        skillName: "New Skill",
+        skillDescription: "",
+        inputDescriptions: [
+          { handleId: "text", description: "Text input" },
+          { handleId: "image", description: "Image input" },
+        ],
+        outputDescription: "",
+      } as SkillNodeData;
 
   }
 };
@@ -354,7 +375,7 @@ export function hydrateNodeData(
     "promptConcatenator", "nanoBanana", "generateVideo", "generate3d",
     "llmGenerate", "splitGrid", "output", "outputGallery", "imageCompare",
     "videoStitch", "easeCurve", "glbViewer", "imageIterator", "textIterator",
-    "webScraper", "stickyNote", "soraBlueprint", "brollBatch", "subWorkflow",
+    "webScraper", "stickyNote", "soraBlueprint", "brollBatch", "brandDna", "subWorkflow", "skill",
   ];
 
   if (!knownTypes.includes(type)) {

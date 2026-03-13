@@ -5,7 +5,8 @@ import { ContentLevel } from "./templates";
  */
 export function buildQuickstartPrompt(
   description: string,
-  contentLevel: ContentLevel
+  contentLevel: ContentLevel,
+  hasScreenshot: boolean = false
 ): string {
   const timestamp = Date.now();
 
@@ -390,7 +391,13 @@ Notice how:
 - Nodes are laid out left-to-right with proper spacing
 - customTitle makes each node's purpose clear
 
-## User's Request
+${hasScreenshot ? `## SCREENSHOT PROVIDED
+The user has attached a screenshot image. Carefully analyze the screenshot to understand:
+- What kind of workflow, tool, or process is shown
+- The structure, nodes, steps, or pipeline visible in the image
+- Any text, labels, or settings visible
+Use this visual context together with the user's text description to create a more accurate workflow. If the screenshot shows a node graph or workflow, try to replicate its structure using Node Banana node types.
+` : ""}## User's Request
 "${description}"
 
 ## CHECKLIST BEFORE OUTPUT

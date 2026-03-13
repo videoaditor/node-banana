@@ -16,11 +16,11 @@ interface EdgeData extends WorkflowEdgeData {
   offsetY?: number;
 }
 
-// Colors for different connection types — Dark Foundry palette
+// Colors for different connection types — Dark Foundry palette (boosted saturation)
 const EDGE_COLORS = {
-  image: "#3ecf8e",   // Success green for image connections
-  prompt: "#4a90d9",  // Accent blue for prompt connections
-  default: "#4a4f60", // Muted for unknown
+  image: "#4de8a0",   // Brighter green for image connections
+  prompt: "#5ea3f0",  // Brighter blue for prompt connections
+  default: "#6b7185", // Lifted from muted gray for better visibility
   pause: "#f5a623",   // Warning amber for paused edges
 };
 
@@ -184,22 +184,22 @@ export function EditableEdge({
       {/* SVG gradient definition for bright-dim-bright effect */}
       <defs>
         <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 1 : 0.4} />
-          <stop offset="50%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 0.6 : 0.15} />
-          <stop offset="100%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 1 : 0.4} />
+          <stop offset="0%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 1 : 0.6} />
+          <stop offset="50%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 0.7 : 0.35} />
+          <stop offset="100%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 1 : 0.6} />
         </linearGradient>
       </defs>
 
-      {/* Subtle glow path behind the main edge for depth */}
+      {/* Glow path behind the main edge for depth */}
       <path
         d={edgePath}
         fill="none"
         stroke={edgeColor}
-        strokeWidth={6}
+        strokeWidth={8}
         strokeLinecap="round"
         strokeLinejoin="round"
         style={{
-          opacity: isConnectedToSelection ? 0.12 : 0.05,
+          opacity: isConnectedToSelection ? 0.18 : 0.08,
           filter: 'blur(4px)',
         }}
       />
@@ -211,7 +211,7 @@ export function EditableEdge({
         style={{
           ...style,
           stroke: `url(#${gradientId})`,
-          strokeWidth: 2,
+          strokeWidth: 2.5,
           strokeLinecap: "round",
           strokeLinejoin: "round",
         }}

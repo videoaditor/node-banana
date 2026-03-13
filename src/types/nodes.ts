@@ -46,7 +46,9 @@ export type NodeType =
   | "stickyNote"
   | "soraBlueprint"
   | "brollBatch"
-  | "subWorkflow";
+  | "brandDna"
+  | "subWorkflow"
+  | "skill";
 
 
 /**
@@ -84,6 +86,7 @@ export interface PromptNodeData extends BaseNodeData {
   activePromptIndex?: number; // Which one is active (default 0)
   variableName?: string; // Optional variable name for use in PromptConstructor templates
   isAppInput?: boolean; // Mark as flexible input for App Mode
+  jsonMode?: boolean; // When true, prompt is validated and formatted as JSON
 }
 
 /**
@@ -436,6 +439,24 @@ export interface BrollBatchNodeData extends BaseNodeData {
 }
 
 /**
+ * Brand DNA trait - a single JSON key-value entry with toggle
+ */
+export interface BrandDnaTrait {
+  id: string;
+  label: string;
+  value: string; // JSON string
+  enabled: boolean;
+}
+
+/**
+ * Brand DNA node - holds multiple JSON trait entries merged into text output
+ */
+export interface BrandDnaNodeData extends BaseNodeData {
+  traits: BrandDnaTrait[];
+  outputJson: string | null;
+}
+
+/**
  * Union of all node data types
  */
 export type WorkflowNodeData =
@@ -462,7 +483,9 @@ export type WorkflowNodeData =
   | StickyNoteNodeData
   | SoraBlueprintNodeData
   | BrollBatchNodeData
-  | SubWorkflowNodeData;
+  | BrandDnaNodeData
+  | SubWorkflowNodeData
+  | SkillNodeData;
 
 
 /**
@@ -519,6 +542,17 @@ export interface NodeDefaultsConfig {
   generateVideo?: GenerateVideoNodeDefaults;
   generate3d?: Generate3DNodeDefaults;
   llm?: LLMNodeDefaults;
+}
+
+/**
+ * Skill node — defines a workflow capability that the Agent Mode can invoke.
+ * Connects to input nodes (imageInput, prompt) and describes what the connected workflow does.
+ */
+export interface SkillNodeData extends BaseNodeData {
+  skillName: string;        // Human-readable name e.g. "Animate Scene"
+  skillDescription: string; // What this skill does, for the agent
+  inputDescriptions: { handleId: string; description: string }[]; // Describe each input
+  outputDescription: string; // What the skill outputs
 }
 
 /**

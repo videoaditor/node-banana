@@ -1,12 +1,24 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, DragEvent } from "react";
 import { WorkflowFile } from "@/store/workflowStore";
 import { QuickstartBackButton } from "./QuickstartBackButton";
 
 interface PromptWorkflowViewProps {
   onBack: () => void;
   onWorkflowGenerated: (workflow: WorkflowFile) => void;
+}
+
+/**
+ * Convert a File to a base64 data URL
+ */
+function fileToDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 export function PromptWorkflowView({
@@ -16,6 +28,60 @@ export function PromptWorkflowView({
   const [description, setDescription] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [screenshotImage, setScreenshotImage] = useState<string | null>(null);
+  const [screenshotFilename, setScreenshotFilename] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageFile = useCallback(async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      setError("Please upload an image file (PNG, JPG, WebP, etc.)");
+      return;
+    }
+    // Limit to 10MB
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Image must be under 10MB");
+      return;
+    }
+    try {
+      const dataUrl = await fileToDataURL(file);
+      setScreenshotImage(dataUrl);
+      setScreenshotFilename(file.name);
+      setError(null);
+    } catch {
+      setError("Failed to read image file");
+    }
+  }, []);
+
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith("image/")) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) handleImageFile(file);
+        return;
+      }
+    }
+  }, [handleImageFile]);
+
+  const handleDragOver = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer?.files?.[0];
+    if (file) handleImageFile(file);
+  }, [handleImageFile]);
 
   const handleGenerate = useCallback(async () => {
     if (!description || description.trim().length < 3) {
@@ -33,6 +99,7 @@ export function PromptWorkflowView({
         body: JSON.stringify({
           description: description.trim(),
           contentLevel: "full",
+          ...(screenshotImage ? { screenshotImage } : {}),
         }),
       });
 
@@ -53,7 +120,7 @@ export function PromptWorkflowView({
     } finally {
       setIsGenerating(false);
     }
-  }, [description, onWorkflowGenerated]);
+  }, [description, screenshotImage, onWorkflowGenerated]);
 
   const canGenerate = description.trim().length >= 3 && !isGenerating;
 
@@ -98,6 +165,80 @@ export function PromptWorkflowView({
           <p className="text-xs text-[var(--text-secondary)]">
             Note: This feature currently only works with Gemini models.
           </p>
+        </div>
+
+        {/* Screenshot Upload */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-[var(--text-secondary)]">
+            Reference screenshot{" "}
+            <span className="text-[var(--text-muted)]">(optional)</span>
+          </label>
+          {screenshotImage ? (
+            <div className="relative group rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-base)]/50 p-3">
+              <div className="flex items-center gap-3">
+                <img
+                  src={screenshotImage}
+                  alt="Screenshot"
+                  className="w-20 h-20 object-cover rounded border border-[var(--border-subtle)]"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-[var(--text-primary)] truncate">
+                    {screenshotFilename || "Pasted image"}
+                  </p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">
+                    The AI will analyze this image to help design your workflow
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setScreenshotImage(null);
+                    setScreenshotFilename(null);
+                  }}
+                  disabled={isGenerating}
+                  className="p-1.5 rounded-md hover:bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                  title="Remove screenshot"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onPaste={handlePaste}
+              onClick={() => !isGenerating && fileInputRef.current?.click()}
+              className={`
+                flex flex-col items-center justify-center gap-2 px-4 py-5 rounded-lg border-2 border-dashed cursor-pointer transition-all
+                ${isDragging
+                  ? "border-[var(--accent-primary)] bg-[var(--accent-primary)]/5"
+                  : "border-[var(--border-subtle)] hover:border-[var(--text-muted)] bg-[var(--bg-base)]/30"
+                }
+                ${isGenerating ? "opacity-50 cursor-not-allowed" : ""}
+              `}
+            >
+              <svg className="w-6 h-6 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+              </svg>
+              <p className="text-xs text-[var(--text-muted)] text-center">
+                Drop a screenshot, paste from clipboard, or click to browse
+              </p>
+            </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleImageFile(file);
+              e.target.value = "";
+            }}
+          />
         </div>
 
         {/* Error */}

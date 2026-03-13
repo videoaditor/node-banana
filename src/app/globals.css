@@ -179,7 +179,7 @@ body {
 
 .react-flow__edge-path {
   stroke: var(--border-subtle);
-  stroke-width: 2;
+  stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -415,7 +415,12 @@ body {
   }
 }
 
-/* ── Canvas background / dot grid enhancement ────────────────────── */
+/* ── Canvas background / dot grid enhancement (FL Studio style) ───── */
 .react-flow__background pattern circle {
-  fill: rgba(255, 255, 255, 0.08) !important;
+  fill: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ── Node status LED pulse (reuses handlePulse keyframes) ────────── */
+.node-status-led-active {
+  animation: handlePulse 1.2s ease-in-out infinite;
 }

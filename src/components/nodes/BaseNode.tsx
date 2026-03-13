@@ -287,12 +287,12 @@ export function BaseNode({
           ${className}
         `}
         style={{
-          background: 'rgba(20, 21, 25, 0.85)',
-          backdropFilter: 'blur(16px) saturate(1.4)',
-          WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
+          background: 'rgba(20, 21, 25, 0.92)',
+          backdropFilter: 'blur(20px) saturate(1.5)',
+          WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
           boxShadow: selected
-            ? `0 0 0 1px var(--accent-primary), 0 0 20px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)${accentColor ? `, 0 0 24px ${accentColor}15` : ''}`
-            : `0 4px 16px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)${accentColor ? `, -3px 0 12px -4px ${accentColor}20` : ''}`,
+            ? `0 0 0 1px var(--accent-primary), 0 0 20px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)${accentColor ? `, 0 0 24px ${accentColor}20` : ''}`
+            : `0 6px 24px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)${accentColor ? `, -3px 0 16px -4px ${accentColor}25` : ''}`,
           borderLeft: accentColor ? `3px solid ${accentColor}` : undefined,
         }}
       >
@@ -307,6 +307,24 @@ export function BaseNode({
         >
           {/* Title Section */}
           <div className="flex-1 min-w-0 flex items-center gap-1.5">
+            {/* Status LED */}
+            <div
+              className="w-[6px] h-[6px] rounded-full shrink-0"
+              style={{
+                background: isCurrentlyExecuting || isExecuting
+                  ? 'var(--accent-primary)'
+                  : hasError
+                    ? 'var(--node-error)'
+                    : accentColor || 'var(--text-muted)',
+                boxShadow: isCurrentlyExecuting || isExecuting
+                  ? '0 0 6px var(--accent-primary), 0 0 2px var(--accent-primary)'
+                  : hasError
+                    ? '0 0 6px var(--node-error)'
+                    : 'none',
+                opacity: isCurrentlyExecuting || isExecuting || hasError ? 1 : 0.5,
+                animation: isCurrentlyExecuting || isExecuting ? 'handlePulse 1.2s ease-in-out infinite' : 'none',
+              }}
+            />
             {titlePrefix}
             {isEditingTitle ? (
               <input
