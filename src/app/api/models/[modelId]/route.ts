@@ -700,6 +700,52 @@ function getKieSchema(modelId: string): ExtractedSchema {
         { name: "tail_image_url", type: "image", required: false, label: "Tail Image" },
       ],
     },
+    "fal-ai/kling-video/o3/standard/image-to-video": {
+      parameters: [
+        { name: "aspect_ratio", type: "string", description: "Output aspect ratio", enum: ["16:9", "9:16", "1:1"], default: "16:9" },
+        { name: "duration", type: "string", description: "Video duration", enum: ["5", "10"], default: "5" },
+        { name: "seed", type: "integer", description: "Random seed for reproducibility", minimum: 0 },
+      ],
+      inputs: [
+        { name: "prompt", type: "text", required: false, label: "Prompt" },
+        { name: "image_url", type: "image", required: true, label: "Start Frame" },
+        { name: "tail_image_url", type: "image", required: false, label: "End Frame" },
+      ],
+    },
+    "fal-ai/kling-video/o3/pro/image-to-video": {
+      parameters: [
+        { name: "aspect_ratio", type: "string", description: "Output aspect ratio", enum: ["16:9", "9:16", "1:1"], default: "16:9" },
+        { name: "duration", type: "string", description: "Video duration", enum: ["5", "10"], default: "5" },
+        { name: "cfg_scale", type: "number", description: "Guidance scale", minimum: 0, maximum: 1, default: 0.5 },
+        { name: "seed", type: "integer", description: "Random seed for reproducibility", minimum: 0 },
+      ],
+      inputs: [
+        { name: "prompt", type: "text", required: false, label: "Prompt" },
+        { name: "negative_prompt", type: "text", required: false, label: "Negative Prompt" },
+        { name: "image_url", type: "image", required: true, label: "Start Frame" },
+        { name: "tail_image_url", type: "image", required: false, label: "End Frame" },
+      ],
+    },
+    "fal-ai/kling-video/o3/pro/reference-to-video": {
+      parameters: [
+        { name: "aspect_ratio", type: "string", description: "Output aspect ratio", enum: ["16:9", "9:16", "1:1"], default: "16:9" },
+        { name: "duration", type: "string", description: "Video duration", enum: ["5", "10"], default: "5" },
+        { name: "seed", type: "integer", description: "Random seed for reproducibility", minimum: 0 },
+      ],
+      inputs: [
+        { name: "prompt", type: "text", required: true, label: "Prompt" },
+        { name: "image_url", type: "image", required: true, label: "Reference Image" },
+      ],
+    },
+    "fal-ai/kling-video/o3/pro/video-to-video/edit": {
+      parameters: [
+        { name: "seed", type: "integer", description: "Random seed for reproducibility", minimum: 0 },
+      ],
+      inputs: [
+        { name: "prompt", type: "text", required: true, label: "Prompt" },
+        { name: "video_url", type: "image", required: true, label: "Input Video" },
+      ],
+    },
     "wan/2-6-text-to-video": {
       parameters: [
         { name: "duration", type: "string", description: "Video duration in seconds", enum: ["5", "10", "15"], default: "5" },
