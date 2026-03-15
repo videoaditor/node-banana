@@ -11,7 +11,7 @@ const DEFAULT_PROJECTS_DIR = path.join(os.homedir(), "clawd", "projects", "node-
 
 // POST: Save workflow to file
 export async function POST(request: NextRequest) {
-  let directoryPath: string;
+  let directoryPath: string = DEFAULT_PROJECTS_DIR;
   let filename: string | undefined;
   try {
     const body = await request.json();
