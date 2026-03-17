@@ -9,7 +9,7 @@
   --color-df-base: #0d0e11;
   --color-df-surface: #141519;
   --color-df-elevated: #1c1e24;
-  --color-df-border: #2a2d38;
+  --color-df-border: #363a48;
   --color-df-border-active: #4a90d9;
   --color-df-accent: #4a90d9;
   --color-df-accent-glow: rgba(74, 144, 217, 0.15);
@@ -27,7 +27,7 @@
   --bg-base: #0d0e11;
   --bg-surface: #141519;
   --bg-elevated: #1c1e24;
-  --border-subtle: #2a2d38;
+  --border-subtle: #363a48;
   --border-active: #4a90d9;
   --accent-primary: #4a90d9;
   --accent-glow: rgba(74, 144, 217, 0.15);
