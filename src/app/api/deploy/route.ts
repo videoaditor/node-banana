@@ -1,20 +1,62 @@
 /**
  * Deploy API Route
  * 
+ * Accepts GitHub webhooks or direct POSTs to trigger deployment.
  * Pulls latest from git, installs deps, rebuilds, and restarts the service.
- * Used by the restart button in the Header.
  */
 
 import { NextResponse } from "next/server";
 import { exec } from "child_process";
 import { promisify } from "util";
+import crypto from "crypto";
 
 const execAsync = promisify(exec);
 
-export async function POST() {
+const WEBHOOK_SECRET = process.env.DEPLOY_WEBHOOK_SECRET || "changeme";
+
+function verifySignature(payload: string, signature: string | null): boolean {
+    if (!signature) return false;
+    const hmac = crypto.createHmac('sha256', WEBHOOK_SECRET);
+    const digest = 'sha256=' + hmac.update(payload).digest('hex');
+    try {
+        return crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(signature));
+    } catch {
+        return false;
+    }
+}
+
+export async function POST(request: Request) {
     const projectPath = "/Users/player/clawd/projects/node-banana";
 
     try {
+        // Read body for webhook verification
+        const body = await request.text();
+        const signature = request.headers.get('x-hub-signature-256');
+
+        // If signature is provided, verify it (GitHub webhook)
+        if (signature) {
+            if (!verifySignature(body, signature)) {
+                console.log('[Deploy] Invalid webhook signature');
+                return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+            }
+
+            // Check if this is a push to develop branch
+            try {
+                const payload = JSON.parse(body);
+                if (payload.ref !== 'refs/heads/develop') {
+                    console.log(`[Deploy] Ignoring push to ${payload.ref}`);
+                    return NextResponse.json({ message: 'Ignored (not develop branch)' });
+                }
+                console.log(`[Deploy] GitHub webhook received for ${payload.repository?.name}`);
+            } catch (e) {
+                console.error('[Deploy] Failed to parse webhook payload:', e);
+            }
+        } else {
+            console.log('[Deploy] Manual deployment triggered (no signature)');
+        }
+
+        console.log("[Deploy] Starting deployment...");
+
         // Step 1: git pull
         const pull = await execAsync("git pull origin develop", { cwd: projectPath, timeout: 30000 });
         console.log("[Deploy] git pull:", pull.stdout.trim());
