@@ -111,3 +111,4 @@ Set in the plist file:
 - **`develop`** — current production branch, all features merge here
 - **`master`** — old stable (20+ commits behind develop)
 - Deploy from `develop` unless rolling back
+# Auto-deploy enabled
