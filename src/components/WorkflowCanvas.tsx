@@ -43,7 +43,8 @@ import {
   StickyNoteNode,
   SoraBlueprintNode,
   BrollBatchNode,
-  SubWorkflowNode,
+  ArrayNode,
+  ListSelectorNode,
 
 } from "./nodes";
 
@@ -90,7 +91,8 @@ const nodeTypes: NodeTypes = {
   stickyNote: StickyNoteNode,
   soraBlueprint: SoraBlueprintNode,
   brollBatch: BrollBatchNode,
-  subWorkflow: SubWorkflowNode,
+  arrayNode: ArrayNode,
+  listSelector: ListSelectorNode,
 
 };
 
@@ -1170,7 +1172,8 @@ export function WorkflowCanvas() {
               stickyNote: { width: 200, height: 200 },
               soraBlueprint: { width: 320, height: 360 },
               brollBatch: { width: 380, height: 420 },
-              subWorkflow: { width: 300, height: 260 },
+              arrayNode: { width: 320, height: 320 },
+              listSelector: { width: 280, height: 200 },
             };
             const dims = defaultDimensions[nodeType!];
             addNode(nodeType!, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
@@ -1207,7 +1210,8 @@ export function WorkflowCanvas() {
           stickyNote: { width: 200, height: 160 },
           soraBlueprint: { width: 320, height: 360 },
           brollBatch: { width: 380, height: 420 },
-          subWorkflow: { width: 300, height: 260 },
+          arrayNode: { width: 320, height: 320 },
+          listSelector: { width: 280, height: 200 },
         };
         const dims = defaultDimensions[nodeType];
         addNode(nodeType, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
@@ -1724,6 +1728,8 @@ export function WorkflowCanvas() {
             { type: "promptConstructor", label: "Prompt Constructor", icon: "M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959" },
             { type: "imageIterator", label: "Image Iterator", icon: "M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" },
             { type: "textIterator", label: "Text Iterator", icon: "M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" },
+            { type: "arrayNode", label: "Array", icon: "M4 6h16M4 12h16M4 18h16" },
+            { type: "listSelector", label: "List Selector", icon: "M8 9l4-4 4 4m0 6l-4 4-4-4" },
             { type: "splitGrid", label: "Split Grid", icon: "M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6z" },
             { type: "annotation", label: "Annotate", icon: "M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" },
             { type: "imageCompare", label: "Image Compare", icon: "M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" },
@@ -1792,7 +1798,6 @@ export function WorkflowCanvas() {
           </div>
           {[
             { type: "stickyNote", label: "Sticky Note", icon: "M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75h9z" },
-            { type: "subWorkflow", label: "Sub-Workflow", icon: "M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z" },
           ].map(({ type, label, icon }) => (
             <button
               key={type}
@@ -1958,8 +1963,10 @@ export function WorkflowCanvas() {
                 return "#0ea5e9"; // sky-500 (text iteration)
               case "webScraper":
                 return "#f59e0b"; // amber-500 (web)
-              case "subWorkflow":
-                return "#818cf8"; // indigo-400 (nested workflow)
+              case "arrayNode":
+                return "#3b82f6"; // blue-500 (array)
+              case "listSelector":
+                return "#6366f1"; // indigo-500 (list)
               default:
                 return "#94a3b8";
             }

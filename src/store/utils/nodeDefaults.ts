@@ -22,7 +22,8 @@ import {
   StickyNoteNodeData,
   SoraBlueprintNodeData,
   BrollBatchNodeData,
-  SubWorkflowNodeData,
+  ArrayNodeData,
+  ListSelectorNodeData,
 
   WorkflowNodeData,
   GroupColor,
@@ -58,7 +59,8 @@ export const defaultNodeDimensions: Record<NodeType, { width: number; height: nu
   stickyNote: { width: 200, height: 160 },
   soraBlueprint: { width: 320, height: 360 },
   brollBatch: { width: 380, height: 420 },
-  subWorkflow: { width: 300, height: 260 },
+  arrayNode: { width: 320, height: 320 },
+  listSelector: { width: 280, height: 200 },
 
 };
 
@@ -326,42 +328,21 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         status: "idle",
         error: null,
       } as BrollBatchNodeData;
-    case "subWorkflow":
+
+    case "arrayNode":
       return {
-        selectedWorkflowFilename: null,
-        selectedWorkflowName: null,
-        outputText: null,
-        outputImage: null,
+        items: ["Item 1", "Item 2", "Item 3"],
+        currentItem: null,
         status: "idle",
         error: null,
-      } as SubWorkflowNodeData;
+      } as ArrayNodeData;
+
+    case "listSelector":
+      return {
+        items: ["Option A", "Option B", "Option C"],
+        selectedIndex: 0,
+        outputText: "Option A",
+      } as ListSelectorNodeData;
 
   }
 };
-
-/**
- * Hydrate a node's data by merging AI-generated/imported data on top of defaults.
- * This ensures all required fields exist even when the AI omits them.
- * Imported values take precedence over defaults.
- */
-export function hydrateNodeData(
-  type: string,
-  importedData: Record<string, unknown>
-): Record<string, unknown> {
-  // Get defaults for known node types, otherwise return imported data as-is
-  const knownTypes = [
-    "imageInput", "audioInput", "annotation", "prompt", "promptConstructor",
-    "promptConcatenator", "nanoBanana", "generateVideo", "generate3d",
-    "llmGenerate", "splitGrid", "output", "outputGallery", "imageCompare",
-    "videoStitch", "easeCurve", "glbViewer", "imageIterator", "textIterator",
-    "webScraper", "stickyNote", "soraBlueprint", "brollBatch", "subWorkflow",
-  ];
-
-  if (!knownTypes.includes(type)) {
-    return importedData;
-  }
-
-  const defaults = createDefaultNodeData(type as NodeType) as Record<string, unknown>;
-  // Merge: defaults first, then overlay with imported data (imported wins)
-  return { ...defaults, ...importedData };
-}

@@ -21,5 +21,6 @@ export { WebScraperNode } from "./WebScraperNode";
 export { StickyNoteNode } from "./StickyNoteNode";
 export { SoraBlueprintNode } from "./SoraBlueprintNode";
 export { BrollBatchNode } from "./BrollBatchNode";
-export { SubWorkflowNode } from "./SubWorkflowNode";
+export { ArrayNode } from "./ArrayNode";
+export { ListSelectorNode } from "./ListSelectorNode";
 

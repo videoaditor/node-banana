@@ -96,6 +96,10 @@ function getSourceOutput(sourceNode: WorkflowNode, sourceHandle?: string | null)
     return { type: "image", value };
   } else if (sourceNode.type === "textIterator") {
     return { type: "text", value: (sourceNode.data as any).currentText || null };
+  } else if (sourceNode.type === "arrayNode") {
+    return { type: "text", value: (sourceNode.data as any).currentItem || null };
+  } else if (sourceNode.type === "listSelector") {
+    return { type: "text", value: (sourceNode.data as any).outputText || null };
   } else if (sourceNode.type === "webScraper") {
     const wsData = sourceNode.data as WebScraperNodeData;
     // Dual output: resolve based on source handle

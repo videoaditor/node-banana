@@ -13,6 +13,8 @@ import { ModelSearchDialog } from "@/components/modals/ModelSearchDialog";
 const LLM_PROVIDERS: { value: LLMProvider; label: string }[] = [
   { value: "google", label: "Google" },
   { value: "openai", label: "OpenAI" },
+  { value: "anthropic", label: "Anthropic" },
+  { value: "groq", label: "Groq" },
 ];
 
 const LLM_MODELS: Record<LLMProvider, { value: LLMModelType; label: string }[]> = {
@@ -25,9 +27,16 @@ const LLM_MODELS: Record<LLMProvider, { value: LLMModelType; label: string }[]> 
     { value: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
     { value: "gpt-4.1-nano", label: "GPT-4.1 Nano" },
   ],
-  anthropic: [],
-  groq: [],
-} as Record<LLMProvider, { value: LLMModelType; label: string }[]>;
+  anthropic: [
+    { value: "claude-sonnet-4-20250514", label: "Claude Sonnet 4" },
+    { value: "claude-3-5-haiku-20241022", label: "Claude 3.5 Haiku" },
+  ],
+  groq: [
+    { value: "llama-3.3-70b-versatile", label: "Llama 3.3 70B" },
+    { value: "llama-3.1-8b-instant", label: "Llama 3.1 8B" },
+    { value: "deepseek-r1-distill-llama-70b", label: "DeepSeek R1 70B" },
+  ],
+};
 
 // Provider icons
 const GeminiIcon = () => (

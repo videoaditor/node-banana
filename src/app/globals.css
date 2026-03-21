@@ -9,7 +9,7 @@
   --color-df-base: #0d0e11;
   --color-df-surface: #141519;
   --color-df-elevated: #1c1e24;
-  --color-df-border: #2a2d38;
+  --color-df-border: #363a48;
   --color-df-border-active: #4a90d9;
   --color-df-accent: #4a90d9;
   --color-df-accent-glow: rgba(74, 144, 217, 0.15);
@@ -27,7 +27,7 @@
   --bg-base: #0d0e11;
   --bg-surface: #141519;
   --bg-elevated: #1c1e24;
-  --border-subtle: #2a2d38;
+  --border-subtle: #363a48;
   --border-active: #4a90d9;
   --accent-primary: #4a90d9;
   --accent-glow: rgba(74, 144, 217, 0.15);
@@ -38,6 +38,8 @@
   --node-warning: #f5a623;
   --node-error: #e85d75;
   --node-neutral: #6c7280;
+  --node-border: #4a4f60;
+  --node-border-hover: #6b7280;
 
   /* ── Handle / port colors ── */
   --handle-color-image: #3ecf8e;
@@ -83,22 +85,22 @@ body {
   box-shadow: none !important;
 }
 
-/* ── Handles / port connectors ───────────────────────────────────── */
+/* ── Handles / port connectors — FL Studio-inspired bubbles ─────── */
 
 .react-flow__handle {
-  width: 10px;
-  height: 10px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  border: 1.5px solid var(--border-subtle);
-  background: var(--bg-surface);
-  box-shadow: 0 0 0 2.5px var(--bg-base), 0 0 0 3.5px rgba(255, 255, 255, 0.04);
-  transition: all 150ms ease;
+  border: 2.5px solid var(--node-border);
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.15), var(--bg-elevated) 70%);
+  box-shadow: 0 0 0 2.5px var(--bg-base), 0 1px 3px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.08);
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .react-flow__handle:hover {
-  transform: scale(1.35);
+  transform: scale(1.3);
   border-color: var(--accent-primary);
-  box-shadow: 0 0 10px var(--accent-glow), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(74, 144, 217, 0.2);
+  box-shadow: 0 0 14px var(--accent-glow), 0 0 0 2.5px var(--bg-base), 0 0 0 5px rgba(74, 144, 217, 0.2), inset 0 1px 2px rgba(255,255,255,0.12);
 }
 
 /* Glow ring when connecting */
@@ -115,71 +117,75 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
 }
 
 .react-flow__handle-left {
-  left: -4px;
+  left: -6px;
 }
 
 .react-flow__handle-right {
-  right: -4px;
+  right: -6px;
 }
 
 /* Input handles: slightly lower opacity fill */
 .react-flow__handle-left[data-handletype="image"],
 .react-flow__handle-left[data-handletype="text"],
 .react-flow__handle-left[data-handletype="3d"] {
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 /* Image handles — success green */
 .react-flow__handle[data-handletype="image"] {
-  background: var(--handle-color-image);
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.2), var(--handle-color-image) 70%);
   border-color: var(--handle-color-image);
+  box-shadow: 0 0 0 2.5px var(--bg-base), 0 0 10px rgba(62, 207, 142, 0.3), inset 0 1px 2px rgba(255,255,255,0.15);
 }
 
 .react-flow__handle[data-handletype="image"]:hover {
-  box-shadow: 0 0 10px rgba(62, 207, 142, 0.35), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(62, 207, 142, 0.2);
+  box-shadow: 0 0 16px rgba(62, 207, 142, 0.5), 0 0 0 2.5px var(--bg-base), 0 0 0 5px rgba(62, 207, 142, 0.2), inset 0 1px 2px rgba(255,255,255,0.2);
 }
 
 /* Text handles — accent blue */
 .react-flow__handle[data-handletype="text"] {
-  background: var(--handle-color-text);
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.2), var(--handle-color-text) 70%);
   border-color: var(--handle-color-text);
+  box-shadow: 0 0 0 2.5px var(--bg-base), 0 0 10px rgba(74, 144, 217, 0.3), inset 0 1px 2px rgba(255,255,255,0.15);
 }
 
 .react-flow__handle[data-handletype="text"]:hover {
-  box-shadow: 0 0 10px rgba(74, 144, 217, 0.35), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(74, 144, 217, 0.2);
+  box-shadow: 0 0 16px rgba(74, 144, 217, 0.5), 0 0 0 2.5px var(--bg-base), 0 0 0 5px rgba(74, 144, 217, 0.2), inset 0 1px 2px rgba(255,255,255,0.2);
 }
 
 /* 3D handles — warning amber */
 .react-flow__handle[data-handletype="3d"] {
-  background: var(--handle-color-3d);
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.2), var(--handle-color-3d) 70%);
   border-color: var(--handle-color-3d);
+  box-shadow: 0 0 0 2.5px var(--bg-base), 0 0 10px rgba(245, 166, 35, 0.3), inset 0 1px 2px rgba(255,255,255,0.15);
 }
 
 .react-flow__handle[data-handletype="3d"]:hover {
-  box-shadow: 0 0 10px rgba(245, 166, 35, 0.35), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(245, 166, 35, 0.2);
+  box-shadow: 0 0 16px rgba(245, 166, 35, 0.5), 0 0 0 2.5px var(--bg-base), 0 0 0 5px rgba(245, 166, 35, 0.2), inset 0 1px 2px rgba(255,255,255,0.2);
 }
 
 /* Video handles — purple */
 .react-flow__handle[data-handletype="video"] {
-  background: #c084fc;
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.2), #c084fc 70%);
   border-color: #c084fc;
+  box-shadow: 0 0 0 2.5px var(--bg-base), 0 0 10px rgba(192, 132, 252, 0.3), inset 0 1px 2px rgba(255,255,255,0.15);
 }
 
 .react-flow__handle[data-handletype="video"]:hover {
-  box-shadow: 0 0 10px rgba(192, 132, 252, 0.35), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(192, 132, 252, 0.2);
+  box-shadow: 0 0 16px rgba(192, 132, 252, 0.5), 0 0 0 2.5px var(--bg-base), 0 0 0 5px rgba(192, 132, 252, 0.2), inset 0 1px 2px rgba(255,255,255,0.2);
 }
 
 /* ── Edges ────────────────────────────────────────────────────────── */
 
 .react-flow__edge-path {
   stroke: var(--border-subtle);
-  stroke-width: 2;
+  stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -187,7 +193,7 @@ body {
 .react-flow__edge.selected .react-flow__edge-path,
 .react-flow__edge:hover .react-flow__edge-path {
   stroke: var(--accent-primary);
-  filter: drop-shadow(0 0 4px var(--accent-glow));
+  filter: drop-shadow(0 0 6px var(--accent-glow));
 }
 
 /* ── Resize controls ──────────────────────────────────────────────── */
@@ -417,5 +423,19 @@ body {
 
 /* ── Canvas background / dot grid enhancement ────────────────────── */
 .react-flow__background pattern circle {
-  fill: rgba(255, 255, 255, 0.08) !important;
+  fill: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ── Canvas vignette overlay — Freepik-style depth ───────────────── */
+.react-flow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  background: radial-gradient(
+    ellipse 80% 70% at 50% 50%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
 }

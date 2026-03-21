@@ -269,11 +269,11 @@ export function BaseNode({
       />
       <div
         className={`
-          rounded-[8px] h-full w-full flex flex-col overflow-hidden
+          rounded-[16px] h-full w-full flex flex-col overflow-hidden
           transition-all duration-[180ms] ease-out
           ${isCurrentlyExecuting || isExecuting
             ? "border border-[var(--accent-primary)] ring-1 ring-[var(--accent-glow)]"
-            : "border border-[var(--border-subtle)]"
+            : "border border-[var(--node-border)]"
           }
           ${hasError ? "border-[var(--node-error)]" : ""}
           ${selected
@@ -281,26 +281,25 @@ export function BaseNode({
             : ""
           }
           ${!selected && !isCurrentlyExecuting && !isExecuting && !hasError
-            ? "hover:border-[var(--accent-primary)]/60 hover:-translate-y-[1px]"
+            ? "hover:border-[var(--node-border-hover)] hover:-translate-y-[1px]"
             : ""
           }
           ${className}
         `}
         style={{
-          background: 'rgba(20, 21, 25, 0.85)',
-          backdropFilter: 'blur(16px) saturate(1.4)',
-          WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
+          background: 'rgba(28, 30, 38, 0.88)',
+          backdropFilter: 'blur(20px) saturate(1.5)',
+          WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
           boxShadow: selected
-            ? `0 0 0 1px var(--accent-primary), 0 0 20px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)${accentColor ? `, 0 0 24px ${accentColor}15` : ''}`
-            : `0 4px 16px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)${accentColor ? `, -3px 0 12px -4px ${accentColor}20` : ''}`,
-          borderLeft: accentColor ? `3px solid ${accentColor}` : undefined,
+            ? `0 0 0 1px var(--accent-primary), 0 0 24px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10)${accentColor ? `, 0 0 30px ${accentColor}20` : ''}`
+            : `0 4px 24px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)${accentColor ? `, 0 0 20px ${accentColor}12` : ''}`,
         }}
       >
         {/* Header bar — slightly darker strip with gradient separator */}
         <div
-          className="px-3 pt-2 pb-1 flex items-center justify-between shrink-0"
+          className="px-4 pt-3 pb-2 flex items-center justify-between shrink-0"
           style={{
-            background: 'rgba(13, 14, 17, 0.7)',
+            background: 'rgba(18, 19, 24, 0.7)',
             borderBottom: '1px solid transparent',
             borderImage: 'linear-gradient(to right, transparent, var(--border-subtle), transparent) 1',
           }}
@@ -496,7 +495,7 @@ export function BaseNode({
             </div>
           )}
         </div>
-        <div className={contentClassName ?? "px-3 pb-4 flex-1 min-h-0 overflow-hidden flex flex-col"}>{children}</div>
+        <div className={contentClassName ?? "px-4 pb-5 flex-1 min-h-0 overflow-hidden flex flex-col"}>{children}</div>
       </div>
     </>
   );

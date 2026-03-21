@@ -146,6 +146,15 @@ const TEXT_TARGET_OPTIONS: MenuOption[] = [
     ),
   },
   {
+    type: "listSelector",
+    label: "List Selector",
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+      </svg>
+    ),
+  },
+  {
     type: "nanoBanana",
     label: "Generate Image",
     icon: (

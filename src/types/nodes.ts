@@ -46,7 +46,8 @@ export type NodeType =
   | "stickyNote"
   | "soraBlueprint"
   | "brollBatch"
-  | "subWorkflow";
+  | "arrayNode"
+  | "listSelector";
 
 
 /**
@@ -438,6 +439,25 @@ export interface BrollBatchNodeData extends BaseNodeData {
 /**
  * Union of all node data types
  */
+/**
+ * Array node - holds multiple text items, each output as separate text during iteration
+ */
+export interface ArrayNodeData extends BaseNodeData {
+  items: string[];             // List of text items
+  currentItem?: string | null; // Currently iterating item for downstream nodes
+  status: NodeStatus;
+  error: string | null;
+}
+
+/**
+ * List Selector node - picks one item from a set of values
+ */
+export interface ListSelectorNodeData extends BaseNodeData {
+  items: string[];             // Available options
+  selectedIndex: number;       // Currently selected item index
+  outputText: string | null;   // The selected item value
+}
+
 export type WorkflowNodeData =
   | ImageInputNodeData
   | AudioInputNodeData
@@ -462,7 +482,8 @@ export type WorkflowNodeData =
   | StickyNoteNodeData
   | SoraBlueprintNodeData
   | BrollBatchNodeData
-  | SubWorkflowNodeData;
+  | ArrayNodeData
+  | ListSelectorNodeData;
 
 
 /**
@@ -519,18 +540,4 @@ export interface NodeDefaultsConfig {
   generateVideo?: GenerateVideoNodeDefaults;
   generate3d?: Generate3DNodeDefaults;
   llm?: LLMNodeDefaults;
-}
-
-/**
- * Sub-workflow node — calls another saved workflow as a step.
- * Inputs: text (optional), image (optional)
- * Outputs: text (optional), image (optional)
- */
-export interface SubWorkflowNodeData extends BaseNodeData {
-  selectedWorkflowFilename: string | null;
-  selectedWorkflowName: string | null;
-  outputText: string | null;
-  outputImage: string | null;
-  status: "idle" | "loading" | "complete" | "error";
-  error: string | null;
 }

@@ -45,7 +45,7 @@ export function ReferenceEdge({
       targetX,
       targetY,
       targetPosition,
-      curvature: 0.25,
+      curvature: 0.4,
     });
   }, [sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition]);
 

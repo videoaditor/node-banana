@@ -963,7 +963,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           if (levelNodes.length === 0) continue;
 
           // Check for iterators in this level
-          const iterators = levelNodes.filter(n => n.type === "imageIterator" || n.type === "textIterator");
+          const iterators = levelNodes.filter(n => n.type === "imageIterator" || n.type === "textIterator" || n.type === "arrayNode");
 
           if (iterators.length > 0) {
             // Put iterator at the end, run normal nodes first
@@ -1023,6 +1023,13 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
                 else if (data.splitMode === "custom" && data.customSeparator) items = text.split(data.customSeparator).filter(t => t.trim());
                 else items = [text];
               }
+            } else if (iterator.type === "arrayNode") {
+              const { text } = ctx.getConnectedInputs(iterator.id);
+              const data = iterator.data as any;
+              // Merge: local items + connected text (split by newlines)
+              const localItems = (data.items || []).filter((t: string) => t.trim());
+              const connectedItems = text ? text.split("\n").filter((t: string) => t.trim()) : [];
+              items = [...localItems, ...connectedItems];
             }
 
             ctx.updateNodeData(iterator.id, { status: "complete" });
@@ -1044,6 +1051,8 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
               // Set the current output for downstream connected nodes to consume
               if (iterator.type === "imageIterator") {
                 ctx.updateNodeData(iterator.id, { currentImage: items[i], status: "loading" } as any);
+              } else if (iterator.type === "arrayNode") {
+                ctx.updateNodeData(iterator.id, { currentItem: items[i], status: "loading" } as any);
               } else {
                 ctx.updateNodeData(iterator.id, { currentText: items[i], status: "loading" } as any);
               }
@@ -1052,7 +1061,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
               await executeLevelsSequentially(levelIdx + 1, endIndex);
             }
 
-            ctx.updateNodeData(iterator.id, { status: "complete", currentImage: null, currentText: null } as any);
+            ctx.updateNodeData(iterator.id, { status: "complete", currentImage: null, currentText: null, currentItem: null } as any);
             return; // We fully handled all downstream execution inside the loop above!
           }
 
