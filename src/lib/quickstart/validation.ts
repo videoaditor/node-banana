@@ -1,5 +1,5 @@
 import { WorkflowFile } from "@/store/workflowStore";
-import { NodeType, WorkflowNodeData, ImageIteratorNodeData } from "@/types";
+import { NodeType, WorkflowNodeData, ImageIteratorNodeData, ArrayNodeData, ListSelectorNodeData } from "@/types";
 
 interface ValidationError {
   path: string;
@@ -387,7 +387,7 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
         imageCount: 0,
         status: "idle",
         error: null,
-      };
+      } as WorkflowNodeData;
     case "stickyNote":
       return {
         text: "",
@@ -422,13 +422,13 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
         currentItem: null,
         status: "idle",
         error: null,
-      };
+      } as ArrayNodeData;
     case "listSelector":
       return {
         items: ["Option A", "Option B", "Option C"],
         selectedIndex: 0,
         outputText: "Option A",
-      };
+      } as ListSelectorNodeData;
   }
 }
 
