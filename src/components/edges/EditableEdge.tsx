@@ -98,7 +98,7 @@ export function EditableEdge({
         targetX,
         targetY,
         targetPosition,
-        curvature: 0.25,
+        curvature: 0.4,
       });
     } else {
       return getSmoothStepPath({
@@ -184,9 +184,9 @@ export function EditableEdge({
       {/* SVG gradient definition for bright-dim-bright effect */}
       <defs>
         <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 1 : 0.4} />
-          <stop offset="50%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 0.6 : 0.15} />
-          <stop offset="100%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 1 : 0.4} />
+          <stop offset="0%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 1 : 0.6} />
+          <stop offset="50%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 0.7 : 0.25} />
+          <stop offset="100%" stopColor={edgeColor} stopOpacity={isConnectedToSelection ? 1 : 0.6} />
         </linearGradient>
       </defs>
 
@@ -195,12 +195,12 @@ export function EditableEdge({
         d={edgePath}
         fill="none"
         stroke={edgeColor}
-        strokeWidth={6}
+        strokeWidth={8}
         strokeLinecap="round"
         strokeLinejoin="round"
         style={{
-          opacity: isConnectedToSelection ? 0.12 : 0.05,
-          filter: 'blur(4px)',
+          opacity: isConnectedToSelection ? 0.15 : 0.07,
+          filter: 'blur(5px)',
         }}
       />
 
@@ -211,7 +211,7 @@ export function EditableEdge({
         style={{
           ...style,
           stroke: `url(#${gradientId})`,
-          strokeWidth: 2,
+          strokeWidth: 2.5,
           strokeLinecap: "round",
           strokeLinejoin: "round",
         }}

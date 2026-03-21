@@ -86,19 +86,19 @@ body {
 /* ── Handles / port connectors ───────────────────────────────────── */
 
 .react-flow__handle {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   border: 1.5px solid var(--border-subtle);
   background: var(--bg-surface);
   box-shadow: 0 0 0 2.5px var(--bg-base), 0 0 0 3.5px rgba(255, 255, 255, 0.04);
-  transition: all 150ms ease;
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .react-flow__handle:hover {
-  transform: scale(1.35);
+  transform: scale(1.4);
   border-color: var(--accent-primary);
-  box-shadow: 0 0 10px var(--accent-glow), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(74, 144, 217, 0.2);
+  box-shadow: 0 0 12px var(--accent-glow), 0 0 0 2.5px var(--bg-base), 0 0 0 4.5px rgba(74, 144, 217, 0.25);
 }
 
 /* Glow ring when connecting */
@@ -179,7 +179,7 @@ body {
 
 .react-flow__edge-path {
   stroke: var(--border-subtle);
-  stroke-width: 2;
+  stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -187,7 +187,7 @@ body {
 .react-flow__edge.selected .react-flow__edge-path,
 .react-flow__edge:hover .react-flow__edge-path {
   stroke: var(--accent-primary);
-  filter: drop-shadow(0 0 4px var(--accent-glow));
+  filter: drop-shadow(0 0 6px var(--accent-glow));
 }
 
 /* ── Resize controls ──────────────────────────────────────────────── */
@@ -417,5 +417,5 @@ body {
 
 /* ── Canvas background / dot grid enhancement ────────────────────── */
 .react-flow__background pattern circle {
-  fill: rgba(255, 255, 255, 0.08) !important;
+  fill: rgba(255, 255, 255, 0.05) !important;
 }

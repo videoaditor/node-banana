@@ -269,7 +269,7 @@ export function BaseNode({
       />
       <div
         className={`
-          rounded-[8px] h-full w-full flex flex-col overflow-hidden
+          rounded-[16px] h-full w-full flex flex-col overflow-hidden
           transition-all duration-[180ms] ease-out
           ${isCurrentlyExecuting || isExecuting
             ? "border border-[var(--accent-primary)] ring-1 ring-[var(--accent-glow)]"
@@ -287,18 +287,18 @@ export function BaseNode({
           ${className}
         `}
         style={{
-          background: 'rgba(30, 32, 40, 0.92)',
-          backdropFilter: 'blur(16px) saturate(1.4)',
-          WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
+          background: 'rgba(28, 30, 38, 0.88)',
+          backdropFilter: 'blur(20px) saturate(1.5)',
+          WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
           boxShadow: selected
-            ? `0 0 0 1px var(--accent-primary), 0 0 20px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)${accentColor ? `, 0 0 24px ${accentColor}15` : ''}`
-            : `0 4px 20px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)${accentColor ? `, -3px 0 12px -4px ${accentColor}20` : ''}`,
+            ? `0 0 0 1px var(--accent-primary), 0 0 24px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10)${accentColor ? `, 0 0 28px ${accentColor}18` : ''}`
+            : `0 4px 24px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)${accentColor ? `, -3px 0 14px -4px ${accentColor}25` : ''}`,
           borderLeft: accentColor ? `3px solid ${accentColor}` : undefined,
         }}
       >
         {/* Header bar — slightly darker strip with gradient separator */}
         <div
-          className="px-3 pt-2 pb-1 flex items-center justify-between shrink-0"
+          className="px-4 pt-3 pb-2 flex items-center justify-between shrink-0"
           style={{
             background: 'rgba(18, 19, 24, 0.7)',
             borderBottom: '1px solid transparent',
@@ -496,7 +496,7 @@ export function BaseNode({
             </div>
           )}
         </div>
-        <div className={contentClassName ?? "px-3 pb-4 flex-1 min-h-0 overflow-hidden flex flex-col"}>{children}</div>
+        <div className={contentClassName ?? "px-4 pb-5 flex-1 min-h-0 overflow-hidden flex flex-col"}>{children}</div>
       </div>
     </>
   );
