@@ -45,6 +45,15 @@ export function ArrayNode({ id, data, selected }: NodeProps<ArrayNodeType>) {
         </svg>
       }
     >
+      {/* Text input handle — receives text to append as items */}
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="text"
+        data-handletype="text"
+        title="Text input (appends to items)"
+      />
+
       {/* Text output handle */}
       <Handle
         type="source"

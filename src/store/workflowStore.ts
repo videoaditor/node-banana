@@ -1020,8 +1020,12 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
                 else items = [text];
               }
             } else if (iterator.type === "arrayNode") {
+              const { text } = ctx.getConnectedInputs(iterator.id);
               const data = iterator.data as any;
-              items = (data.items || []).filter((t: string) => t.trim());
+              // Merge: local items + connected text (split by newlines)
+              const localItems = (data.items || []).filter((t: string) => t.trim());
+              const connectedItems = text ? text.split("\n").filter((t: string) => t.trim()) : [];
+              items = [...localItems, ...connectedItems];
             }
 
             ctx.updateNodeData(iterator.id, { status: "complete" });
