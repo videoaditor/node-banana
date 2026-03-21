@@ -273,7 +273,7 @@ export function BaseNode({
           transition-all duration-[180ms] ease-out
           ${isCurrentlyExecuting || isExecuting
             ? "border border-[var(--accent-primary)] ring-1 ring-[var(--accent-glow)]"
-            : "border border-[var(--border-subtle)]"
+            : "border border-[var(--node-border)]"
           }
           ${hasError ? "border-[var(--node-error)]" : ""}
           ${selected
@@ -281,7 +281,7 @@ export function BaseNode({
             : ""
           }
           ${!selected && !isCurrentlyExecuting && !isExecuting && !hasError
-            ? "hover:border-[var(--accent-primary)]/60 hover:-translate-y-[1px]"
+            ? "hover:border-[var(--node-border-hover)] hover:-translate-y-[1px]"
             : ""
           }
           ${className}
@@ -291,9 +291,8 @@ export function BaseNode({
           backdropFilter: 'blur(20px) saturate(1.5)',
           WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
           boxShadow: selected
-            ? `0 0 0 1px var(--accent-primary), 0 0 24px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10)${accentColor ? `, 0 0 28px ${accentColor}18` : ''}`
-            : `0 4px 24px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)${accentColor ? `, -3px 0 14px -4px ${accentColor}25` : ''}`,
-          borderLeft: accentColor ? `3px solid ${accentColor}` : undefined,
+            ? `0 0 0 1px var(--accent-primary), 0 0 24px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10)${accentColor ? `, 0 0 30px ${accentColor}20` : ''}`
+            : `0 4px 24px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)${accentColor ? `, 0 0 20px ${accentColor}12` : ''}`,
         }}
       >
         {/* Header bar — slightly darker strip with gradient separator */}

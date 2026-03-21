@@ -38,6 +38,8 @@
   --node-warning: #f5a623;
   --node-error: #e85d75;
   --node-neutral: #6c7280;
+  --node-border: #4a4f60;
+  --node-border-hover: #6b7280;
 
   /* ── Handle / port colors ── */
   --handle-color-image: #3ecf8e;
@@ -89,9 +91,9 @@ body {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 1.5px solid var(--border-subtle);
-  background: var(--bg-surface);
-  box-shadow: 0 0 0 2.5px var(--bg-base), 0 0 0 3.5px rgba(255, 255, 255, 0.04);
+  border: 2px solid var(--node-border);
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 2px var(--bg-base), 0 0 6px rgba(255, 255, 255, 0.06);
   transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -139,40 +141,44 @@ body {
 .react-flow__handle[data-handletype="image"] {
   background: var(--handle-color-image);
   border-color: var(--handle-color-image);
+  box-shadow: 0 0 0 2px var(--bg-base), 0 0 8px rgba(62, 207, 142, 0.25);
 }
 
 .react-flow__handle[data-handletype="image"]:hover {
-  box-shadow: 0 0 10px rgba(62, 207, 142, 0.35), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(62, 207, 142, 0.2);
+  box-shadow: 0 0 14px rgba(62, 207, 142, 0.45), 0 0 0 2px var(--bg-base), 0 0 0 4.5px rgba(62, 207, 142, 0.25);
 }
 
 /* Text handles — accent blue */
 .react-flow__handle[data-handletype="text"] {
   background: var(--handle-color-text);
   border-color: var(--handle-color-text);
+  box-shadow: 0 0 0 2px var(--bg-base), 0 0 8px rgba(74, 144, 217, 0.25);
 }
 
 .react-flow__handle[data-handletype="text"]:hover {
-  box-shadow: 0 0 10px rgba(74, 144, 217, 0.35), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(74, 144, 217, 0.2);
+  box-shadow: 0 0 14px rgba(74, 144, 217, 0.45), 0 0 0 2px var(--bg-base), 0 0 0 4.5px rgba(74, 144, 217, 0.25);
 }
 
 /* 3D handles — warning amber */
 .react-flow__handle[data-handletype="3d"] {
   background: var(--handle-color-3d);
   border-color: var(--handle-color-3d);
+  box-shadow: 0 0 0 2px var(--bg-base), 0 0 8px rgba(245, 166, 35, 0.25);
 }
 
 .react-flow__handle[data-handletype="3d"]:hover {
-  box-shadow: 0 0 10px rgba(245, 166, 35, 0.35), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(245, 166, 35, 0.2);
+  box-shadow: 0 0 14px rgba(245, 166, 35, 0.45), 0 0 0 2px var(--bg-base), 0 0 0 4.5px rgba(245, 166, 35, 0.25);
 }
 
 /* Video handles — purple */
 .react-flow__handle[data-handletype="video"] {
   background: #c084fc;
   border-color: #c084fc;
+  box-shadow: 0 0 0 2px var(--bg-base), 0 0 8px rgba(192, 132, 252, 0.25);
 }
 
 .react-flow__handle[data-handletype="video"]:hover {
-  box-shadow: 0 0 10px rgba(192, 132, 252, 0.35), 0 0 0 2.5px var(--bg-base), 0 0 0 4px rgba(192, 132, 252, 0.2);
+  box-shadow: 0 0 14px rgba(192, 132, 252, 0.45), 0 0 0 2px var(--bg-base), 0 0 0 4.5px rgba(192, 132, 252, 0.25);
 }
 
 /* ── Edges ────────────────────────────────────────────────────────── */
