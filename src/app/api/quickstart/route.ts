@@ -9,7 +9,7 @@ import {
   parseJSONFromResponse,
 } from "@/lib/quickstart/validation";
 import { ImageInputNodeData } from "@/types";
-import { hydrateNodeData } from "@/store/utils/nodeDefaults";
+import { createDefaultNodeData } from "@/store/utils/nodeDefaults";
 import fs from "fs/promises";
 import path from "path";
 
@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
     // Hydrate node data with defaults (even valid workflows may lack required fields)
     workflow.nodes = workflow.nodes.map((node) => ({
       ...node,
-      data: hydrateNodeData(node.type!, node.data as Record<string, unknown>),
+      data: { ...createDefaultNodeData(node.type!), ...(node.data as Record<string, unknown>) },
     })) as WorkflowFile["nodes"];
 
     // Ensure the workflow has an ID

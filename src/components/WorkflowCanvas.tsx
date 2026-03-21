@@ -1174,6 +1174,7 @@ export function WorkflowCanvas() {
               brollBatch: { width: 380, height: 420 },
               arrayNode: { width: 320, height: 320 },
               listSelector: { width: 280, height: 200 },
+              subWorkflow: { width: 320, height: 280 },
             };
             const dims = defaultDimensions[nodeType!];
             addNode(nodeType!, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
@@ -1212,6 +1213,7 @@ export function WorkflowCanvas() {
           brollBatch: { width: 380, height: 420 },
           arrayNode: { width: 320, height: 320 },
           listSelector: { width: 280, height: 200 },
+              subWorkflow: { width: 320, height: 280 },
         };
         const dims = defaultDimensions[nodeType];
         addNode(nodeType, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });

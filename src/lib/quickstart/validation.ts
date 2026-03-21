@@ -1,5 +1,5 @@
 import { WorkflowFile } from "@/store/workflowStore";
-import { NodeType, WorkflowNodeData, ImageIteratorNodeData, ArrayNodeData, ListSelectorNodeData } from "@/types";
+import { NodeType, WorkflowNodeData, ImageIteratorNodeData, ArrayNodeData, ListSelectorNodeData, SubWorkflowNodeData } from "@/types";
 
 interface ValidationError {
   path: string;
@@ -52,6 +52,7 @@ const DEFAULT_DIMENSIONS: Record<NodeType, { width: number; height: number }> = 
   brollBatch: { width: 380, height: 420 },
   arrayNode: { width: 320, height: 320 },
   listSelector: { width: 280, height: 200 },
+  subWorkflow: { width: 320, height: 280 },
 
 };
 
@@ -429,6 +430,15 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
         selectedIndex: 0,
         outputText: "Option A",
       } as ListSelectorNodeData;
+    case "subWorkflow":
+      return {
+        selectedWorkflowFilename: null,
+        selectedWorkflowName: null,
+        outputText: null,
+        outputImage: null,
+        status: "idle",
+        error: null,
+      } as SubWorkflowNodeData;
   }
 }
 

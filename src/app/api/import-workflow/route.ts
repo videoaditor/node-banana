@@ -10,7 +10,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { hydrateNodeData } from "@/store/utils/nodeDefaults";
+import { createDefaultNodeData } from "@/store/utils/nodeDefaults";
+import { NodeType } from "@/types";
 
 export const maxDuration = 120; // 2 minutes for complex workflows
 export const dynamic = "force-dynamic";
@@ -312,7 +313,7 @@ export async function POST(request: NextRequest) {
                 id: node.id || `imported_${idx}`,
                 type,
                 position: node.position || { x: idx * 300, y: 0 },
-                data: hydrateNodeData(type, rawData),
+                data: { ...createDefaultNodeData(type as NodeType), ...rawData },
             };
         });
 

@@ -12,7 +12,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { hydrateNodeData } from "@/store/utils/nodeDefaults";
+import { createDefaultNodeData } from "@/store/utils/nodeDefaults";
+import { NodeType } from "@/types";
 
 export const maxDuration = 120;
 export const dynamic = "force-dynamic";
@@ -504,7 +505,7 @@ export async function POST(request: NextRequest) {
             const rawData = (node.data || {}) as Record<string, unknown>;
 
             // Hydrate with defaults so all required fields exist
-            const data = hydrateNodeData(type, rawData);
+            const data = { ...createDefaultNodeData(type as NodeType), ...rawData };
 
             // Auto-mark input nodes as app inputs so the workflow
             // can be used as an API endpoint right away
