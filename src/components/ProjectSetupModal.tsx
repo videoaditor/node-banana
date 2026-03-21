@@ -159,12 +159,38 @@ export function ProjectSetupModal({
 
       if (mode === "settings") {
         setName(workflowName || "");
-        setDirectoryPath(saveDirectoryPath || "");
         setExternalStorage(useExternalImageStorage);
+        
+        // If no directory is set, fetch default
+        if (!saveDirectoryPath) {
+          fetch("/api/projects/default-path")
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success && data.defaultPath) {
+                setDirectoryPath(data.defaultPath);
+              }
+            })
+            .catch(() => {
+              setDirectoryPath("");
+            });
+        } else {
+          setDirectoryPath(saveDirectoryPath);
+        }
       } else if (mode === "new") {
         setName("aditor-workflows");
-        setDirectoryPath("/Users/player/clawd/projects/node-banana-workflows");
         setExternalStorage(true);
+        // Fetch default directory path from server
+        fetch("/api/projects/default-path")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success && data.defaultPath) {
+              setDirectoryPath(data.defaultPath);
+            }
+          })
+          .catch(() => {
+            // Fallback in case API fails
+            setDirectoryPath("");
+          });
       }
 
       // Sync local providers state

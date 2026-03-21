@@ -129,7 +129,22 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const stats = await fs.stat(filePath);
+    // Try to stat the path, create directory if it doesn't exist
+    let stats;
+    try {
+      stats = await fs.stat(filePath);
+    } catch (statError) {
+      // Path doesn't exist - try to create it as a directory
+      try {
+        await fs.mkdir(filePath, { recursive: true });
+        stats = await fs.stat(filePath);
+        logger.info('file.load', 'Created directory on validation', {
+          filePath,
+        });
+      } catch (createError) {
+        throw statError; // Re-throw original error if we can't create
+      }
+    }
 
     // If it's a directory, return validation info (legacy behavior)
     if (stats.isDirectory()) {
