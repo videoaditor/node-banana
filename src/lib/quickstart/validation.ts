@@ -378,8 +378,13 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
       return {
         url: "",
         scrapeMode: "best-image",
+        maxImages: 4,
+        minImageSize: 100,
         outputImage: null,
+        outputImages: [],
         outputText: null,
+        pageTitle: null,
+        imageCount: 0,
         status: "idle",
         error: null,
       };
