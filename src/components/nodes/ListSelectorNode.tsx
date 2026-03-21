@@ -1,0 +1,151 @@
+"use client";
+
+import React, { useCallback } from "react";
+import { Handle, Position, NodeProps, Node } from "@xyflow/react";
+import { BaseNode } from "./BaseNode";
+import { useWorkflowStore } from "@/store/workflowStore";
+import { ListSelectorNodeData } from "@/types";
+
+type ListSelectorNodeType = Node<ListSelectorNodeData, "listSelector">;
+
+export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorNodeType>) {
+  const nodeData = data;
+  const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
+
+  const handleSelectionChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const index = parseInt(e.target.value, 10);
+      updateNodeData(id, {
+        selectedIndex: index,
+        outputText: nodeData.items[index] || null,
+      });
+    },
+    [id, nodeData.items, updateNodeData]
+  );
+
+  const handleItemChange = useCallback(
+    (index: number, value: string) => {
+      const newItems = [...nodeData.items];
+      newItems[index] = value;
+      const updates: Partial<ListSelectorNodeData> = { items: newItems };
+      // Update outputText if the selected item changed
+      if (index === nodeData.selectedIndex) {
+        updates.outputText = value;
+      }
+      updateNodeData(id, updates);
+    },
+    [id, nodeData.items, nodeData.selectedIndex, updateNodeData]
+  );
+
+  const handleAddItem = useCallback(() => {
+    updateNodeData(id, { items: [...nodeData.items, `Option ${nodeData.items.length + 1}`] });
+  }, [id, nodeData.items, updateNodeData]);
+
+  const handleRemoveItem = useCallback(
+    (index: number) => {
+      const newItems = nodeData.items.filter((_, i) => i !== index);
+      if (newItems.length === 0) return;
+      const newSelectedIndex = Math.min(nodeData.selectedIndex, newItems.length - 1);
+      updateNodeData(id, {
+        items: newItems,
+        selectedIndex: newSelectedIndex,
+        outputText: newItems[newSelectedIndex] || null,
+      });
+    },
+    [id, nodeData.items, nodeData.selectedIndex, updateNodeData]
+  );
+
+  return (
+    <BaseNode
+      id={id}
+      selected={selected}
+      title="List Selector"
+      nodeAccentColor="blue"
+      titlePrefix={
+        <svg className="w-3.5 h-3.5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+        </svg>
+      }
+    >
+      {/* Text input handle (optional — can receive items from upstream) */}
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="text"
+        data-handletype="text"
+        title="Text input (populates options)"
+      />
+
+      {/* Text output handle */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="text"
+        data-handletype="text"
+        title="Selected text output"
+      />
+
+      <div className="space-y-3 pt-2">
+        {/* Selector dropdown */}
+        <div>
+          <label className="block text-[10px] text-[var(--text-muted)] mb-1 uppercase tracking-wider font-['DM_Mono',monospace]">
+            Selected
+          </label>
+          <select
+            value={nodeData.selectedIndex}
+            onChange={handleSelectionChange}
+            className="nodrag nopan w-full px-2 py-1.5 text-xs bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-md focus:outline-none focus:border-[var(--accent-primary)] text-[var(--text-primary)]"
+          >
+            {nodeData.items.map((item, index) => (
+              <option key={index} value={index}>
+                {item || `(empty ${index + 1})`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Editable items list */}
+        <div>
+          <label className="block text-[10px] text-[var(--text-muted)] mb-1 uppercase tracking-wider font-['DM_Mono',monospace]">
+            Options
+          </label>
+          <div className="space-y-1 max-h-32 overflow-y-auto">
+            {nodeData.items.map((item, index) => (
+              <div key={index} className="flex items-center gap-1 group">
+                <div
+                  className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                    index === nodeData.selectedIndex
+                      ? "bg-[var(--accent-primary)]"
+                      : "bg-[var(--text-muted)]"
+                  }`}
+                />
+                <input
+                  type="text"
+                  value={item}
+                  onChange={(e) => handleItemChange(index, e.target.value)}
+                  className="nodrag nopan flex-1 px-1.5 py-0.5 text-[11px] bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-[var(--accent-primary)] focus:outline-none text-[var(--text-primary)]"
+                />
+                {nodeData.items.length > 1 && (
+                  <button
+                    onClick={() => handleRemoveItem(index)}
+                    className="nodrag nopan opacity-0 group-hover:opacity-100 p-0.5 text-[var(--text-muted)] hover:text-[var(--node-error)] transition-all duration-[120ms]"
+                  >
+                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={handleAddItem}
+            className="nodrag nopan mt-1.5 text-[10px] text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-all duration-[120ms]"
+          >
+            + Add option
+          </button>
+        </div>
+      </div>
+    </BaseNode>
+  );
+}

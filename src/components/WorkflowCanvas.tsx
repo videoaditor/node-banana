@@ -43,6 +43,8 @@ import {
   StickyNoteNode,
   SoraBlueprintNode,
   BrollBatchNode,
+  ArrayNode,
+  ListSelectorNode,
 
 } from "./nodes";
 
@@ -89,6 +91,8 @@ const nodeTypes: NodeTypes = {
   stickyNote: StickyNoteNode,
   soraBlueprint: SoraBlueprintNode,
   brollBatch: BrollBatchNode,
+  arrayNode: ArrayNode,
+  listSelector: ListSelectorNode,
 
 };
 
@@ -1168,6 +1172,8 @@ export function WorkflowCanvas() {
               stickyNote: { width: 200, height: 200 },
               soraBlueprint: { width: 320, height: 360 },
               brollBatch: { width: 380, height: 420 },
+              arrayNode: { width: 320, height: 320 },
+              listSelector: { width: 280, height: 200 },
             };
             const dims = defaultDimensions[nodeType!];
             addNode(nodeType!, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
@@ -1204,6 +1210,8 @@ export function WorkflowCanvas() {
           stickyNote: { width: 200, height: 160 },
           soraBlueprint: { width: 320, height: 360 },
           brollBatch: { width: 380, height: 420 },
+          arrayNode: { width: 320, height: 320 },
+          listSelector: { width: 280, height: 200 },
         };
         const dims = defaultDimensions[nodeType];
         addNode(nodeType, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
@@ -1953,6 +1961,10 @@ export function WorkflowCanvas() {
                 return "#0ea5e9"; // sky-500 (text iteration)
               case "webScraper":
                 return "#f59e0b"; // amber-500 (web)
+              case "arrayNode":
+                return "#3b82f6"; // blue-500 (array)
+              case "listSelector":
+                return "#6366f1"; // indigo-500 (list)
               default:
                 return "#94a3b8";
             }

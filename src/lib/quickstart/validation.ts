@@ -50,6 +50,8 @@ const DEFAULT_DIMENSIONS: Record<NodeType, { width: number; height: number }> = 
   stickyNote: { width: 200, height: 160 },
   soraBlueprint: { width: 320, height: 360 },
   brollBatch: { width: 380, height: 420 },
+  arrayNode: { width: 320, height: 320 },
+  listSelector: { width: 280, height: 200 },
 
 };
 
@@ -408,6 +410,19 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
         status: "idle",
         error: null,
 
+      };
+    case "arrayNode":
+      return {
+        items: ["Item 1", "Item 2", "Item 3"],
+        currentItem: null,
+        status: "idle",
+        error: null,
+      };
+    case "listSelector":
+      return {
+        items: ["Option A", "Option B", "Option C"],
+        selectedIndex: 0,
+        outputText: "Option A",
       };
   }
 }

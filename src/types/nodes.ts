@@ -45,7 +45,9 @@ export type NodeType =
   | "webScraper"
   | "stickyNote"
   | "soraBlueprint"
-  | "brollBatch";
+  | "brollBatch"
+  | "arrayNode"
+  | "listSelector";
 
 
 /**
@@ -437,6 +439,25 @@ export interface BrollBatchNodeData extends BaseNodeData {
 /**
  * Union of all node data types
  */
+/**
+ * Array node - holds multiple text items, each output as separate text during iteration
+ */
+export interface ArrayNodeData extends BaseNodeData {
+  items: string[];             // List of text items
+  currentItem?: string | null; // Currently iterating item for downstream nodes
+  status: NodeStatus;
+  error: string | null;
+}
+
+/**
+ * List Selector node - picks one item from a set of values
+ */
+export interface ListSelectorNodeData extends BaseNodeData {
+  items: string[];             // Available options
+  selectedIndex: number;       // Currently selected item index
+  outputText: string | null;   // The selected item value
+}
+
 export type WorkflowNodeData =
   | ImageInputNodeData
   | AudioInputNodeData
@@ -460,7 +481,9 @@ export type WorkflowNodeData =
   | WebScraperNodeData
   | StickyNoteNodeData
   | SoraBlueprintNodeData
-  | BrollBatchNodeData;
+  | BrollBatchNodeData
+  | ArrayNodeData
+  | ListSelectorNodeData;
 
 
 /**
