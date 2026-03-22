@@ -17,6 +17,8 @@ const PROVIDER_HEADER_MAP: Record<ProviderType, string> = {
   kie: "X-Kie-Key",
   wavespeed: "X-WaveSpeed-Key",
   openai: "X-OpenAI-API-Key",
+  anthropic: "X-Anthropic-API-Key",
+  groq: "X-Groq-API-Key",
 };
 
 /**
@@ -65,8 +67,17 @@ export function buildLlmHeaders(
     if (openaiConfig?.apiKey) {
       headers["X-OpenAI-API-Key"] = openaiConfig.apiKey;
     }
+  } else if (llmProvider === "anthropic") {
+    const anthropicConfig = providerSettings.providers.anthropic;
+    if (anthropicConfig?.apiKey) {
+      headers["X-Anthropic-API-Key"] = anthropicConfig.apiKey;
+    }
+  } else if (llmProvider === "groq") {
+    const groqConfig = providerSettings.providers.groq;
+    if (groqConfig?.apiKey) {
+      headers["X-Groq-API-Key"] = groqConfig.apiKey;
+    }
   }
-  // Anthropic and Groq use env vars only for now (no user-settable keys yet)
 
   return headers;
 }

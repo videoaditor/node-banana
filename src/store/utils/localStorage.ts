@@ -47,6 +47,8 @@ export const defaultProviderSettings: ProviderSettings = {
     fal: { id: "fal", name: "fal.ai", enabled: true, apiKey: null, apiKeyEnvVar: "FAL_API_KEY" },
     kie: { id: "kie", name: "Kie.ai", enabled: false, apiKey: null, apiKeyEnvVar: "KIE_API_KEY" },
     wavespeed: { id: "wavespeed", name: "WaveSpeed", enabled: false, apiKey: null, apiKeyEnvVar: "WAVESPEED_API_KEY" },
+    anthropic: { id: "anthropic", name: "Anthropic", enabled: true, apiKey: null, apiKeyEnvVar: "ANTHROPIC_API_KEY" },
+    groq: { id: "groq", name: "Groq", enabled: true, apiKey: null, apiKeyEnvVar: "GROQ_API_KEY" },
   }
 };
 

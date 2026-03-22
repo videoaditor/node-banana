@@ -130,6 +130,8 @@ export function ProjectSetupModal({
     fal: false,
     kie: false,
     wavespeed: false,
+    anthropic: false,
+    groq: false,
   });
   const [overrideActive, setOverrideActive] = useState<Record<ProviderType, boolean>>({
     gemini: false,
@@ -138,6 +140,8 @@ export function ProjectSetupModal({
     fal: false,
     kie: false,
     wavespeed: false,
+    anthropic: false,
+    groq: false,
   });
   const [envStatus, setEnvStatus] = useState<EnvStatusResponse | null>(null);
 
@@ -169,7 +173,7 @@ export function ProjectSetupModal({
 
       // Sync local providers state
       setLocalProviders(providerSettings);
-      setShowApiKey({ gemini: false, openai: false, replicate: false, fal: false, kie: false, wavespeed: false });
+      setShowApiKey({ gemini: false, openai: false, replicate: false, fal: false, kie: false, wavespeed: false, anthropic: false, groq: false });
       // Initialize override as active if user already has a key set
       setOverrideActive({
         gemini: !!providerSettings.providers.gemini?.apiKey,
@@ -178,6 +182,8 @@ export function ProjectSetupModal({
         fal: !!providerSettings.providers.fal?.apiKey,
         kie: !!providerSettings.providers.kie?.apiKey,
         wavespeed: !!providerSettings.providers.wavespeed?.apiKey,
+        anthropic: !!providerSettings.providers.anthropic?.apiKey,
+        groq: !!providerSettings.providers.groq?.apiKey,
       });
       setError(null);
 
@@ -280,7 +286,7 @@ export function ProjectSetupModal({
 
   const handleSaveProviders = () => {
     // Save each provider's settings
-    const providerIds: ProviderType[] = ["gemini", "openai", "replicate", "fal", "kie", "wavespeed"];
+    const providerIds: ProviderType[] = ["gemini", "openai", "replicate", "fal", "kie", "wavespeed", "anthropic", "groq"];
     for (const providerId of providerIds) {
       const local = localProviders.providers[providerId];
       const current = providerSettings.providers[providerId];
@@ -749,6 +755,106 @@ export function ProjectSetupModal({
                     )}
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Anthropic */}
+            <div className="p-3 bg-[var(--bg-base)] rounded-lg border border-[var(--border-subtle)]">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-[var(--text-primary)]">Anthropic</span>
+                  {envStatus?.anthropic && !overrideActive.anthropic ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-[var(--node-success)]">Configured via .env</span>
+                      <button
+                        type="button"
+                        onClick={() => setOverrideActive((prev) => ({ ...prev, anthropic: true }))}
+                        className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      >
+                        Override
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type={showApiKey.anthropic ? "text" : "password"}
+                        value={localProviders.providers.anthropic?.apiKey || ""}
+                        onChange={(e) => updateLocalProvider("anthropic", { apiKey: e.target.value || null })}
+                        placeholder="sk-ant-..."
+                        className="w-48 px-2 py-1 text-xs bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowApiKey((prev) => ({ ...prev, anthropic: !prev.anthropic }))}
+                        className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      >
+                        {showApiKey.anthropic ? "Hide" : "Show"}
+                      </button>
+                      {envStatus?.anthropic && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOverrideActive((prev) => ({ ...prev, anthropic: false }));
+                            updateLocalProvider("anthropic", { apiKey: null });
+                          }}
+                          className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Groq */}
+            <div className="p-3 bg-[var(--bg-base)] rounded-lg border border-[var(--border-subtle)]">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-[var(--text-primary)]">Groq</span>
+                  {envStatus?.groq && !overrideActive.groq ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-[var(--node-success)]">Configured via .env</span>
+                      <button
+                        type="button"
+                        onClick={() => setOverrideActive((prev) => ({ ...prev, groq: true }))}
+                        className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      >
+                        Override
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type={showApiKey.groq ? "text" : "password"}
+                        value={localProviders.providers.groq?.apiKey || ""}
+                        onChange={(e) => updateLocalProvider("groq", { apiKey: e.target.value || null })}
+                        placeholder="gsk_..."
+                        className="w-48 px-2 py-1 text-xs bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded text-[var(--text-primary)]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowApiKey((prev) => ({ ...prev, groq: !prev.groq }))}
+                        className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      >
+                        {showApiKey.groq ? "Hide" : "Show"}
+                      </button>
+                      {envStatus?.groq && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOverrideActive((prev) => ({ ...prev, groq: false }));
+                            updateLocalProvider("groq", { apiKey: null });
+                          }}
+                          className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
