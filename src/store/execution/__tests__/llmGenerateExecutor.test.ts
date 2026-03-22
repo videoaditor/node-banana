@@ -14,6 +14,8 @@ const defaultProviderSettings = {
     kie: { apiKey: "" },
     wavespeed: { apiKey: "" },
     openai: { apiKey: "okey" },
+    anthropic: { apiKey: "" },
+    groq: { apiKey: "" },
   },
 } as any;
 

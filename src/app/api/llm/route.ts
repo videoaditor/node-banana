@@ -209,8 +209,9 @@ async function generateWithAnthropic(
   maxTokens: number,
   images?: string[],
   requestId?: string,
+  userApiKey?: string | null
 ): Promise<string> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = userApiKey || process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     logger.error('api.error', 'ANTHROPIC_API_KEY not configured', { requestId });
     throw new Error("ANTHROPIC_API_KEY not configured. Add it to .env.local.");
@@ -290,8 +291,9 @@ async function generateWithGroq(
   maxTokens: number,
   _images?: string[],
   requestId?: string,
+  userApiKey?: string | null
 ): Promise<string> {
-  const apiKey = process.env.GROQ_API_KEY;
+  const apiKey = userApiKey || process.env.GROQ_API_KEY;
   if (!apiKey) {
     logger.error('api.error', 'GROQ_API_KEY not configured', { requestId });
     throw new Error("GROQ_API_KEY not configured. Add it to .env.local.");
@@ -350,6 +352,8 @@ export async function POST(request: NextRequest) {
     // Get user-provided API keys from headers (override env variables)
     const geminiApiKey = request.headers.get("X-Gemini-API-Key");
     const openaiApiKey = request.headers.get("X-OpenAI-API-Key");
+    const anthropicApiKey = request.headers.get("X-Anthropic-API-Key");
+    const groqApiKey = request.headers.get("X-Groq-API-Key");
 
     const body: LLMGenerateRequest = await request.json();
     const {
@@ -399,9 +403,9 @@ export async function POST(request: NextRequest) {
     } else if (provider === "openai") {
       text = await generateWithOpenAI(prompt, model, temperature, maxTokens, images, requestId, openaiApiKey);
     } else if (provider === "anthropic") {
-      text = await generateWithAnthropic(prompt, model, temperature, maxTokens, images, requestId);
+      text = await generateWithAnthropic(prompt, model, temperature, maxTokens, images, requestId, anthropicApiKey);
     } else if (provider === "groq") {
-      text = await generateWithGroq(prompt, model, temperature, maxTokens, images, requestId);
+      text = await generateWithGroq(prompt, model, temperature, maxTokens, images, requestId, groqApiKey);
     } else {
       logger.warn('api.llm', 'Unknown provider requested', { requestId, provider });
       return NextResponse.json<LLMGenerateResponse>(
