@@ -170,7 +170,7 @@ async function generateWithOpenAI(
       model: modelId,
       messages: [{ role: "user", content }],
       temperature,
-      max_tokens: maxTokens,
+      max_completion_tokens: maxTokens,
     }),
   });
   const duration = Date.now() - startTime;
