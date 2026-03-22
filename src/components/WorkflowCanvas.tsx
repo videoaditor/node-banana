@@ -167,6 +167,10 @@ const getNodeHandles = (nodeType: string): { inputs: string[]; outputs: string[]
       return { inputs: ["text"], outputs: ["text"] };
     case "webScraper":
       return { inputs: ["text"], outputs: ["image", "text"] };
+    case "arrayNode":
+      return { inputs: ["text"], outputs: ["text"] };
+    case "listSelector":
+      return { inputs: ["text"], outputs: ["text"] };
     default:
       return { inputs: [], outputs: [] };
   }
