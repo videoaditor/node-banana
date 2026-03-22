@@ -17,9 +17,9 @@ const PROVIDERS: { value: LLMProvider; label: string }[] = [
 
 const MODELS: Record<LLMProvider, { value: LLMModelType; label: string }[]> = {
   google: [
-    { value: "gemini-3-flash-preview", label: "Gemini 3 Flash" },
+    { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
     { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-    { value: "gemini-3-pro-preview", label: "Gemini 3.0 Pro" },
+    { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
   ],
   openai: [
     { value: "gpt-4.1-mini", label: "GPT-4.1 Mini" },

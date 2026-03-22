@@ -40,9 +40,9 @@ export type LLMProvider = "google" | "openai" | "anthropic" | "groq";
 
 // LLM Model Options
 export type LLMModelType =
+  | "gemini-2.0-flash"
   | "gemini-2.5-flash"
-  | "gemini-3-flash-preview"
-  | "gemini-3-pro-preview"
+  | "gemini-2.5-pro"
   | "gpt-4.1-mini"
   | "gpt-4.1-nano"
   | "claude-sonnet-4-20250514"

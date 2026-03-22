@@ -1,5 +1,5 @@
 import { WorkflowFile } from "@/store/workflowStore";
-import { NodeType, WorkflowNodeData, ImageIteratorNodeData, ArrayNodeData, ListSelectorNodeData, SubWorkflowNodeData } from "@/types";
+import { NodeType, WorkflowNodeData, ImageIteratorNodeData, ArrayNodeData, ListSelectorNodeData, SubWorkflowNodeData, LLMGenerateNodeData } from "@/types";
 
 interface ValidationError {
   path: string;
@@ -289,12 +289,12 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
         outputHistory: [],
         selectedHistoryIndex: -1,
         provider: "google",
-        model: "gemini-3-flash-preview",
+        model: "gemini-2.5-flash",
         temperature: 0.7,
         maxTokens: 8192,
         status: "idle",
         error: null,
-      };
+      } as LLMGenerateNodeData;
     case "splitGrid":
       return {
         sourceImage: null,

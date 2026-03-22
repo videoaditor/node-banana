@@ -12,9 +12,9 @@ function generateRequestId(): string {
 
 // Map model types to actual API model IDs
 const GOOGLE_MODEL_MAP: Record<string, string> = {
+  "gemini-2.0-flash": "gemini-2.0-flash",
   "gemini-2.5-flash": "gemini-2.5-flash",
-  "gemini-3-flash-preview": "gemini-3-flash-preview",
-  "gemini-3-pro-preview": "gemini-3-pro-preview",
+  "gemini-2.5-pro": "gemini-2.5-pro",
 };
 
 const OPENAI_MODEL_MAP: Record<string, string> = {

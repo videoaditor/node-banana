@@ -200,7 +200,7 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         outputHistory: [],
         selectedHistoryIndex: -1,
         provider: llmDefaults?.provider ?? "google",
-        model: llmDefaults?.model ?? "gemini-3-flash-preview",
+        model: llmDefaults?.model ?? "gemini-2.5-flash",
         temperature: llmDefaults?.temperature ?? 0.7,
         maxTokens: llmDefaults?.maxTokens ?? 8192,
         status: "idle",
