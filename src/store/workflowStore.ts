@@ -967,7 +967,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
           if (iterators.length > 0) {
             // Put iterator at the end, run normal nodes first
-            const normalNodes = levelNodes.filter(n => n.type !== "imageIterator" && n.type !== "textIterator");
+            const normalNodes = levelNodes.filter(n => n.type !== "imageIterator" && n.type !== "textIterator" && n.type !== "arrayNode");
             if (normalNodes.length > 0) {
               const normalBatches = chunk(normalNodes, maxConcurrentCalls);
               for (const batch of normalBatches) {
