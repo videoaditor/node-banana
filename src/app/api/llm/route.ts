@@ -18,8 +18,9 @@ const GOOGLE_MODEL_MAP: Record<string, string> = {
 };
 
 const OPENAI_MODEL_MAP: Record<string, string> = {
-  "gpt-4.1-mini": "gpt-4.1-mini",
-  "gpt-4.1-nano": "gpt-4.1-nano",
+  "gpt-5.4": "gpt-5.4",
+  "gpt-5.4-mini": "gpt-5.4-mini",
+  "gpt-5.4-nano": "gpt-5.4-nano",
 };
 
 const ANTHROPIC_MODEL_MAP: Record<string, string> = {
