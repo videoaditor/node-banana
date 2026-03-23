@@ -160,13 +160,14 @@ export function WebScraperNode({ id, data, selected }: NodeProps<WebScraperNodeT
               Max images
             </label>
             <select
-              value={nodeData.maxImages || 4}
+              value={nodeData.maxImages ?? 20}
               onChange={handleMaxImagesChange}
               className="nodrag nopan w-full px-2 py-1 text-xs bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-md focus:outline-none focus:border-orange-500 text-[var(--text-secondary)]"
             >
-              {[1, 2, 3, 4, 6, 8, 10].map(n => (
-                <option key={n} value={n}>{n} {n === 1 ? "image" : "images"}</option>
+              {[1, 2, 4, 6, 10, 15, 20, 30].map(n => (
+                <option key={n} value={n}>{n} images</option>
               ))}
+              <option value={0}>All images</option>
             </select>
           </div>
 
