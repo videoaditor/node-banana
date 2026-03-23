@@ -24,6 +24,8 @@ import {
   BrollBatchNodeData,
   ArrayNodeData,
   ListSelectorNodeData,
+  ImageFilterNodeData,
+  ZipIteratorNodeData,
 
   WorkflowNodeData,
   GroupColor,
@@ -61,6 +63,8 @@ export const defaultNodeDimensions: Record<NodeType, { width: number; height: nu
   brollBatch: { width: 380, height: 420 },
   arrayNode: { width: 320, height: 320 },
   listSelector: { width: 280, height: 200 },
+  imageFilter: { width: 320, height: 400 },
+  zipIterator: { width: 340, height: 380 },
   subWorkflow: { width: 320, height: 280 },
 
 };
@@ -346,6 +350,33 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         splitMode: "newline",
         customSeparator: "",
       } as ListSelectorNodeData;
+    case "imageFilter":
+      return {
+        filterCriteria: "only product photos",
+        provider: "google",
+        model: "gemini-2.5-flash",
+        inputImages: [],
+        outputImages: [],
+        filterResults: [],
+        status: "idle",
+        error: null,
+      } as ImageFilterNodeData;
+
+    case "zipIterator":
+      return {
+        splitMode: "newline",
+        customSeparator: "",
+        mode: "zip",
+        textItems: [],
+        imageItems: [],
+        currentText: null,
+        currentImage: null,
+        currentIndex: 0,
+        totalPairs: 0,
+        status: "idle",
+        error: null,
+      } as ZipIteratorNodeData;
+
     case "subWorkflow":
       return {
         selectedWorkflowFilename: null,

@@ -22,6 +22,7 @@ import { executeGenerate3D } from "./generate3dExecutor";
 import { executeLlmGenerate } from "./llmGenerateExecutor";
 import { executeSplitGrid } from "./splitGridExecutor";
 import { executeVideoStitch, executeEaseCurve } from "./videoProcessingExecutors";
+import { executeImageFilter } from "./imageFilterExecutor";
 
 export interface ExecuteNodeOptions {
   /** When true, executors that support it will fall back to stored inputs. */
@@ -86,5 +87,9 @@ export async function executeNode(
     case "glbViewer":
       await executeGlbViewer(ctx);
       break;
+    case "imageFilter":
+      await executeImageFilter(ctx);
+      break;
+    // zipIterator is handled by the workflowStore iteration loop, not here
   }
 }

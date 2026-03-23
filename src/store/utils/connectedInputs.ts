@@ -22,6 +22,8 @@ import {
   LLMGenerateNodeData,
   GLBViewerNodeData,
   WebScraperNodeData,
+  ImageFilterNodeData,
+  ZipIteratorNodeData,
 } from "@/types";
 
 /**
@@ -109,6 +111,18 @@ function getSourceOutput(sourceNode: WorkflowNode, sourceHandle?: string | null)
       // "image" handle or default — return first image
       return { type: "image", value: wsData.outputImage || (wsData.outputImages?.[0] || null) };
     }
+  } else if (sourceNode.type === "imageFilter") {
+    const ifData = sourceNode.data as ImageFilterNodeData;
+    // Image filter outputs filtered images
+    return { type: "image", value: ifData.outputImages?.[0] || null };
+  } else if (sourceNode.type === "zipIterator") {
+    const zipData = sourceNode.data as ZipIteratorNodeData;
+    // Dual output: resolve based on source handle
+    if (sourceHandle === "text") {
+      return { type: "text", value: zipData.currentText };
+    } else {
+      return { type: "image", value: zipData.currentImage };
+    }
   } else if (sourceNode.type === "subWorkflow") {
     const swData = sourceNode.data as { outputText: string | null; outputImage: string | null };
     if (sourceHandle === "text") {
@@ -168,6 +182,16 @@ export function getConnectedInputsPure(
       if (!sourceNode) return;
 
       const handleId = edge.targetHandle;
+
+      // Special case: imageFilter has multi-image output
+      if (sourceNode.type === "imageFilter") {
+        const ifData = sourceNode.data as ImageFilterNodeData;
+        const filtered = ifData.outputImages || [];
+        if (filtered.length > 0) {
+          filtered.forEach(img => images.push(img));
+        }
+        return;
+      }
 
       // Special case: webScraper has multi-image output
       if (sourceNode.type === "webScraper") {
