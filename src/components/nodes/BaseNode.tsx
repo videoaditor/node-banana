@@ -316,11 +316,11 @@ export function BaseNode({
                 onBlur={handleTitleSubmit}
                 onKeyDown={handleTitleKeyDown}
                 placeholder="Custom title..."
-                className="nodrag nopan w-full bg-transparent border-none outline-none text-[11px] font-medium tracking-[0.08em] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] uppercase font-['DM_Mono',monospace]"
+                className="nodrag nopan w-full bg-transparent border-none outline-none text-[11px] font-medium tracking-[0.08em] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] uppercase font-medium"
               />
             ) : (
               <span
-                className="nodrag text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-secondary)] cursor-text truncate font-['DM_Mono',monospace]"
+                className="nodrag text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-secondary)] cursor-text truncate font-medium"
                 onClick={() => setIsEditingTitle(true)}
                 title="Click to edit title"
               >
@@ -391,7 +391,7 @@ export function BaseNode({
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                       </svg>
                     </button>
-                    <span className="text-xs text-[var(--text-muted)] min-w-[32px] text-center font-['DM_Mono',monospace]">
+                    <span className="text-xs text-[var(--text-muted)] min-w-[32px] text-center font-medium">
                       {commentNavigation.currentIndex}/{commentNavigation.totalCount}
                     </span>
                     <button
@@ -469,7 +469,7 @@ export function BaseNode({
                   <line x1="21" y1="3" x2="14" y2="10" />
                   <line x1="3" y1="21" x2="10" y2="14" />
                 </svg>
-                <span className="max-w-0 opacity-0 whitespace-nowrap text-[10px] font-['DM_Mono',monospace] transition-all duration-[120ms] ease overflow-hidden group-hover:max-w-[60px] group-hover:opacity-100 group-hover:ml-1">
+                <span className="max-w-0 opacity-0 whitespace-nowrap text-[10px] font-medium transition-all duration-[120ms] ease overflow-hidden group-hover:max-w-[60px] group-hover:opacity-100 group-hover:ml-1">
                   Expand
                 </span>
               </button>
@@ -488,7 +488,7 @@ export function BaseNode({
                 <svg className="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
-                <span className="max-w-0 opacity-0 whitespace-nowrap text-[10px] font-['DM_Mono',monospace] transition-all duration-[120ms] ease overflow-hidden group-hover:max-w-[60px] group-hover:opacity-100 group-hover:ml-1">
+                <span className="max-w-0 opacity-0 whitespace-nowrap text-[10px] font-medium transition-all duration-[120ms] ease overflow-hidden group-hover:max-w-[60px] group-hover:opacity-100 group-hover:ml-1">
                   Run node
                 </span>
               </button>

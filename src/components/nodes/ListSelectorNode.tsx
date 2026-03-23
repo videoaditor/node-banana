@@ -110,7 +110,7 @@ export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorN
       <div className="space-y-3 pt-2">
         {/* Split mode dropdown */}
         <div>
-          <label className="block text-[10px] text-[var(--text-muted)] mb-1 uppercase tracking-wider font-['DM_Mono',monospace]">
+          <label className="block text-[10px] text-[var(--text-muted)] mb-1 uppercase tracking-wider font-medium">
             Split at
           </label>
           <select
@@ -141,14 +141,14 @@ export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorN
 
         {/* Upstream indicator */}
         {hasUpstreamItems && (
-          <div className="text-[10px] text-[var(--accent-primary)] font-['DM_Mono',monospace]">
+          <div className="text-[10px] text-[var(--accent-primary)] font-medium">
             {nodeData.items.length} items from upstream
           </div>
         )}
 
         {/* Selector dropdown */}
         <div>
-          <label className="block text-[10px] text-[var(--text-muted)] mb-1 uppercase tracking-wider font-['DM_Mono',monospace]">
+          <label className="block text-[10px] text-[var(--text-muted)] mb-1 uppercase tracking-wider font-medium">
             Selected
           </label>
           <select
@@ -166,7 +166,7 @@ export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorN
 
         {/* Items list */}
         <div>
-          <label className="block text-[10px] text-[var(--text-muted)] mb-1 uppercase tracking-wider font-['DM_Mono',monospace]">
+          <label className="block text-[10px] text-[var(--text-muted)] mb-1 uppercase tracking-wider font-medium">
             Options ({nodeData.items.length})
           </label>
           <div className="space-y-1 max-h-32 overflow-y-auto">
@@ -210,7 +210,7 @@ export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorN
 
         {/* Output preview */}
         {nodeData.outputText && (
-          <div className="text-[10px] text-[var(--text-secondary)] font-['DM_Mono',monospace] bg-[var(--bg-base)] p-1.5 rounded max-h-16 overflow-y-auto">
+          <div className="text-[10px] text-[var(--text-secondary)] font-medium bg-[var(--bg-base)] p-1.5 rounded max-h-16 overflow-y-auto">
             {nodeData.outputText.substring(0, 150)}{nodeData.outputText.length > 150 ? "..." : ""}
           </div>
         )}
