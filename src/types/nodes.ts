@@ -453,9 +453,12 @@ export interface ArrayNodeData extends BaseNodeData {
  * List Selector node - picks one item from a set of values
  */
 export interface ListSelectorNodeData extends BaseNodeData {
-  items: string[];             // Available options
+  items: string[];             // Available options (manual or from upstream)
   selectedIndex: number;       // Currently selected item index
   outputText: string | null;   // The selected item value
+  splitMode: "newline" | "period" | "hash" | "dash" | "custom"; // How to split upstream text
+  customSeparator: string;     // Used when splitMode is "custom"
+  upstreamItems?: string[];    // Items populated from upstream text (kept separate from manual items)
 }
 
 export type WorkflowNodeData =

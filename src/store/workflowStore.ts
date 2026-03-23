@@ -942,6 +942,32 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         case "webScraper":
           await executeWebScraper(executionCtx);
           break;
+        case "listSelector": {
+          // Populate items from upstream text if connected
+          const { text: lsText } = executionCtx.getConnectedInputs(node.id);
+          if (lsText) {
+            const lsData = node.data as any;
+            const mode = lsData.splitMode || "newline";
+            let splitItems: string[];
+            if (mode === "newline") splitItems = lsText.split("\n").filter((t: string) => t.trim());
+            else if (mode === "period") splitItems = lsText.split(".").filter((t: string) => t.trim());
+            else if (mode === "hash") splitItems = lsText.split("#").filter((t: string) => t.trim());
+            else if (mode === "dash") splitItems = lsText.split("-").filter((t: string) => t.trim());
+            else if (mode === "custom" && lsData.customSeparator) splitItems = lsText.split(lsData.customSeparator).filter((t: string) => t.trim());
+            else splitItems = [lsText];
+
+            if (splitItems.length > 0) {
+              const selectedIdx = Math.min(lsData.selectedIndex || 0, splitItems.length - 1);
+              executionCtx.updateNodeData(node.id, {
+                items: splitItems,
+                upstreamItems: splitItems,
+                selectedIndex: selectedIdx,
+                outputText: splitItems[selectedIdx] || null,
+              });
+            }
+          }
+          break;
+        }
       }
     }; // End of executeSingleNode helper
 

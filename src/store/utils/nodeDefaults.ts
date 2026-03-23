@@ -342,6 +342,8 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         items: ["Option A", "Option B", "Option C"],
         selectedIndex: 0,
         outputText: "Option A",
+        splitMode: "newline",
+        customSeparator: "",
       } as ListSelectorNodeData;
 
   }

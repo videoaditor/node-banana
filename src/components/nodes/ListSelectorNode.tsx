@@ -8,9 +8,18 @@ import { ListSelectorNodeData } from "@/types";
 
 type ListSelectorNodeType = Node<ListSelectorNodeData, "listSelector">;
 
+const SPLIT_MODES = [
+  { value: "newline", label: "Newline" },
+  { value: "period", label: "Period (.)" },
+  { value: "hash", label: "Hash (#)" },
+  { value: "dash", label: "Dash (-)" },
+  { value: "custom", label: "Custom" },
+] as const;
+
 export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorNodeType>) {
   const nodeData = data;
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
+  const hasUpstreamItems = !!(nodeData.upstreamItems && nodeData.upstreamItems.length > 0);
 
   const handleSelectionChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -23,12 +32,25 @@ export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorN
     [id, nodeData.items, updateNodeData]
   );
 
+  const handleSplitModeChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      updateNodeData(id, { splitMode: e.target.value as ListSelectorNodeData["splitMode"] });
+    },
+    [id, updateNodeData]
+  );
+
+  const handleCustomSeparatorChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      updateNodeData(id, { customSeparator: e.target.value });
+    },
+    [id, updateNodeData]
+  );
+
   const handleItemChange = useCallback(
     (index: number, value: string) => {
       const newItems = [...nodeData.items];
       newItems[index] = value;
       const updates: Partial<ListSelectorNodeData> = { items: newItems };
-      // Update outputText if the selected item changed
       if (index === nodeData.selectedIndex) {
         updates.outputText = value;
       }
@@ -67,7 +89,7 @@ export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorN
         </svg>
       }
     >
-      {/* Text input handle (optional — can receive items from upstream) */}
+      {/* Text input handle */}
       <Handle
         type="target"
         position={Position.Left}
@@ -86,6 +108,44 @@ export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorN
       />
 
       <div className="space-y-3 pt-2">
+        {/* Split mode dropdown */}
+        <div>
+          <label className="block text-[10px] text-[var(--text-muted)] mb-1 uppercase tracking-wider font-['DM_Mono',monospace]">
+            Split at
+          </label>
+          <select
+            value={nodeData.splitMode || "newline"}
+            onChange={handleSplitModeChange}
+            className="nodrag nopan w-full px-2 py-1.5 text-xs bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-md focus:outline-none focus:border-[var(--accent-primary)] text-[var(--text-primary)]"
+          >
+            {SPLIT_MODES.map((mode) => (
+              <option key={mode.value} value={mode.value}>
+                {mode.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Custom separator input */}
+        {nodeData.splitMode === "custom" && (
+          <div>
+            <input
+              type="text"
+              value={nodeData.customSeparator || ""}
+              onChange={handleCustomSeparatorChange}
+              placeholder="Enter separator"
+              className="nodrag nopan w-full px-2 py-1 text-xs bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-md focus:outline-none focus:border-[var(--accent-primary)] text-[var(--text-primary)]"
+            />
+          </div>
+        )}
+
+        {/* Upstream indicator */}
+        {hasUpstreamItems && (
+          <div className="text-[10px] text-[var(--accent-primary)] font-['DM_Mono',monospace]">
+            {nodeData.items.length} items from upstream
+          </div>
+        )}
+
         {/* Selector dropdown */}
         <div>
           <label className="block text-[10px] text-[var(--text-muted)] mb-1 uppercase tracking-wider font-['DM_Mono',monospace]">
@@ -98,16 +158,16 @@ export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorN
           >
             {nodeData.items.map((item, index) => (
               <option key={index} value={index}>
-                {item || `(empty ${index + 1})`}
+                {item.length > 60 ? item.substring(0, 60) + "..." : item || `(empty ${index + 1})`}
               </option>
             ))}
           </select>
         </div>
 
-        {/* Editable items list */}
+        {/* Items list */}
         <div>
           <label className="block text-[10px] text-[var(--text-muted)] mb-1 uppercase tracking-wider font-['DM_Mono',monospace]">
-            Options
+            Options ({nodeData.items.length})
           </label>
           <div className="space-y-1 max-h-32 overflow-y-auto">
             {nodeData.items.map((item, index) => (
@@ -138,13 +198,22 @@ export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorN
               </div>
             ))}
           </div>
-          <button
-            onClick={handleAddItem}
-            className="nodrag nopan mt-1.5 text-[10px] text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-all duration-[120ms]"
-          >
-            + Add option
-          </button>
+          {!hasUpstreamItems && (
+            <button
+              onClick={handleAddItem}
+              className="nodrag nopan mt-1.5 text-[10px] text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-all duration-[120ms]"
+            >
+              + Add option
+            </button>
+          )}
         </div>
+
+        {/* Output preview */}
+        {nodeData.outputText && (
+          <div className="text-[10px] text-[var(--text-secondary)] font-['DM_Mono',monospace] bg-[var(--bg-base)] p-1.5 rounded max-h-16 overflow-y-auto">
+            {nodeData.outputText.substring(0, 150)}{nodeData.outputText.length > 150 ? "..." : ""}
+          </div>
+        )}
       </div>
     </BaseNode>
   );
