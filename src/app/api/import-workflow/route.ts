@@ -10,6 +10,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { createDefaultNodeData } from "@/store/utils/nodeDefaults";
+import { NodeType } from "@/types";
 
 export const maxDuration = 120; // 2 minutes for complex workflows
 export const dynamic = "force-dynamic";
@@ -303,12 +305,17 @@ export async function POST(request: NextRequest) {
         workflow.edges = workflow.edges || [];
 
         // Generate proper IDs if missing
-        workflow.nodes = workflow.nodes.map((node: Record<string, unknown>, idx: number) => ({
-            ...node,
-            id: node.id || `imported_${idx}`,
-            position: node.position || { x: idx * 300, y: 0 },
-            data: node.data || {},
-        }));
+        workflow.nodes = workflow.nodes.map((node: Record<string, unknown>, idx: number) => {
+            const type = (node.type as string) || "stickyNote";
+            const rawData = (node.data || {}) as Record<string, unknown>;
+            return {
+                ...node,
+                id: node.id || `imported_${idx}`,
+                type,
+                position: node.position || { x: idx * 300, y: 0 },
+                data: { ...createDefaultNodeData(type as NodeType), ...rawData },
+            };
+        });
 
         workflow.edges = workflow.edges.map((edge: Record<string, unknown>, idx: number) => ({
             ...edge,

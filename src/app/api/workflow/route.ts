@@ -2,16 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { logger } from "@/utils/logger";
+import os from "os";
 
 export const maxDuration = 300; // 5 minute timeout for large workflow files
 
+// Default projects directory
+const DEFAULT_PROJECTS_DIR = path.join(os.homedir(), "clawd", "projects", "node-banana-workflows");
+
 // POST: Save workflow to file
 export async function POST(request: NextRequest) {
-  let directoryPath: string | undefined;
+  let directoryPath: string = DEFAULT_PROJECTS_DIR;
   let filename: string | undefined;
   try {
     const body = await request.json();
-    directoryPath = body.directoryPath;
+    directoryPath = body.directoryPath || DEFAULT_PROJECTS_DIR;
     filename = body.filename;
     const workflow = body.workflow;
 
@@ -21,9 +25,10 @@ export async function POST(request: NextRequest) {
       hasWorkflow: !!workflow,
       nodeCount: workflow?.nodes?.length,
       edgeCount: workflow?.edges?.length,
+      usedDefault: !body.directoryPath,
     });
 
-    if (!directoryPath || !filename || !workflow) {
+    if (!filename || !workflow) {
       logger.warn('file.save', 'Workflow save validation failed: missing fields', {
         hasDirectoryPath: !!directoryPath,
         hasFilename: !!filename,
@@ -35,8 +40,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate directory exists
+    // Ensure directory exists (create if using default, validate if custom)
     try {
+      await fs.mkdir(directoryPath, { recursive: true });
       const stats = await fs.stat(directoryPath);
       if (!stats.isDirectory()) {
         logger.warn('file.error', 'Workflow save failed: path is not a directory', {
@@ -48,11 +54,12 @@ export async function POST(request: NextRequest) {
         );
       }
     } catch (dirError) {
-      logger.warn('file.error', 'Workflow save failed: directory does not exist', {
+      logger.warn('file.error', 'Workflow save failed: could not create/access directory', {
         directoryPath,
+        error: dirError instanceof Error ? dirError.message : 'Unknown error',
       });
       return NextResponse.json(
-        { success: false, error: "Directory does not exist" },
+        { success: false, error: "Could not create or access directory" },
         { status: 400 }
       );
     }
@@ -122,7 +129,22 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const stats = await fs.stat(filePath);
+    // Try to stat the path, create directory if it doesn't exist
+    let stats;
+    try {
+      stats = await fs.stat(filePath);
+    } catch (statError) {
+      // Path doesn't exist - try to create it as a directory
+      try {
+        await fs.mkdir(filePath, { recursive: true });
+        stats = await fs.stat(filePath);
+        logger.info('file.load', 'Created directory on validation', {
+          filePath,
+        });
+      } catch (createError) {
+        throw statError; // Re-throw original error if we can't create
+      }
+    }
 
     // If it's a directory, return validation info (legacy behavior)
     if (stats.isDirectory()) {

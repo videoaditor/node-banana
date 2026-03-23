@@ -38,3 +38,5 @@ export {
   executeVideoStitch,
   executeEaseCurve,
 } from "./videoProcessingExecutors";
+
+export { executeSubWorkflowNode } from "./executeSubWorkflow";

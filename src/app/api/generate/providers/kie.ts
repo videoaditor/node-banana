@@ -104,6 +104,24 @@ export function getKieModelDefaults(modelId: string): Record<string, unknown> {
         cfg_scale: 0.5,
       };
 
+    // Kling O3 models
+    case "fal-ai/kling-video/o3/standard/image-to-video":
+      return {
+        aspect_ratio: "16:9",
+        duration: "5",
+      };
+
+    case "fal-ai/kling-video/o3/pro/image-to-video":
+    case "fal-ai/kling-video/o3/pro/reference-to-video":
+      return {
+        aspect_ratio: "16:9",
+        duration: "5",
+        cfg_scale: 0.5,
+      };
+
+    case "fal-ai/kling-video/o3/pro/video-to-video/edit":
+      return {};
+
     // Wan video models
     case "wan/2-6-text-to-video":
     case "wan/2-6-image-to-video":

@@ -2,16 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { logger } from "@/utils/logger";
+import os from "os";
+
+// Default projects directory
+const DEFAULT_PROJECTS_DIR = path.join(os.homedir(), "clawd", "projects", "node-banana-workflows");
 
 // GET: List all workflow JSON files in a project directory
 export async function GET(request: NextRequest) {
-  const directoryPath = request.nextUrl.searchParams.get("path");
+  const directoryPath = request.nextUrl.searchParams.get("path") || DEFAULT_PROJECTS_DIR;
 
-  if (!directoryPath) {
-    return NextResponse.json(
-      { success: false, error: "Missing 'path' query parameter" },
-      { status: 400 }
-    );
+  // Ensure default directory exists
+  if (directoryPath === DEFAULT_PROJECTS_DIR) {
+    try {
+      await fs.mkdir(directoryPath, { recursive: true });
+    } catch {
+      // Ignore errors - will be caught below
+    }
   }
 
   try {

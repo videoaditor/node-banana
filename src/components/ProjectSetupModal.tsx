@@ -19,13 +19,14 @@ const LLM_PROVIDERS: { value: LLMProvider; label: string }[] = [
 
 const LLM_MODELS: Record<LLMProvider, { value: LLMModelType; label: string }[]> = {
   google: [
-    { value: "gemini-3-flash-preview", label: "Gemini 3 Flash" },
+    { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
     { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-    { value: "gemini-3-pro-preview", label: "Gemini 3.0 Pro" },
+    { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
   ],
   openai: [
-    { value: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
-    { value: "gpt-4.1-nano", label: "GPT-4.1 Nano" },
+    { value: "gpt-5.4", label: "GPT-5.4" },
+    { value: "gpt-5.4-mini", label: "GPT-5.4 Mini" },
+    { value: "gpt-5.4-nano", label: "GPT-5.4 Nano" },
   ],
   anthropic: [
     { value: "claude-sonnet-4-20250514", label: "Claude Sonnet 4" },
@@ -163,12 +164,38 @@ export function ProjectSetupModal({
 
       if (mode === "settings") {
         setName(workflowName || "");
-        setDirectoryPath(saveDirectoryPath || "");
         setExternalStorage(useExternalImageStorage);
+        
+        // If no directory is set, fetch default
+        if (!saveDirectoryPath) {
+          fetch("/api/projects/default-path")
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success && data.defaultPath) {
+                setDirectoryPath(data.defaultPath);
+              }
+            })
+            .catch(() => {
+              setDirectoryPath("");
+            });
+        } else {
+          setDirectoryPath(saveDirectoryPath);
+        }
       } else if (mode === "new") {
         setName("aditor-workflows");
-        setDirectoryPath("/Users/player/clawd/projects/node-banana-workflows");
         setExternalStorage(true);
+        // Fetch default directory path from server
+        fetch("/api/projects/default-path")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success && data.defaultPath) {
+              setDirectoryPath(data.defaultPath);
+            }
+          })
+          .catch(() => {
+            // Fallback in case API fails
+            setDirectoryPath("");
+          });
       }
 
       // Sync local providers state

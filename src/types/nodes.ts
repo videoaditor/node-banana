@@ -47,7 +47,8 @@ export type NodeType =
   | "soraBlueprint"
   | "brollBatch"
   | "arrayNode"
-  | "listSelector";
+  | "listSelector"
+  | "subWorkflow";
 
 
 /**
@@ -461,6 +462,18 @@ export interface ListSelectorNodeData extends BaseNodeData {
   upstreamItems?: string[];    // Items populated from upstream text (kept separate from manual items)
 }
 
+
+/**
+ * SubWorkflow node - executes another workflow as a sub-process
+ */
+export interface SubWorkflowNodeData extends BaseNodeData {
+  selectedWorkflowFilename: string | null;
+  selectedWorkflowName: string | null;
+  outputText: string | null;
+  outputImage: string | null;
+  status: NodeStatus;
+  error: string | null;
+}
 export type WorkflowNodeData =
   | ImageInputNodeData
   | AudioInputNodeData
@@ -486,7 +499,8 @@ export type WorkflowNodeData =
   | SoraBlueprintNodeData
   | BrollBatchNodeData
   | ArrayNodeData
-  | ListSelectorNodeData;
+  | ListSelectorNodeData
+  | SubWorkflowNodeData;
 
 
 /**

@@ -61,6 +61,7 @@ export const defaultNodeDimensions: Record<NodeType, { width: number; height: nu
   brollBatch: { width: 380, height: 420 },
   arrayNode: { width: 320, height: 320 },
   listSelector: { width: 280, height: 200 },
+  subWorkflow: { width: 320, height: 280 },
 
 };
 
@@ -199,7 +200,7 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         outputHistory: [],
         selectedHistoryIndex: -1,
         provider: llmDefaults?.provider ?? "google",
-        model: llmDefaults?.model ?? "gemini-3-flash-preview",
+        model: llmDefaults?.model ?? "gemini-2.5-flash",
         temperature: llmDefaults?.temperature ?? 0.7,
         maxTokens: llmDefaults?.maxTokens ?? 8192,
         status: "idle",
@@ -345,6 +346,15 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
         splitMode: "newline",
         customSeparator: "",
       } as ListSelectorNodeData;
+    case "subWorkflow":
+      return {
+        selectedWorkflowFilename: null,
+        selectedWorkflowName: null,
+        outputText: null,
+        outputImage: null,
+        status: "idle",
+        error: null,
+      };
 
   }
 };

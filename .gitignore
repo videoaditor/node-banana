@@ -38,7 +38,7 @@ next-env.d.ts
 renders/
 
 # logs
-logs/*.json
+logs/
 
 # .claude
 .claude/
@@ -50,4 +50,5 @@ logs/*.json
 .agents/
 
 # shared workflows (local data)
+.shared-workflows/logs/
 .shared-workflows/

@@ -75,6 +75,7 @@ import {
   executeEaseCurve,
   executeGlbViewer,
   executeWebScraper,
+  executeSubWorkflowNode,
 } from "./execution";
 import type { NodeExecutionContext } from "./execution";
 export type { LevelGroup } from "./utils/executionUtils";
@@ -968,6 +969,9 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           }
           break;
         }
+        case "subWorkflow":
+          await executeSubWorkflowNode(executionCtx);
+          break;
       }
     }; // End of executeSingleNode helper
 
@@ -1378,6 +1382,9 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           break;
         case "webScraper":
           await executeWebScraper(executionCtx);
+          break;
+        case "subWorkflow":
+          await executeSubWorkflowNode(executionCtx);
           break;
       }
     };
@@ -1843,6 +1850,15 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           generationsPath: get().generationsPath,
           lastSavedAt: timestamp,
           useExternalImageStorage,
+        });
+
+        // Also push a copy to team-workflows (fire-and-forget, don't block on it)
+        fetch("/api/team-workflows", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workflow: { ...workflow, name: workflowName } }),
+        }).catch((err) => {
+          console.warn("[workflowStore] Failed to sync to team-workflows:", err);
         });
 
         return true;
