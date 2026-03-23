@@ -73,7 +73,7 @@ body {
 }
 
 .react-flow__node {
-  font-family: 'DM Mono', 'IBM Plex Mono', monospace;
+  font-family: 'SF Pro Display', 'SF Pro Text', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Remove default React Flow styling for output nodes */

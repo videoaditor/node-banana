@@ -68,7 +68,7 @@ export function ArrayNode({ id, data, selected }: NodeProps<ArrayNodeType>) {
         <div className="space-y-1.5 max-h-48 overflow-y-auto">
           {nodeData.items.map((item, index) => (
             <div key={index} className="flex items-center gap-1.5 group">
-              <span className="text-[10px] text-[var(--text-muted)] w-4 text-right font-['DM_Mono',monospace] shrink-0">
+              <span className="text-[10px] text-[var(--text-muted)] w-4 text-right font-medium shrink-0">
                 {index + 1}
               </span>
               <input
@@ -102,7 +102,7 @@ export function ArrayNode({ id, data, selected }: NodeProps<ArrayNodeType>) {
         </button>
 
         {/* Item count */}
-        <div className="text-[10px] text-[var(--text-muted)] text-right font-['DM_Mono',monospace]">
+        <div className="text-[10px] text-[var(--text-muted)] text-right font-medium">
           {nodeData.items.filter(i => i.trim()).length} items
         </div>
 
