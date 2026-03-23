@@ -1,5 +1,6 @@
 import { WorkflowFile } from "@/store/workflowStore";
 import { NodeType, WorkflowNodeData, ImageIteratorNodeData, ArrayNodeData, ListSelectorNodeData, SubWorkflowNodeData, LLMGenerateNodeData } from "@/types";
+import { defaultNodeDimensions } from "@/store/utils/nodeDefaults";
 
 interface ValidationError {
   path: string;
@@ -25,36 +26,8 @@ const VALID_NODE_TYPES: NodeType[] = [
 
 const VALID_HANDLE_TYPES = ["image", "text", "reference"];
 
-// Default node dimensions
-const DEFAULT_DIMENSIONS: Record<NodeType, { width: number; height: number }> = {
-  imageInput: { width: 300, height: 280 },
-  audioInput: { width: 300, height: 200 },
-  annotation: { width: 300, height: 280 },
-  prompt: { width: 320, height: 220 },
-  promptConstructor: { width: 340, height: 280 },
-  promptConcatenator: { width: 320, height: 240 },
-  nanoBanana: { width: 300, height: 300 },
-  generateVideo: { width: 300, height: 300 },
-  generate3d: { width: 300, height: 300 },
-  llmGenerate: { width: 320, height: 360 },
-  splitGrid: { width: 300, height: 320 },
-  output: { width: 320, height: 320 },
-  outputGallery: { width: 320, height: 360 },
-  imageCompare: { width: 400, height: 360 },
-  videoStitch: { width: 400, height: 280 },
-  easeCurve: { width: 340, height: 480 },
-  glbViewer: { width: 360, height: 380 },
-  imageIterator: { width: 340, height: 300 },
-  textIterator: { width: 340, height: 280 },
-  webScraper: { width: 340, height: 320 },
-  stickyNote: { width: 200, height: 160 },
-  soraBlueprint: { width: 320, height: 360 },
-  brollBatch: { width: 380, height: 420 },
-  arrayNode: { width: 320, height: 320 },
-  listSelector: { width: 280, height: 200 },
-  subWorkflow: { width: 320, height: 280 },
-
-};
+// Use centralized node dimensions
+const DEFAULT_DIMENSIONS = defaultNodeDimensions;
 
 /**
  * Validate a workflow JSON object
@@ -430,6 +403,31 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
         selectedIndex: 0,
         outputText: "Option A",
       } as ListSelectorNodeData;
+    case "imageFilter":
+      return {
+        filterCriteria: "only product photos",
+        provider: "google",
+        model: "gemini-2.5-flash",
+        inputImages: [],
+        outputImages: [],
+        filterResults: [],
+        status: "idle",
+        error: null,
+      } as WorkflowNodeData;
+    case "zipIterator":
+      return {
+        splitMode: "newline",
+        customSeparator: "",
+        mode: "zip",
+        textItems: [],
+        imageItems: [],
+        currentText: null,
+        currentImage: null,
+        currentIndex: 0,
+        totalPairs: 0,
+        status: "idle",
+        error: null,
+      } as WorkflowNodeData;
     case "subWorkflow":
       return {
         selectedWorkflowFilename: null,

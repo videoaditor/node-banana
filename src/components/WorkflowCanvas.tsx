@@ -45,7 +45,8 @@ import {
   BrollBatchNode,
   ArrayNode,
   ListSelectorNode,
-
+  ImageFilterNode,
+  ZipIteratorNode,
 } from "./nodes";
 
 // Lazy-load GLBViewerNode to avoid bundling three.js for users who don't use 3D nodes
@@ -93,7 +94,8 @@ const nodeTypes: NodeTypes = {
   brollBatch: BrollBatchNode,
   arrayNode: ArrayNode,
   listSelector: ListSelectorNode,
-
+  imageFilter: ImageFilterNode,
+  zipIterator: ZipIteratorNode,
 };
 
 const edgeTypes: EdgeTypes = {
@@ -1152,35 +1154,7 @@ export function WorkflowCanvas() {
             event.preventDefault();
             const { centerX, centerY } = getViewportCenter();
             // Offset by half the default node dimensions to center it
-            const defaultDimensions: Record<NodeType, { width: number; height: number }> = {
-              imageInput: { width: 300, height: 280 },
-              audioInput: { width: 300, height: 200 },
-              annotation: { width: 300, height: 280 },
-              prompt: { width: 320, height: 220 },
-              promptConstructor: { width: 340, height: 280 },
-              promptConcatenator: { width: 320, height: 240 },
-              nanoBanana: { width: 300, height: 300 },
-              generateVideo: { width: 300, height: 300 },
-              generate3d: { width: 300, height: 300 },
-              llmGenerate: { width: 320, height: 360 },
-              splitGrid: { width: 300, height: 320 },
-              output: { width: 320, height: 320 },
-              outputGallery: { width: 320, height: 360 },
-              imageCompare: { width: 400, height: 360 },
-              videoStitch: { width: 400, height: 280 },
-              easeCurve: { width: 340, height: 480 },
-              glbViewer: { width: 360, height: 380 },
-              imageIterator: { width: 340, height: 300 },
-              textIterator: { width: 340, height: 280 },
-              webScraper: { width: 340, height: 320 },
-              stickyNote: { width: 200, height: 200 },
-              soraBlueprint: { width: 320, height: 360 },
-              brollBatch: { width: 380, height: 420 },
-              arrayNode: { width: 320, height: 320 },
-              listSelector: { width: 280, height: 200 },
-              subWorkflow: { width: 320, height: 280 },
-            };
-            const dims = defaultDimensions[nodeType!];
+            const dims = defaultNodeDimensions[nodeType!];
             addNode(nodeType!, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
             return;
           }
@@ -1191,35 +1165,7 @@ export function WorkflowCanvas() {
         event.preventDefault();
         const { centerX, centerY } = getViewportCenter();
         // Offset by half the default node dimensions to center it
-        const defaultDimensions: Record<NodeType, { width: number; height: number }> = {
-          imageInput: { width: 300, height: 280 },
-          audioInput: { width: 300, height: 200 },
-          annotation: { width: 300, height: 280 },
-          prompt: { width: 320, height: 220 },
-          promptConstructor: { width: 340, height: 280 },
-          promptConcatenator: { width: 320, height: 240 },
-          nanoBanana: { width: 300, height: 300 },
-          generateVideo: { width: 300, height: 300 },
-          generate3d: { width: 300, height: 300 },
-          llmGenerate: { width: 320, height: 360 },
-          splitGrid: { width: 300, height: 320 },
-          output: { width: 320, height: 320 },
-          outputGallery: { width: 320, height: 360 },
-          imageCompare: { width: 400, height: 360 },
-          videoStitch: { width: 400, height: 280 },
-          easeCurve: { width: 340, height: 480 },
-          glbViewer: { width: 360, height: 380 },
-          imageIterator: { width: 340, height: 300 },
-          textIterator: { width: 340, height: 280 },
-          webScraper: { width: 340, height: 320 },
-          stickyNote: { width: 200, height: 160 },
-          soraBlueprint: { width: 320, height: 360 },
-          brollBatch: { width: 380, height: 420 },
-          arrayNode: { width: 320, height: 320 },
-          listSelector: { width: 280, height: 200 },
-              subWorkflow: { width: 320, height: 280 },
-        };
-        const dims = defaultDimensions[nodeType];
+        const dims = defaultNodeDimensions[nodeType];
         addNode(nodeType, { x: centerX - dims.width / 2, y: centerY - dims.height / 2 });
         return;
       }

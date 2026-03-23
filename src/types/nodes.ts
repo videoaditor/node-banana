@@ -48,6 +48,8 @@ export type NodeType =
   | "brollBatch"
   | "arrayNode"
   | "listSelector"
+  | "imageFilter"
+  | "zipIterator"
   | "subWorkflow";
 
 
@@ -474,6 +476,37 @@ export interface SubWorkflowNodeData extends BaseNodeData {
   status: NodeStatus;
   error: string | null;
 }
+/**
+ * Image Filter node - uses LLM vision to evaluate images against criteria
+ */
+export interface ImageFilterNodeData extends BaseNodeData {
+  filterCriteria: string;          // Text criteria for filtering (e.g. "only product photos")
+  provider: string;                // LLM provider (google, openai)
+  model: string;                   // Model ID for vision evaluation
+  inputImages: string[];           // All input images (for display)
+  outputImages: string[];          // Only images that passed the filter
+  filterResults: Array<{ image: string; passed: boolean; overridden?: boolean }>; // Per-image results for UI
+  status: NodeStatus;
+  error: string | null;
+}
+
+/**
+ * Zip Iterator node - pairs multiple text + image inputs positionally and iterates
+ */
+export interface ZipIteratorNodeData extends BaseNodeData {
+  splitMode: "newline" | "period" | "hash" | "dash" | "custom";
+  customSeparator: string;
+  mode: "zip" | "product";        // zip = pair by index, product = all combinations
+  textItems: string[];             // Parsed text items (for display)
+  imageItems: string[];            // Input images (for display)
+  currentText: string | null;      // Current text for this iteration
+  currentImage: string | null;     // Current image for this iteration
+  currentIndex: number;            // Current iteration index
+  totalPairs: number;              // Total number of pairs
+  status: NodeStatus;
+  error: string | null;
+}
+
 export type WorkflowNodeData =
   | ImageInputNodeData
   | AudioInputNodeData
@@ -500,6 +533,8 @@ export type WorkflowNodeData =
   | BrollBatchNodeData
   | ArrayNodeData
   | ListSelectorNodeData
+  | ImageFilterNodeData
+  | ZipIteratorNodeData
   | SubWorkflowNodeData;
 
 

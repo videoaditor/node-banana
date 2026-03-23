@@ -989,11 +989,11 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           if (levelNodes.length === 0) continue;
 
           // Check for iterators in this level
-          const iterators = levelNodes.filter(n => n.type === "imageIterator" || n.type === "textIterator" || n.type === "arrayNode");
+          const iterators = levelNodes.filter(n => n.type === "imageIterator" || n.type === "textIterator" || n.type === "arrayNode" || n.type === "zipIterator");
 
           if (iterators.length > 0) {
             // Put iterator at the end, run normal nodes first
-            const normalNodes = levelNodes.filter(n => n.type !== "imageIterator" && n.type !== "textIterator" && n.type !== "arrayNode");
+            const normalNodes = levelNodes.filter(n => n.type !== "imageIterator" && n.type !== "textIterator" && n.type !== "arrayNode" && n.type !== "zipIterator");
             if (normalNodes.length > 0) {
               const normalBatches = chunk(normalNodes, maxConcurrentCalls);
               for (const batch of normalBatches) {
@@ -1041,6 +1041,11 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
               const { text } = ctx.getConnectedInputs(iterator.id);
               const data = iterator.data as any;
 
+              // Store the input text on the node so the UI can show a preview
+              if (text) {
+                ctx.updateNodeData(iterator.id, { inputText: text } as any);
+              }
+
               if (text) {
                 if (data.splitMode === "newline") items = text.split("\n").filter(t => t.trim());
                 else if (data.splitMode === "period") items = text.split(".").filter(t => t.trim());
@@ -1058,6 +1063,74 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
               items = [...localItems, ...connectedItems];
             }
 
+            // --- Zip Iterator: special dual-output path ---
+            if (iterator.type === "zipIterator") {
+              const { images: connectedImages, text: connectedText } = ctx.getConnectedInputs(iterator.id);
+              const data = iterator.data as any;
+              const splitMode = data.splitMode || "newline";
+              const customSep = data.customSeparator || "";
+
+              // Split text into items
+              let textItems: string[] = [];
+              if (connectedText) {
+                if (splitMode === "newline") textItems = connectedText.split("\n").filter((t: string) => t.trim());
+                else if (splitMode === "period") textItems = connectedText.split(".").filter((t: string) => t.trim());
+                else if (splitMode === "hash") textItems = connectedText.split("#").filter((t: string) => t.trim());
+                else if (splitMode === "dash") textItems = connectedText.split("-").filter((t: string) => t.trim());
+                else if (splitMode === "custom" && customSep) textItems = connectedText.split(customSep).filter((t: string) => t.trim());
+                else textItems = [connectedText];
+              }
+
+              const imageItems = connectedImages || [];
+
+              let totalPairs: number;
+              if (data.mode === "product") {
+                totalPairs = Math.max(textItems.length, 1) * Math.max(imageItems.length, 1);
+              } else {
+                totalPairs = Math.max(textItems.length, imageItems.length);
+              }
+
+              ctx.updateNodeData(iterator.id, {
+                textItems,
+                imageItems,
+                totalPairs,
+                status: "loading",
+              } as any);
+
+              if (totalPairs === 0) {
+                logger.warn('node.execution', 'Zip iterator has no items', { nodeId: iterator.id });
+                ctx.updateNodeData(iterator.id, { status: "complete" } as any);
+                return;
+              }
+
+              for (let i = 0; i < totalPairs; i++) {
+                if (abortController.signal.aborted || !get().isRunning) break;
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+                let currentText: string | null;
+                let currentImage: string | null;
+
+                if (data.mode === "product") {
+                  const tIdx = Math.floor(i / Math.max(imageItems.length, 1));
+                  const iIdx = i % Math.max(imageItems.length, 1);
+                  currentText = textItems[tIdx] || null;
+                  currentImage = imageItems[iIdx] || null;
+                } else {
+                  currentText = textItems[i] || null;
+                  currentImage = imageItems[i] || null;
+                }
+
+                logger.info('node.execution', `Zip iteration ${i + 1}/${totalPairs}`, { nodeId: iterator.id });
+                ctx.updateNodeData(iterator.id, { currentText, currentImage, currentIndex: i, status: "loading" } as any);
+
+                await executeLevelsSequentially(levelIdx + 1, endIndex);
+              }
+
+              ctx.updateNodeData(iterator.id, { status: "complete", currentText: null, currentImage: null, currentIndex: 0 } as any);
+              return;
+            }
+
+            // --- Standard single-output iterators ---
             ctx.updateNodeData(iterator.id, { status: "complete" });
 
             if (items.length === 0) {

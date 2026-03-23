@@ -23,4 +23,6 @@ export { SoraBlueprintNode } from "./SoraBlueprintNode";
 export { BrollBatchNode } from "./BrollBatchNode";
 export { ArrayNode } from "./ArrayNode";
 export { ListSelectorNode } from "./ListSelectorNode";
+export { ImageFilterNode } from "./ImageFilterNode";
+export { ZipIteratorNode } from "./ZipIteratorNode";
 
