@@ -313,6 +313,15 @@ export async function generateWithFalQueue(
     }
     Object.assign(requestBody, filteredInputs);
 
+    // CRITICAL: Ensure prompt is always included even if not in dynamicInputs
+    // This handles the case where the user types directly in the NanoBanana node
+    // instead of connecting a Prompt node (which would populate dynamicInputs.prompt)
+    const promptParam = paramMap.prompt || "prompt";
+    if (input.prompt && !requestBody[promptParam]) {
+      requestBody[promptParam] = input.prompt;
+      console.log(`[API:${requestId}] Added prompt from input.prompt (not in dynamicInputs)`);
+    }
+
     // Also include images from input.images (e.g., Image Iterator node)
     // ONLY if no image param is already covered by dynamicInputs or requestBody
     if (input.images && input.images.length > 0) {
