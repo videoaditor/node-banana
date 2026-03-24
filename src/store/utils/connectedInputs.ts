@@ -100,7 +100,10 @@ export function getSourceOutput(sourceNode: WorkflowNode, sourceHandle?: string 
     const value = iterData.currentImage || (iterData.localImages?.length > 0 ? iterData.localImages[0] : null);
     return { type: "image", value };
   } else if (sourceNode.type === "textIterator") {
-    return { type: "text", value: (sourceNode.data as any).currentText || null };
+    // During iteration: currentText is set per-loop. Before execution, fall back to inputText
+    // so downstream nodes can preview the raw connected text.
+    const tiData = sourceNode.data as any;
+    return { type: "text", value: tiData.currentText || tiData.inputText || null };
   } else if (sourceNode.type === "arrayNode") {
     return { type: "text", value: (sourceNode.data as any).currentItem || null };
   } else if (sourceNode.type === "listSelector") {
