@@ -8,6 +8,7 @@ import { useCommentNavigation } from "@/hooks/useCommentNavigation";
 import { useWorkflowStore } from "@/store/workflowStore";
 import { PromptNodeData } from "@/types";
 import { PromptEditorModal } from "@/components/modals/PromptEditorModal";
+import { useUpstreamText } from "@/hooks/useUpstreamData";
 
 type PromptNodeType = Node<PromptNodeData, "prompt">;
 
@@ -17,7 +18,6 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
   const incrementModalCount = useWorkflowStore((state) => state.incrementModalCount);
   const decrementModalCount = useWorkflowStore((state) => state.decrementModalCount);
-  const getConnectedInputs = useWorkflowStore((state) => state.getConnectedInputs);
   const edges = useWorkflowStore((state) => state.edges);
   const [isModalOpenLocal, setIsModalOpenLocal] = useState(false);
 
@@ -44,25 +44,25 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
     return edges.some((edge) => edge.target === id && edge.targetHandle === "text");
   }, [edges, id]);
 
-  // Track the last received text from connected LLM node to detect when it changes
+  // REACTIVE: Subscribe to upstream text changes — re-renders when upstream node types
+  const upstreamText = useUpstreamText(id);
+
+  // Track the last received text to detect changes
   const lastReceivedTextRef = useRef<string | null>(null);
 
-  // Get connected text input and update prompt when LLM output changes
+  // Update prompt when upstream text changes (live as user types in connected node)
   useEffect(() => {
-    if (hasIncomingTextConnection) {
-      const { text } = getConnectedInputs(id);
-      // Only update if the incoming text changed (LLM node ran again)
-      if (text !== null && text !== lastReceivedTextRef.current) {
-        lastReceivedTextRef.current = text;
+    if (hasIncomingTextConnection && upstreamText !== null) {
+      if (upstreamText !== lastReceivedTextRef.current) {
+        lastReceivedTextRef.current = upstreamText;
         const newPrompts = [...prompts];
-        newPrompts[safeIndex] = text;
-        updateNodeData(id, { prompt: text, prompts: newPrompts });
+        newPrompts[safeIndex] = upstreamText;
+        updateNodeData(id, { prompt: upstreamText, prompts: newPrompts });
       }
-    } else {
-      // Clear tracking when connection is removed
+    } else if (!hasIncomingTextConnection) {
       lastReceivedTextRef.current = null;
     }
-  }, [hasIncomingTextConnection, id, getConnectedInputs, updateNodeData, prompts, safeIndex]);
+  }, [hasIncomingTextConnection, upstreamText, id, updateNodeData, prompts, safeIndex]);
 
   // Sync local prompt when active index changes or when not editing
   useEffect(() => {
