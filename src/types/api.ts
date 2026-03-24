@@ -32,6 +32,7 @@ export interface GenerateResponse {
 // API Request/Response types for LLM Text Generation
 export interface LLMGenerateRequest {
   prompt: string;
+  systemPrompt?: string;
   images?: string[];
   provider: LLMProvider;
   model: LLMModelType;

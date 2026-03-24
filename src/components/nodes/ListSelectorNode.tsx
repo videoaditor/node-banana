@@ -14,6 +14,7 @@ const SPLIT_MODES = [
   { value: "period", label: "Period (.)" },
   { value: "hash", label: "Hash (#)" },
   { value: "dash", label: "Dash (-)" },
+  { value: "asterisk", label: "Asterisk (*)" },
   { value: "custom", label: "Custom" },
 ] as const;
 
@@ -23,6 +24,7 @@ function splitText(text: string, mode: string, customSep?: string): string[] {
   else if (mode === "period") items = text.split(".");
   else if (mode === "hash") items = text.split("#");
   else if (mode === "dash") items = text.split("-");
+  else if (mode === "asterisk") items = text.split("*");
   else if (mode === "custom" && customSep) items = text.split(customSep);
   else items = [text];
   return items.filter((t) => t.trim()).map((t) => t.trim());

@@ -43,6 +43,29 @@ export async function executeLlmGenerate(
     text = inputs.text ?? nodeData.inputPrompt;
   }
 
+  // Get system prompt from "system" handle connection or from node's own field
+  // Check for connected system prompt via edges
+  let systemPrompt: string | null = nodeData.systemPrompt || null;
+  const edges = getEdges();
+  const nodes = getNodes();
+  const systemEdge = edges.find(
+    (e) => e.target === node.id && e.targetHandle === "system"
+  );
+  if (systemEdge) {
+    const sourceNode = nodes.find((n) => n.id === systemEdge.source);
+    if (sourceNode) {
+      const d = sourceNode.data as Record<string, unknown>;
+      // Extract text from common text-producing node types
+      const connectedSystemText =
+        (d.prompt as string | null) ??
+        (d.outputText as string | null) ??
+        (d.currentText as string | null) ??
+        (d.currentItem as string | null) ??
+        null;
+      if (connectedSystemText) systemPrompt = connectedSystemText;
+    }
+  }
+
   if (!text) {
     updateNodeData(node.id, {
       status: "error",
@@ -66,6 +89,7 @@ export async function executeLlmGenerate(
       headers,
       body: JSON.stringify({
         prompt: text,
+        ...(systemPrompt && { systemPrompt }),
         ...(images.length > 0 && { images }),
         provider: nodeData.provider,
         model: nodeData.model,

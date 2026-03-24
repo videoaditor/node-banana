@@ -955,6 +955,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
             else if (mode === "period") splitItems = lsText.split(".").filter((t: string) => t.trim());
             else if (mode === "hash") splitItems = lsText.split("#").filter((t: string) => t.trim());
             else if (mode === "dash") splitItems = lsText.split("-").filter((t: string) => t.trim());
+            else if (mode === "asterisk") splitItems = lsText.split("*").filter((t: string) => t.trim());
             else if (mode === "custom" && lsData.customSeparator) splitItems = lsText.split(lsData.customSeparator).filter((t: string) => t.trim());
             else splitItems = [lsText];
 
@@ -1055,6 +1056,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
                 else if (data.splitMode === "period") items = text.split(".").filter(t => t.trim());
                 else if (data.splitMode === "hash") items = text.split("#").filter(t => t.trim());
                 else if (data.splitMode === "dash") items = text.split("-").filter(t => t.trim());
+                else if (data.splitMode === "asterisk") items = text.split("*").filter(t => t.trim());
                 else if (data.splitMode === "custom" && data.customSeparator) items = text.split(data.customSeparator).filter(t => t.trim());
                 else items = [text];
               }
@@ -1081,6 +1083,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
                 else if (splitMode === "period") textItems = connectedText.split(".").filter((t: string) => t.trim());
                 else if (splitMode === "hash") textItems = connectedText.split("#").filter((t: string) => t.trim());
                 else if (splitMode === "dash") textItems = connectedText.split("-").filter((t: string) => t.trim());
+                else if (splitMode === "asterisk") textItems = connectedText.split("*").filter((t: string) => t.trim());
                 else if (splitMode === "custom" && customSep) textItems = connectedText.split(customSep).filter((t: string) => t.trim());
                 else textItems = [connectedText];
               }
@@ -1472,6 +1475,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
             else if (mode === "period") splitItems = lsText.split(".").filter((t: string) => t.trim());
             else if (mode === "hash") splitItems = lsText.split("#").filter((t: string) => t.trim());
             else if (mode === "dash") splitItems = lsText.split("-").filter((t: string) => t.trim());
+            else if (mode === "asterisk") splitItems = lsText.split("*").filter((t: string) => t.trim());
             else if (mode === "custom" && lsData.customSeparator) splitItems = lsText.split(lsData.customSeparator).filter((t: string) => t.trim());
             else splitItems = [lsText];
 
