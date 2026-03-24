@@ -4,6 +4,9 @@
  * Server-side workflow executor that doesn't depend on React or Zustand.
  * Reuses the same per-node execution functions but with plain JS objects
  * for node/edge state. Used by POST /api/run.
+ *
+ * IMPORTANT: This must stay in sync with workflowStore.ts execution logic.
+ * When adding new node types, update BOTH files.
  */
 
 import type {
@@ -21,6 +24,8 @@ import type {
     WebScraperNodeData,
     ImageHistoryItem,
     ProviderSettings,
+    ImageFilterNodeData,
+    ZipIteratorNodeData,
 } from "@/types";
 import type { NodeExecutionContext } from "@/store/execution/types";
 import { getConnectedInputsPure } from "@/store/utils/connectedInputs";
@@ -41,6 +46,7 @@ import {
     executeWebScraper,
     executeSubWorkflowNode,
 } from "@/store/execution";
+import { executeImageFilter } from "@/store/execution/imageFilterExecutor";
 
 export interface HeadlessInput {
     [nodeId: string]: string | string[]; // text, base64 image, or array of images for iterators
@@ -69,6 +75,9 @@ interface WorkflowFileInput {
     edgeStyle: string;
     groups?: Record<string, unknown>;
 }
+
+// Iterator node types — keep in sync with workflowStore.ts
+const ITERATOR_TYPES = ["imageIterator", "textIterator", "arrayNode", "zipIterator"];
 
 /**
  * Execute a workflow headlessly (no React, no Zustand).
@@ -105,6 +114,7 @@ export async function executeWorkflowHeadless(
     }
 
     // Helper to update node data in-place
+    // Uses getter pattern so contexts always see latest nodes
     const updateNodeData = (nodeId: string, data: Partial<WorkflowNodeData>) => {
         nodes = nodes.map((n) =>
             n.id === nodeId
@@ -114,6 +124,8 @@ export async function executeWorkflowHeadless(
     };
 
     // Build execution context for a node
+    // IMPORTANT: getConnectedInputs/getFreshNode/getNodes use closures that
+    // always reference the current `nodes` array, not a stale snapshot
     const buildContext = (node: WorkflowNode, signal?: AbortSignal): NodeExecutionContext => ({
         node,
         getConnectedInputs: (id: string) => getConnectedInputsPure(id, nodes, edges),
@@ -138,18 +150,31 @@ export async function executeWorkflowHeadless(
         get: () => ({ nodes, edges }),
     });
 
-    // Execute a single node
+    // Execute a single node — must handle ALL node types
     const executeSingleNode = async (node: WorkflowNode, signal: AbortSignal) => {
         if (signal.aborted) throw new DOMException("Aborted", "AbortError");
 
-        const ctx = buildContext(node, signal);
+        // Always get the freshest node data
+        const freshNode = nodes.find((n) => n.id === node.id) || node;
+        const ctx = buildContext(freshNode, signal);
 
-        switch (node.type) {
+        switch (freshNode.type) {
             case "imageInput":
             case "audioInput":
             case "stickyNote":
-            case "annotation":
                 // Data source / visual-only nodes — no execution needed
+                break;
+            case "annotation":
+                // Annotation passes through source image if outputImage not already set
+                {
+                    const { images } = ctx.getConnectedInputs(freshNode.id);
+                    if (images.length > 0) {
+                        const annData = freshNode.data as Record<string, unknown>;
+                        if (!annData.outputImage) {
+                            updateNodeData(freshNode.id, { outputImage: images[0], sourceImage: images[0] } as Partial<WorkflowNodeData>);
+                        }
+                    }
+                }
                 break;
             case "glbViewer":
                 await executeGlbViewer(ctx);
@@ -193,6 +218,36 @@ export async function executeWorkflowHeadless(
             case "subWorkflow":
                 await executeSubWorkflowNode(ctx);
                 break;
+            case "imageFilter":
+                await executeImageFilter(ctx);
+                break;
+            case "listSelector":
+                // ListSelector: populate from upstream text if connected
+                {
+                    const { text } = ctx.getConnectedInputs(freshNode.id);
+                    if (text) {
+                        const lsData = freshNode.data as Record<string, unknown>;
+                        const splitMode = (lsData.splitMode as string) || "newline";
+                        const customSep = (lsData.customSeparator as string) || "";
+                        let upstreamItems: string[] = [];
+                        if (splitMode === "newline") upstreamItems = text.split("\n").filter(t => t.trim());
+                        else if (splitMode === "period") upstreamItems = text.split(".").filter(t => t.trim());
+                        else if (splitMode === "hash") upstreamItems = text.split("#").filter(t => t.trim());
+                        else if (splitMode === "dash") upstreamItems = text.split("-").filter(t => t.trim());
+                        else if (splitMode === "custom" && customSep) upstreamItems = text.split(customSep).filter(t => t.trim());
+                        else upstreamItems = [text];
+
+                        if (upstreamItems.length > 0) {
+                            const selectedIdx = (lsData.selectedIndex as number) || 0;
+                            const safeIdx = Math.min(selectedIdx, upstreamItems.length - 1);
+                            updateNodeData(freshNode.id, {
+                                upstreamItems,
+                                outputText: upstreamItems[safeIdx] || upstreamItems[0],
+                            } as Partial<WorkflowNodeData>);
+                        }
+                    }
+                }
+                break;
             // videoStitch, easeCurve, soraBlueprint, brollBatch — skipped in headless
             // (they require browser APIs like Canvas/MediaEncoder)
             default:
@@ -200,59 +255,118 @@ export async function executeWorkflowHeadless(
         }
     };
 
-    try {
-        const abortController = new AbortController();
-        const levels = groupNodesByLevel(nodes, edges);
-        const maxConcurrent = 3;
-
-        // Execute levels sequentially
-        for (let levelIdx = 0; levelIdx < levels.length; levelIdx++) {
-            if (abortController.signal.aborted) break;
+    // Recursive level execution — mirrors workflowStore.ts executeLevelsSequentially
+    const executeLevels = async (
+        levels: ReturnType<typeof groupNodesByLevel>,
+        startIdx: number,
+        endIdx: number,
+        abortSignal: AbortSignal,
+        maxConcurrent: number
+    ) => {
+        for (let levelIdx = startIdx; levelIdx <= endIdx; levelIdx++) {
+            if (abortSignal.aborted) break;
 
             const level = levels[levelIdx];
+            if (!level) continue;
+
             const levelNodes = level.nodeIds
                 .map((id) => nodes.find((n) => n.id === id))
                 .filter((n): n is WorkflowNode => n !== undefined);
 
             if (levelNodes.length === 0) continue;
 
-            // Handle iterators
-            const iterators = levelNodes.filter(
-                (n) => n.type === "imageIterator" || n.type === "textIterator"
-            );
+            // Check for iterators
+            const iterators = levelNodes.filter((n) => ITERATOR_TYPES.includes(n.type!));
 
             if (iterators.length > 0) {
                 // Execute non-iterator nodes first
-                const normalNodes = levelNodes.filter(
-                    (n) => n.type !== "imageIterator" && n.type !== "textIterator"
-                );
+                const normalNodes = levelNodes.filter((n) => !ITERATOR_TYPES.includes(n.type!));
                 if (normalNodes.length > 0) {
                     const batches = chunk(normalNodes, maxConcurrent);
                     for (const batch of batches) {
-                        await Promise.all(
-                            batch.map((n) => executeSingleNode(n, abortController.signal))
-                        );
+                        if (abortSignal.aborted) break;
+                        await Promise.all(batch.map((n) => executeSingleNode(n, abortSignal)));
                     }
                 }
 
-                // Execute iterator
+                // Handle the iterator
                 const iterator = iterators[0];
-                const ctx = buildContext(iterator, abortController.signal);
+                const ctx = buildContext(iterator, abortSignal);
+
+                // --- Zip Iterator: special dual-output path ---
+                if (iterator.type === "zipIterator") {
+                    const { images: connectedImages, text: connectedText } = ctx.getConnectedInputs(iterator.id);
+                    const data = iterator.data as Record<string, unknown>;
+                    const splitMode = (data.splitMode as string) || "newline";
+                    const customSep = (data.customSeparator as string) || "";
+                    const mode = (data.mode as string) || "zip";
+
+                    let textItems: string[] = [];
+                    if (connectedText) {
+                        if (splitMode === "newline") textItems = connectedText.split("\n").filter(t => t.trim());
+                        else if (splitMode === "period") textItems = connectedText.split(".").filter(t => t.trim());
+                        else if (splitMode === "hash") textItems = connectedText.split("#").filter(t => t.trim());
+                        else if (splitMode === "dash") textItems = connectedText.split("-").filter(t => t.trim());
+                        else if (splitMode === "custom" && customSep) textItems = connectedText.split(customSep).filter(t => t.trim());
+                        else textItems = [connectedText];
+                    }
+
+                    const imageItems = connectedImages || [];
+                    let totalPairs: number;
+                    if (mode === "product") {
+                        totalPairs = Math.max(textItems.length, 1) * Math.max(imageItems.length, 1);
+                    } else {
+                        totalPairs = Math.max(textItems.length, imageItems.length);
+                    }
+
+                    updateNodeData(iterator.id, { textItems, imageItems, totalPairs, status: "loading" } as Partial<WorkflowNodeData>);
+
+                    for (let i = 0; i < totalPairs; i++) {
+                        if (abortSignal.aborted) break;
+
+                        let currentText: string | null;
+                        let currentImage: string | null;
+
+                        if (mode === "product") {
+                            const tIdx = Math.floor(i / Math.max(imageItems.length, 1));
+                            const iIdx = i % Math.max(imageItems.length, 1);
+                            currentText = textItems[tIdx] || null;
+                            currentImage = imageItems[iIdx] || null;
+                        } else {
+                            currentText = textItems[i] || null;
+                            currentImage = imageItems[i] || null;
+                        }
+
+                        updateNodeData(iterator.id, { currentText, currentImage, currentIndex: i, status: "loading" } as Partial<WorkflowNodeData>);
+                        await executeLevels(levels, levelIdx + 1, endIdx, abortSignal, maxConcurrent);
+                    }
+
+                    updateNodeData(iterator.id, { status: "complete", currentText: null, currentImage: null } as Partial<WorkflowNodeData>);
+                    return; // Iterator handled all downstream
+                }
+
+                // --- Standard single-output iterators ---
                 let items: string[] = [];
 
                 if (iterator.type === "imageIterator") {
-                    const { images } = ctx.getConnectedInputs(iterator.id);
+                    const { images: connectedImages } = ctx.getConnectedInputs(iterator.id);
                     const data = iterator.data as Record<string, unknown>;
+                    // Combine connected images AND locally uploaded images (same as client-side)
+                    const allImages = [
+                        ...connectedImages,
+                        ...((data.localImages as string[]) || []),
+                    ];
                     if (data.mode === "random" && typeof data.randomCount === "number" && data.randomCount > 0) {
-                        const shuffled = [...images].sort(() => 0.5 - Math.random());
+                        const shuffled = [...allImages].sort(() => 0.5 - Math.random());
                         items = shuffled.slice(0, data.randomCount as number);
                     } else {
-                        items = images;
+                        items = allImages;
                     }
                 } else if (iterator.type === "textIterator") {
                     const { text } = ctx.getConnectedInputs(iterator.id);
                     const data = iterator.data as Record<string, unknown>;
                     if (text) {
+                        updateNodeData(iterator.id, { inputText: text } as Partial<WorkflowNodeData>);
                         const splitMode = data.splitMode as string;
                         if (splitMode === "newline") items = text.split("\n").filter((t) => t.trim());
                         else if (splitMode === "period") items = text.split(".").filter((t) => t.trim());
@@ -262,47 +376,52 @@ export async function executeWorkflowHeadless(
                             items = text.split(data.customSeparator as string).filter((t) => t.trim());
                         else items = [text];
                     }
+                } else if (iterator.type === "arrayNode") {
+                    const { text } = ctx.getConnectedInputs(iterator.id);
+                    const data = iterator.data as Record<string, unknown>;
+                    const localItems = ((data.items as string[]) || []).filter((t: string) => t.trim());
+                    const connectedItems = text ? text.split("\n").filter((t: string) => t.trim()) : [];
+                    items = [...localItems, ...connectedItems];
                 }
 
                 updateNodeData(iterator.id, { status: "complete" } as Partial<WorkflowNodeData>);
 
-                // For each item, update iterator output and run downstream
+                if (items.length === 0) return;
+
                 for (let i = 0; i < items.length; i++) {
-                    if (abortController.signal.aborted) break;
+                    if (abortSignal.aborted) break;
 
                     if (iterator.type === "imageIterator") {
                         updateNodeData(iterator.id, { currentImage: items[i], status: "loading" } as Partial<WorkflowNodeData>);
+                    } else if (iterator.type === "arrayNode") {
+                        updateNodeData(iterator.id, { currentItem: items[i], status: "loading" } as Partial<WorkflowNodeData>);
                     } else {
                         updateNodeData(iterator.id, { currentText: items[i], status: "loading" } as Partial<WorkflowNodeData>);
                     }
 
-                    // Execute downstream levels
-                    for (let dl = levelIdx + 1; dl < levels.length; dl++) {
-                        const dlLevel = levels[dl];
-                        const dlNodes = dlLevel.nodeIds
-                            .map((id) => nodes.find((n) => n.id === id))
-                            .filter((n): n is WorkflowNode => n !== undefined);
-                        const dlBatches = chunk(dlNodes, maxConcurrent);
-                        for (const batch of dlBatches) {
-                            await Promise.all(
-                                batch.map((n) => executeSingleNode(n, abortController.signal))
-                            );
-                        }
-                    }
+                    // Execute downstream levels recursively
+                    await executeLevels(levels, levelIdx + 1, endIdx, abortSignal, maxConcurrent);
                 }
 
-                updateNodeData(iterator.id, { status: "complete", currentImage: null, currentText: null } as Partial<WorkflowNodeData>);
-                break; // Iterator handled all downstream
+                updateNodeData(iterator.id, { status: "complete", currentImage: null, currentText: null, currentItem: null } as Partial<WorkflowNodeData>);
+                return; // Iterator handled all downstream
             }
 
             // Normal execution
             const batches = chunk(levelNodes, maxConcurrent);
             for (const batch of batches) {
-                await Promise.all(
-                    batch.map((n) => executeSingleNode(n, abortController.signal))
-                );
+                if (abortSignal.aborted) break;
+                await Promise.all(batch.map((n) => executeSingleNode(n, abortSignal)));
             }
         }
+    };
+
+    try {
+        const abortController = new AbortController();
+        const levels = groupNodesByLevel(nodes, edges);
+        const maxConcurrent = 3;
+
+        await executeLevels(levels, 0, levels.length - 1, abortController.signal, maxConcurrent);
 
         // Collect outputs from all output-producing node types
         const outputs: HeadlessOutput[] = [];
@@ -374,6 +493,18 @@ export async function executeWorkflowHeadless(
                             type: "image",
                             data: img,
                             label: data.customTitle || "Scraped Image",
+                        });
+                    }
+                }
+            } else if (node.type === "imageFilter") {
+                const data = node.data as ImageFilterNodeData;
+                if (data.outputImages.length > 0) {
+                    for (const img of data.outputImages) {
+                        outputs.push({
+                            nodeId: node.id,
+                            type: "image",
+                            data: img,
+                            label: data.customTitle || "Filtered Image",
                         });
                     }
                 }
