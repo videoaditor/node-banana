@@ -24,6 +24,9 @@ import {
   WebScraperNodeData,
   ImageFilterNodeData,
   ZipIteratorNodeData,
+  SoraBlueprintNodeData,
+  BrollBatchNodeData,
+  SplitGridNodeData,
 } from "@/types";
 
 /**
@@ -58,7 +61,7 @@ function isTextHandle(handleId: string | null | undefined): boolean {
 /**
  * Extract output data and type from a source node
  */
-function getSourceOutput(sourceNode: WorkflowNode, sourceHandle?: string | null): { type: "image" | "text" | "video" | "audio" | "3d"; value: string | null } {
+export function getSourceOutput(sourceNode: WorkflowNode, sourceHandle?: string | null): { type: "image" | "text" | "video" | "audio" | "3d"; value: string | null } {
   if (sourceNode.type === "imageInput") {
     return { type: "image", value: (sourceNode.data as ImageInputNodeData).image };
   } else if (sourceNode.type === "audioInput") {
@@ -123,6 +126,17 @@ function getSourceOutput(sourceNode: WorkflowNode, sourceHandle?: string | null)
     } else {
       return { type: "image", value: zipData.currentImage };
     }
+  } else if (sourceNode.type === "soraBlueprint") {
+    const sbData = sourceNode.data as SoraBlueprintNodeData;
+    return { type: "image", value: sbData.outputBlueprint };
+  } else if (sourceNode.type === "brollBatch") {
+    const bbData = sourceNode.data as BrollBatchNodeData;
+    // Return the first completed shot's video
+    const firstVideo = bbData.shots?.find(s => s.videoUrl)?.videoUrl || null;
+    return { type: "video", value: firstVideo };
+  } else if (sourceNode.type === "splitGrid") {
+    const sgData = sourceNode.data as SplitGridNodeData;
+    return { type: "image", value: sgData.sourceImage };
   } else if (sourceNode.type === "subWorkflow") {
     const swData = sourceNode.data as { outputText: string | null; outputImage: string | null };
     if (sourceHandle === "text") {

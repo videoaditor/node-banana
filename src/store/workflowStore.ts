@@ -76,6 +76,7 @@ import {
   executeGlbViewer,
   executeWebScraper,
   executeSubWorkflowNode,
+  executeImageFilter,
 } from "./execution";
 import type { NodeExecutionContext } from "./execution";
 export type { LevelGroup } from "./utils/executionUtils";
@@ -969,6 +970,9 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           }
           break;
         }
+        case "imageFilter":
+          await executeImageFilter(executionCtx);
+          break;
         case "subWorkflow":
           await executeSubWorkflowNode(executionCtx);
           break;
@@ -1131,9 +1135,10 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
             }
 
             // --- Standard single-output iterators ---
-            ctx.updateNodeData(iterator.id, { status: "complete" });
+            ctx.updateNodeData(iterator.id, { status: "loading" });
 
             if (items.length === 0) {
+              ctx.updateNodeData(iterator.id, { status: "complete" });
               logger.warn('node.execution', 'Iterator has no items to iterate over', { nodeId: iterator.id });
               return; // Skip downstream if nothing to iterate
             }
@@ -1455,6 +1460,35 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           break;
         case "webScraper":
           await executeWebScraper(executionCtx);
+          break;
+        case "listSelector": {
+          // Populate items from upstream text if connected
+          const { text: lsText } = executionCtx.getConnectedInputs(node.id);
+          if (lsText) {
+            const lsData = node.data as any;
+            const mode = lsData.splitMode || "newline";
+            let splitItems: string[];
+            if (mode === "newline") splitItems = lsText.split("\n").filter((t: string) => t.trim());
+            else if (mode === "period") splitItems = lsText.split(".").filter((t: string) => t.trim());
+            else if (mode === "hash") splitItems = lsText.split("#").filter((t: string) => t.trim());
+            else if (mode === "dash") splitItems = lsText.split("-").filter((t: string) => t.trim());
+            else if (mode === "custom" && lsData.customSeparator) splitItems = lsText.split(lsData.customSeparator).filter((t: string) => t.trim());
+            else splitItems = [lsText];
+
+            if (splitItems.length > 0) {
+              const selectedIdx = Math.min(lsData.selectedIndex || 0, splitItems.length - 1);
+              executionCtx.updateNodeData(node.id, {
+                items: splitItems,
+                upstreamItems: splitItems,
+                selectedIndex: selectedIdx,
+                outputText: splitItems[selectedIdx] || null,
+              });
+            }
+          }
+          break;
+        }
+        case "imageFilter":
+          await executeImageFilter(executionCtx);
           break;
         case "subWorkflow":
           await executeSubWorkflowNode(executionCtx);
