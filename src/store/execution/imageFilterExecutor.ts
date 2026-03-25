@@ -120,7 +120,7 @@ export async function executeImageFilter(ctx: NodeExecutionContext): Promise<voi
     outputImages: [],
   });
 
-  const headers = buildLlmHeaders(nodeData.provider, providerSettings);
+  const headers = buildLlmHeaders();
 
   try {
     const passed = await evaluateBatch(

@@ -112,13 +112,12 @@ export async function POST(request: NextRequest) {
 
     // Route to appropriate provider
     if (provider === "replicate") {
-      // User-provided key takes precedence over env variable
-      const replicateApiKey = request.headers.get("X-Replicate-API-Key") || process.env.REPLICATE_API_KEY;
+      const replicateApiKey = process.env.REPLICATE_API_KEY;
       if (!replicateApiKey) {
         return NextResponse.json<GenerateResponse>(
           {
             success: false,
-            error: "Replicate API key not configured. Add REPLICATE_API_KEY to .env.local or configure in Settings.",
+            error: "Replicate API key not configured on server.",
           },
           { status: 401 }
         );
@@ -212,11 +211,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (provider === "fal") {
-      // User-provided key takes precedence over env variable
-      const falApiKey = request.headers.get("X-Fal-API-Key") || process.env.FAL_API_KEY || null;
+      const falApiKey = process.env.FAL_API_KEY || null;
 
       if (!falApiKey) {
-        console.warn(`[API:${requestId}] No FAL API key configured. Proceeding without auth (rate-limited).`);
+        console.warn(`[API:${requestId}] No FAL API key configured on server. Proceeding without auth (rate-limited).`);
       }
 
       // Pass images as-is; generateWithFalQueue uploads base64 to CDN internally
@@ -307,13 +305,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (provider === "kie") {
-      // User-provided key takes precedence over env variable
-      const kieApiKey = request.headers.get("X-Kie-Key") || process.env.KIE_API_KEY;
+      const kieApiKey = process.env.KIE_API_KEY;
       if (!kieApiKey) {
         return NextResponse.json<GenerateResponse>(
           {
             success: false,
-            error: "Kie.ai API key not configured. Add KIE_API_KEY to .env.local or configure in Settings.",
+            error: "Kie.ai API key not configured on server.",
           },
           { status: 401 }
         );
@@ -406,13 +403,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (provider === "wavespeed") {
-      // User-provided key takes precedence over env variable
-      const wavespeedApiKey = request.headers.get("X-WaveSpeed-Key") || process.env.WAVESPEED_API_KEY;
+      const wavespeedApiKey = process.env.WAVESPEED_API_KEY;
       if (!wavespeedApiKey) {
         return NextResponse.json<GenerateResponse>(
           {
             success: false,
-            error: "WaveSpeed API key not configured. Add WAVESPEED_API_KEY to .env.local or configure in Settings.",
+            error: "WaveSpeed API key not configured on server.",
           },
           { status: 401 }
         );
@@ -505,16 +501,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Default: Use Gemini
-    // User-provided key (from settings) takes precedence, but fall back to env key on auth error.
-    const userGeminiKey = request.headers.get("X-Gemini-API-Key") || null;
-    const envGeminiKey = process.env.GEMINI_API_KEY || null;
-    const geminiApiKey = userGeminiKey || envGeminiKey;
+    const geminiApiKey = process.env.GEMINI_API_KEY;
 
     if (!geminiApiKey) {
       return NextResponse.json<GenerateResponse>(
         {
           success: false,
-          error: "API key not configured. Add GEMINI_API_KEY to .env.local or configure in Settings.",
+          error: "Gemini API key not configured on server.",
         },
         { status: 500 }
       );
@@ -591,7 +584,6 @@ export async function POST(request: NextRequest) {
 
     // Try Gemini (with fal.ai fallback on transient errors)
     try {
-      // Try with the resolved key first
       const geminiResult = await generateWithGemini(
         requestId,
         geminiApiKey,
@@ -603,23 +595,7 @@ export async function POST(request: NextRequest) {
         useGoogleSearch
       );
 
-      // If user key was used and it failed with auth error, retry with env key
-      if (userGeminiKey && envGeminiKey && userGeminiKey !== envGeminiKey) {
-        const body = await geminiResult.json() as GenerateResponse;
-        if (!body.success && body.error && /expired|invalid.*key|api.*key|INVALID_ARGUMENT/i.test(body.error)) {
-          console.log(`[API:${requestId}] User Gemini key auth error, falling back to server key`);
-          return await generateWithGemini(requestId, envGeminiKey, prompt, images || [], geminiModel, aspectRatio, resolution, useGoogleSearch);
-        }
-        // Check for transient Gemini errors → fal.ai fallback
-        if (!body.success && body.error && isTransientGeminiError(body.error)) {
-          const falResult = await tryFalFallback(prompt || "", images || []);
-          if (falResult) return falResult;
-        }
-        // Key was fine (or fallback failed), return the parsed body as a new response
-        return NextResponse.json(body, { status: body.success ? 200 : 500 });
-      }
-
-      // No user key path — check response for transient errors
+      // Check response for transient errors
       const cloned = geminiResult.clone();
       const body = await cloned.json() as GenerateResponse;
       if (!body.success && body.error && isTransientGeminiError(body.error)) {

@@ -58,7 +58,7 @@ export async function executeLlmGenerate(
     error: null,
   });
 
-  const headers = buildLlmHeaders(nodeData.provider, providerSettings);
+  const headers = buildLlmHeaders();
 
   try {
     const response = await fetch("/api/llm", {

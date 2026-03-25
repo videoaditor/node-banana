@@ -166,7 +166,7 @@ export async function executeSubWorkflowNode(ctx: NodeExecutionContext): Promise
         const upImages = getUpstreamImages(subNode.id, subEdges, nodeOutputs);
         if (!upText) continue;
 
-        const headers = buildLlmHeaders(subNode.data.provider as string ?? "google", providerSettings);
+        const headers = buildLlmHeaders();
         const res = await fetch("/api/llm", {
           method: "POST",
           headers,
@@ -192,7 +192,7 @@ export async function executeSubWorkflowNode(ctx: NodeExecutionContext): Promise
 
         const selectedModel = subNode.data.selectedModel as { provider: string; modelId: string; displayName: string } | undefined;
         const provider = selectedModel?.provider ?? "gemini";
-        const headers = buildGenerateHeaders(provider, providerSettings);
+        const headers = buildGenerateHeaders();
 
         const res = await fetch("/api/generate", {
           method: "POST",

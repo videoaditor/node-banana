@@ -85,7 +85,7 @@ export async function executeGenerateVideo(
   });
 
   const provider = nodeData.selectedModel.provider;
-  const headers = buildGenerateHeaders(provider, providerSettings);
+  const headers = buildGenerateHeaders();
 
   const requestPayload = {
     images,

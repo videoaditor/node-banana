@@ -70,7 +70,7 @@ export async function executeGenerate3D(
   });
 
   const provider = nodeData.selectedModel?.provider || "fal";
-  const headers = buildGenerateHeaders(provider, providerSettings);
+  const headers = buildGenerateHeaders();
 
   const requestPayload = {
     images,

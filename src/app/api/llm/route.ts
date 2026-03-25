@@ -349,12 +349,6 @@ export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
 
   try {
-    // Get user-provided API keys from headers (override env variables)
-    const geminiApiKey = request.headers.get("X-Gemini-API-Key");
-    const openaiApiKey = request.headers.get("X-OpenAI-API-Key");
-    const anthropicApiKey = request.headers.get("X-Anthropic-API-Key");
-    const groqApiKey = request.headers.get("X-Groq-API-Key");
-
     const body: LLMGenerateRequest = await request.json();
     const {
       prompt,
@@ -387,25 +381,13 @@ export async function POST(request: NextRequest) {
     let text: string;
 
     if (provider === "google") {
-      try {
-        text = await generateWithGoogle(prompt, model, temperature, maxTokens, images, requestId, geminiApiKey);
-      } catch (err) {
-        // If user key caused auth error, retry with env key
-        const errMsg = err instanceof Error ? err.message : String(err);
-        if (geminiApiKey && process.env.GEMINI_API_KEY && geminiApiKey !== process.env.GEMINI_API_KEY &&
-            /expired|invalid.*key|api.*key|INVALID_ARGUMENT/i.test(errMsg)) {
-          logger.info('api.llm', 'User Gemini key auth error, retrying with env key', { requestId });
-          text = await generateWithGoogle(prompt, model, temperature, maxTokens, images, requestId, null);
-        } else {
-          throw err;
-        }
-      }
+      text = await generateWithGoogle(prompt, model, temperature, maxTokens, images, requestId, null);
     } else if (provider === "openai") {
-      text = await generateWithOpenAI(prompt, model, temperature, maxTokens, images, requestId, openaiApiKey);
+      text = await generateWithOpenAI(prompt, model, temperature, maxTokens, images, requestId, null);
     } else if (provider === "anthropic") {
-      text = await generateWithAnthropic(prompt, model, temperature, maxTokens, images, requestId, anthropicApiKey);
+      text = await generateWithAnthropic(prompt, model, temperature, maxTokens, images, requestId, null);
     } else if (provider === "groq") {
-      text = await generateWithGroq(prompt, model, temperature, maxTokens, images, requestId, groqApiKey);
+      text = await generateWithGroq(prompt, model, temperature, maxTokens, images, requestId, null);
     } else {
       logger.warn('api.llm', 'Unknown provider requested', { requestId, provider });
       return NextResponse.json<LLMGenerateResponse>(

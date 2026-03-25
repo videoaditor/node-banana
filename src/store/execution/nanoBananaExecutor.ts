@@ -78,7 +78,7 @@ export async function executeNanoBanana(
   });
 
   const provider = nodeData.selectedModel?.provider || "gemini";
-  const headers = buildGenerateHeaders(provider, providerSettings);
+  const headers = buildGenerateHeaders();
 
   const requestPayload = {
     images,
