@@ -35,15 +35,19 @@ export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorN
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
   const hasUpstreamItems = !!(nodeData.upstreamItems && nodeData.upstreamItems.length > 0);
 
-  // REACTIVE: Live-update items when upstream text changes (as user types)
+  // REACTIVE: Live-update items when upstream text OR split mode changes
   const upstreamText = useUpstreamText(id);
-  const lastUpstreamRef = useRef<string | null>(null);
+  const lastKeyRef = useRef<string>("");
 
   useEffect(() => {
-    if (upstreamText && upstreamText !== lastUpstreamRef.current) {
-      lastUpstreamRef.current = upstreamText;
-      const mode = nodeData.splitMode || "newline";
-      const items = splitText(upstreamText, mode, nodeData.customSeparator);
+    // Build a composite key so we re-split when text, mode, OR separator changes
+    const mode = nodeData.splitMode || "newline";
+    const sep = nodeData.customSeparator || "";
+    const key = `${upstreamText || ""}|${mode}|${sep}`;
+
+    if (upstreamText && key !== lastKeyRef.current) {
+      lastKeyRef.current = key;
+      const items = splitText(upstreamText, mode, sep);
       if (items.length > 0) {
         const selectedIdx = Math.min(nodeData.selectedIndex || 0, items.length - 1);
         updateNodeData(id, {
@@ -53,9 +57,9 @@ export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorN
           outputText: items[selectedIdx] || null,
         });
       }
-    } else if (!upstreamText && lastUpstreamRef.current) {
-      // Upstream disconnected — clear upstream items
-      lastUpstreamRef.current = null;
+    } else if (!upstreamText && lastKeyRef.current) {
+      // Upstream disconnected — clear upstream items, restore defaults
+      lastKeyRef.current = "";
       updateNodeData(id, { upstreamItems: [] });
     }
   }, [upstreamText, nodeData.splitMode, nodeData.customSeparator, nodeData.selectedIndex, id, updateNodeData]);
