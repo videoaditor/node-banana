@@ -950,14 +950,17 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           if (lsText) {
             const lsData = node.data as any;
             const mode = lsData.splitMode || "newline";
-            let splitItems: string[];
-            if (mode === "newline") splitItems = lsText.split("\n").filter((t: string) => t.trim());
-            else if (mode === "period") splitItems = lsText.split(".").filter((t: string) => t.trim());
-            else if (mode === "hash") splitItems = lsText.split("#").filter((t: string) => t.trim());
-            else if (mode === "dash") splitItems = lsText.split("-").filter((t: string) => t.trim());
-            else if (mode === "asterisk") splitItems = lsText.split("*").filter((t: string) => t.trim());
-            else if (mode === "custom" && lsData.customSeparator) splitItems = lsText.split(lsData.customSeparator).filter((t: string) => t.trim());
-            else splitItems = [lsText];
+            let sep: string;
+            if (mode === "newline") sep = "\n";
+            else if (mode === "period") sep = ".";
+            else if (mode === "hash") sep = "#";
+            else if (mode === "dash") sep = "-";
+            else if (mode === "asterisk") sep = "*";
+            else if (mode === "custom" && lsData.customSeparator) sep = lsData.customSeparator;
+            else sep = "";
+            const splitItems = sep
+              ? lsText.split(sep).map((t: string) => t.trim()).filter((t: string) => t)
+              : [lsText];
 
             if (splitItems.length > 0) {
               const selectedIdx = Math.min(lsData.selectedIndex || 0, splitItems.length - 1);
@@ -1470,14 +1473,17 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           if (lsText) {
             const lsData = node.data as any;
             const mode = lsData.splitMode || "newline";
-            let splitItems: string[];
-            if (mode === "newline") splitItems = lsText.split("\n").filter((t: string) => t.trim());
-            else if (mode === "period") splitItems = lsText.split(".").filter((t: string) => t.trim());
-            else if (mode === "hash") splitItems = lsText.split("#").filter((t: string) => t.trim());
-            else if (mode === "dash") splitItems = lsText.split("-").filter((t: string) => t.trim());
-            else if (mode === "asterisk") splitItems = lsText.split("*").filter((t: string) => t.trim());
-            else if (mode === "custom" && lsData.customSeparator) splitItems = lsText.split(lsData.customSeparator).filter((t: string) => t.trim());
-            else splitItems = [lsText];
+            let sep: string;
+            if (mode === "newline") sep = "\n";
+            else if (mode === "period") sep = ".";
+            else if (mode === "hash") sep = "#";
+            else if (mode === "dash") sep = "-";
+            else if (mode === "asterisk") sep = "*";
+            else if (mode === "custom" && lsData.customSeparator) sep = lsData.customSeparator;
+            else sep = "";
+            const splitItems = sep
+              ? lsText.split(sep).map((t: string) => t.trim()).filter((t: string) => t)
+              : [lsText];
 
             if (splitItems.length > 0) {
               const selectedIdx = Math.min(lsData.selectedIndex || 0, splitItems.length - 1);
