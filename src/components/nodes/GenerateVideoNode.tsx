@@ -12,6 +12,7 @@ import { ProviderModel, ModelCapability } from "@/lib/providers/types";
 import { ModelSearchDialog } from "@/components/modals/ModelSearchDialog";
 import { useToast } from "@/components/Toast";
 import { getVideoDimensions, calculateNodeSizePreservingHeight } from "@/utils/nodeDimensions";
+import { ConnectedInputsPreview } from "./ConnectedInputsPreview";
 
 // Provider badge component - shows provider icon for all providers
 function ProviderBadge({ provider }: { provider: ProviderType }) {
@@ -743,6 +744,9 @@ export function GenerateVideoNode({ id, data, selected }: NodeProps<GenerateVide
               )}
             </div>
           )}
+
+          {/* Connected inputs preview — prompt is required for video gen */}
+          <ConnectedInputsPreview nodeId={id} requireText />
 
           {/* Model-specific parameters */}
           {nodeData.selectedModel?.modelId && (

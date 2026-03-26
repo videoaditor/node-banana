@@ -352,6 +352,7 @@ export async function POST(request: NextRequest) {
     const body: LLMGenerateRequest = await request.json();
     const {
       prompt,
+      systemPrompt,
       images,
       provider,
       model,
@@ -381,13 +382,13 @@ export async function POST(request: NextRequest) {
     let text: string;
 
     if (provider === "google") {
-      text = await generateWithGoogle(prompt, model, temperature, maxTokens, images, requestId, null);
+      text = await generateWithGoogle(prompt, model, temperature, maxTokens, images, requestId, null, systemPrompt);
     } else if (provider === "openai") {
-      text = await generateWithOpenAI(prompt, model, temperature, maxTokens, images, requestId, null);
+      text = await generateWithOpenAI(prompt, model, temperature, maxTokens, images, requestId, null, systemPrompt);
     } else if (provider === "anthropic") {
-      text = await generateWithAnthropic(prompt, model, temperature, maxTokens, images, requestId, null);
+      text = await generateWithAnthropic(prompt, model, temperature, maxTokens, images, requestId, null, systemPrompt);
     } else if (provider === "groq") {
-      text = await generateWithGroq(prompt, model, temperature, maxTokens, images, requestId, null);
+      text = await generateWithGroq(prompt, model, temperature, maxTokens, images, requestId, null, systemPrompt);
     } else {
       logger.warn('api.llm', 'Unknown provider requested', { requestId, provider });
       return NextResponse.json<LLMGenerateResponse>(

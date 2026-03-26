@@ -40,3 +40,5 @@ export {
 } from "./videoProcessingExecutors";
 
 export { executeSubWorkflowNode } from "./executeSubWorkflow";
+
+export { executeImageFilter } from "./imageFilterExecutor";

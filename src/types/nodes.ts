@@ -225,6 +225,7 @@ export interface Generate3DNodeData extends BaseNodeData {
  */
 export interface LLMGenerateNodeData extends BaseNodeData {
   inputPrompt: string | null;
+  systemPrompt: string | null; // System prompt for LLM (separate from user prompt)
   inputImages: string[];
   inputImageRefs?: string[]; // External image references for storage optimization
   outputText: string | null;
@@ -362,7 +363,7 @@ export interface ImageIteratorNodeData extends BaseNodeData {
  */
 export interface TextIteratorNodeData extends BaseNodeData {
   inputText: string | null;    // Text from upstream
-  splitMode: "newline" | "period" | "hash" | "dash" | "custom";
+  splitMode: "newline" | "period" | "hash" | "dash" | "asterisk" | "custom";
   customSeparator: string;     // Used when splitMode is "custom"
   currentText?: string | null; // The currenly iterating text downstream nodes receives
   status: NodeStatus;
@@ -459,7 +460,7 @@ export interface ListSelectorNodeData extends BaseNodeData {
   items: string[];             // Available options (manual or from upstream)
   selectedIndex: number;       // Currently selected item index
   outputText: string | null;   // The selected item value
-  splitMode: "newline" | "period" | "hash" | "dash" | "custom"; // How to split upstream text
+  splitMode: "newline" | "period" | "hash" | "dash" | "asterisk" | "custom"; // How to split upstream text
   customSeparator: string;     // Used when splitMode is "custom"
   upstreamItems?: string[];    // Items populated from upstream text (kept separate from manual items)
 }
@@ -494,7 +495,7 @@ export interface ImageFilterNodeData extends BaseNodeData {
  * Zip Iterator node - pairs multiple text + image inputs positionally and iterates
  */
 export interface ZipIteratorNodeData extends BaseNodeData {
-  splitMode: "newline" | "period" | "hash" | "dash" | "custom";
+  splitMode: "newline" | "period" | "hash" | "dash" | "asterisk" | "custom";
   customSeparator: string;
   mode: "zip" | "product";        // zip = pair by index, product = all combinations
   textItems: string[];             // Parsed text items (for display)

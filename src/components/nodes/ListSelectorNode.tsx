@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { Handle, Position, NodeProps, Node } from "@xyflow/react";
 import { BaseNode } from "./BaseNode";
 import { useWorkflowStore } from "@/store/workflowStore";
 import { ListSelectorNodeData } from "@/types";
+import { useUpstreamText } from "@/hooks/useUpstreamData";
 
 type ListSelectorNodeType = Node<ListSelectorNodeData, "listSelector">;
 
@@ -13,13 +14,55 @@ const SPLIT_MODES = [
   { value: "period", label: "Period (.)" },
   { value: "hash", label: "Hash (#)" },
   { value: "dash", label: "Dash (-)" },
+  { value: "asterisk", label: "Asterisk (*)" },
   { value: "custom", label: "Custom" },
 ] as const;
+
+function splitText(text: string, mode: string, customSep?: string): string[] {
+  let items: string[];
+  if (mode === "newline") items = text.split("\n");
+  else if (mode === "period") items = text.split(".");
+  else if (mode === "hash") items = text.split("#");
+  else if (mode === "dash") items = text.split("-");
+  else if (mode === "asterisk") items = text.split("*");
+  else if (mode === "custom" && customSep) items = text.split(customSep);
+  else items = [text];
+  return items.filter((t) => t.trim()).map((t) => t.trim());
+}
 
 export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorNodeType>) {
   const nodeData = data;
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData);
   const hasUpstreamItems = !!(nodeData.upstreamItems && nodeData.upstreamItems.length > 0);
+
+  // REACTIVE: Live-update items when upstream text OR split mode changes
+  const upstreamText = useUpstreamText(id);
+  const lastKeyRef = useRef<string>("");
+
+  useEffect(() => {
+    // Build a composite key so we re-split when text, mode, OR separator changes
+    const mode = nodeData.splitMode || "newline";
+    const sep = nodeData.customSeparator || "";
+    const key = `${upstreamText || ""}|${mode}|${sep}`;
+
+    if (upstreamText && key !== lastKeyRef.current) {
+      lastKeyRef.current = key;
+      const items = splitText(upstreamText, mode, sep);
+      if (items.length > 0) {
+        const selectedIdx = Math.min(nodeData.selectedIndex || 0, items.length - 1);
+        updateNodeData(id, {
+          items,
+          upstreamItems: items,
+          selectedIndex: selectedIdx,
+          outputText: items[selectedIdx] || null,
+        });
+      }
+    } else if (!upstreamText && lastKeyRef.current) {
+      // Upstream disconnected — clear upstream items, restore defaults
+      lastKeyRef.current = "";
+      updateNodeData(id, { upstreamItems: [] });
+    }
+  }, [upstreamText, nodeData.splitMode, nodeData.customSeparator, nodeData.selectedIndex, id, updateNodeData]);
 
   const handleSelectionChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {

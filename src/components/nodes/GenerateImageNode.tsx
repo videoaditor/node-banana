@@ -12,6 +12,7 @@ import { ProviderModel, ModelCapability } from "@/lib/providers/types";
 import { ModelSearchDialog } from "@/components/modals/ModelSearchDialog";
 import { useToast } from "@/components/Toast";
 import { getImageDimensions, calculateNodeSizePreservingHeight } from "@/utils/nodeDimensions";
+import { ConnectedInputsPreview } from "./ConnectedInputsPreview";
 
 // Provider badge component - shows provider icon for all providers
 function ProviderBadge({ provider }: { provider: ProviderType }) {
@@ -829,6 +830,9 @@ export function GenerateImageNode({ id, data, selected }: NodeProps<NanoBananaNo
               <span>Google Search</span>
             </label>
           )}
+
+          {/* Connected inputs preview — prompt is required for image gen */}
+          <ConnectedInputsPreview nodeId={id} requireText />
 
           {/* Add Image Input button */}
           <button

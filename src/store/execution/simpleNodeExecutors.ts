@@ -90,16 +90,36 @@ export async function executePromptConstructor(ctx: NodeExecutionContext): Promi
     const inputTexts: string[] = [];
 
     // Helper: extract text output from any source node.
-    // For prompt nodes, prefer `prompt` (user-editable value) over any stale execution outputText.
-    // For other nodes, prefer `outputText` (execution result).
+    // Covers all node types that can produce text output.
     function extractSourceText(sourceNode: WorkflowNode): string | null {
       const d = sourceNode.data as Record<string, unknown>;
-      let val: string | null;
+      let val: string | null = null;
+
       if (sourceNode.type === "prompt") {
         val = (d.prompt as string | null) ?? null;
+      } else if (sourceNode.type === "textIterator") {
+        // During iteration, currentText holds the active segment
+        val = (d.currentText as string | null) ?? (d.outputText as string | null) ?? null;
+      } else if (sourceNode.type === "arrayNode") {
+        // During iteration, currentItem holds the active item
+        val = (d.currentItem as string | null) ?? null;
+      } else if (sourceNode.type === "listSelector") {
+        val = (d.outputText as string | null) ?? null;
+      } else if (sourceNode.type === "llmGenerate") {
+        val = (d.outputText as string | null) ?? null;
+      } else if (sourceNode.type === "promptConstructor") {
+        val = (d.outputText as string | null) ?? (d.staticText as string | null) ?? null;
+      } else if (sourceNode.type === "promptConcatenator") {
+        val = (d.outputText as string | null) ?? null;
+      } else if (sourceNode.type === "zipIterator") {
+        val = (d.currentText as string | null) ?? null;
+      } else if (sourceNode.type === "webScraper") {
+        val = (d.outputText as string | null) ?? null;
       } else {
+        // Generic fallback for any node with outputText or prompt
         val = (d.outputText as string | null) ?? (d.prompt as string | null) ?? null;
       }
+
       return val && String(val).trim() ? String(val).trim() : null;
     }
 
@@ -174,23 +194,31 @@ export async function executePromptConcatenator(ctx: NodeExecutionContext): Prom
     );
 
     // Helper: extract text output from any node type.
-    // Prompt nodes: always read `prompt` (user-editable value).
-    // Other nodes: prefer `outputText` (execution result).
+    // Covers all node types that can produce text output.
     const extractText = (n: ReturnType<typeof getNodes>[0]): string | null => {
       const d = n.data as Record<string, unknown>;
-      // Prompt nodes: user-editable value is `prompt`
+      let val: string | null = null;
+
       if (n.type === "prompt") {
-        return typeof d.prompt === "string" && d.prompt ? d.prompt : null;
-      }
-      // promptConstructor
-      if (n.type === "promptConstructor") {
+        val = (d.prompt as string | null) ?? null;
+      } else if (n.type === "textIterator") {
+        val = (d.currentText as string | null) ?? (d.outputText as string | null) ?? null;
+      } else if (n.type === "arrayNode") {
+        val = (d.currentItem as string | null) ?? null;
+      } else if (n.type === "listSelector") {
+        val = (d.outputText as string | null) ?? null;
+      } else if (n.type === "promptConstructor") {
         const pc = d as PromptConstructorNodeData;
-        return pc.outputText ?? pc.template ?? null;
+        val = pc.outputText ?? pc.staticText ?? null;
+      } else if (n.type === "zipIterator") {
+        val = (d.currentText as string | null) ?? null;
+      } else {
+        // Generic fallback: outputText → prompt
+        if (typeof d.outputText === "string" && d.outputText) val = d.outputText;
+        else if (typeof d.prompt === "string" && d.prompt) val = d.prompt;
       }
-      // All other nodes: prefer outputText, fallback to prompt
-      if (typeof d.outputText === "string" && d.outputText) return d.outputText;
-      if (typeof d.prompt === "string" && d.prompt) return d.prompt;
-      return null;
+
+      return val && String(val).trim() ? String(val).trim() : null;
     };
 
     const textInputs: string[] = [];

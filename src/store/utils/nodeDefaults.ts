@@ -199,6 +199,7 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
       const llmDefaults = nodeDefaults.llm;
       return {
         inputPrompt: null,
+        systemPrompt: null,
         inputImages: [],
         outputText: null,
         outputHistory: [],

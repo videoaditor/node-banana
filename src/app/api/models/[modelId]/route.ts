@@ -60,7 +60,7 @@ const TEXT_INPUT_NAMES = ["prompt", "negative_prompt"];
 // Properties that start with "image_" but are NOT image inputs
 const IMAGE_PREFIX_EXCLUSIONS = ["image_size"];
 
-// Parameters to filter out (internal/system params)
+// Parameters to filter out (internal/system params only — keep user-facing settings)
 const EXCLUDED_PARAMS = new Set([
   "webhook",
   "webhook_events_filter",
@@ -68,8 +68,6 @@ const EXCLUDED_PARAMS = new Set([
   "disable_safety_checker",
   "go_fast",
   "enable_safety_checker",
-  "output_format",
-  "output_quality",
   "request_id",
 ]);
 
@@ -91,6 +89,24 @@ const PRIORITY_PARAMS = new Set([
   "strength",
   "cfg_scale",
   "lora_scale",
+  // Output format controls
+  "output_format",
+  "output_quality",
+  // Video-specific params
+  "duration",
+  "fps",
+  "aspect_ratio",
+  "resolution",
+  "motion",
+  "style",
+  "mode",
+  "professional_mode",
+  "enhance_prompt",
+  // Image generation params
+  "safety_tolerance",
+  "style_type",
+  "magic_prompt_option",
+  "rendering_speed",
 ]);
 
 interface SchemaSuccessResponse {

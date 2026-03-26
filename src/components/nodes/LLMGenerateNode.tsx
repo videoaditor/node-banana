@@ -7,6 +7,7 @@ import { BaseNode } from "./BaseNode";
 import { useCommentNavigation } from "@/hooks/useCommentNavigation";
 import { useWorkflowStore } from "@/store/workflowStore";
 import { LLMGenerateNodeData, LLMProvider, LLMModelType } from "@/types";
+import { ConnectedInputsPreview } from "./ConnectedInputsPreview";
 
 const PROVIDERS: { value: LLMProvider; label: string }[] = [
   { value: "google", label: "Google" },
@@ -153,22 +154,48 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
         isExecuting={isRunning}
         nodeAccentColor="coral"
       >
+        {/* Prompt input */}
+        <Handle
+          type="target"
+          position={Position.Left}
+          id="text"
+          style={{ top: "25%" }}
+          data-handletype="text"
+        />
+        <span
+          className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none text-[var(--text-muted)]"
+          style={{ left: "16px", top: "25%", transform: "translateY(-50%)" }}
+        >
+          Prompt
+        </span>
+        {/* System Prompt input */}
+        <Handle
+          type="target"
+          position={Position.Left}
+          id="system"
+          style={{ top: "45%" }}
+          data-handletype="text"
+        />
+        <span
+          className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none text-[var(--text-muted)]"
+          style={{ left: "16px", top: "45%", transform: "translateY(-50%)" }}
+        >
+          System
+        </span>
         {/* Image input - optional */}
         <Handle
           type="target"
           position={Position.Left}
           id="image"
-          style={{ top: "35%" }}
+          style={{ top: "70%" }}
           data-handletype="image"
         />
-        {/* Text input */}
-        <Handle
-          type="target"
-          position={Position.Left}
-          id="text"
-          style={{ top: "65%" }}
-          data-handletype="text"
-        />
+        <span
+          className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none text-[var(--text-muted)]"
+          style={{ left: "16px", top: "70%", transform: "translateY(-50%)" }}
+        >
+          Image
+        </span>
         {/* Text output */}
         <Handle
           type="source"
@@ -176,6 +203,12 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
           id="text"
           data-handletype="text"
         />
+        <span
+          className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none text-[var(--text-secondary)]"
+          style={{ right: "16px", top: "50%", transform: "translateY(-50%)" }}
+        >
+          Text
+        </span>
 
         <div className="flex-1 flex flex-col min-h-0 gap-2">
           {/* Output area */}
@@ -311,6 +344,21 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
               </option>
             ))}
           </select>
+
+          {/* System Prompt - collapsible */}
+          <div className="shrink-0">
+            <label className="text-[9px] text-[var(--text-muted)] mb-0.5 block">System Prompt</label>
+            <textarea
+              value={nodeData.systemPrompt || ""}
+              onChange={(e) => updateNodeData(id, { systemPrompt: e.target.value || null })}
+              placeholder="Optional system instructions..."
+              className="nodrag nopan w-full text-[10px] py-1 px-1.5 border border-[var(--border-subtle)] rounded bg-[var(--bg-base)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-[var(--text-secondary)] resize-none"
+              rows={2}
+            />
+          </div>
+
+          {/* Connected inputs preview */}
+          <ConnectedInputsPreview nodeId={id} textLabel="Text input" maxThumbnails={4} requireText />
 
           {/* Model selector */}
           <select
