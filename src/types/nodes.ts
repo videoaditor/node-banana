@@ -171,6 +171,7 @@ export interface NanoBananaNodeData extends BaseNodeData {
   inputImages: string[]; // Now supports multiple images
   inputImageRefs?: string[]; // External image references for storage optimization
   inputPrompt: string | null;
+  systemPrompt?: string | null; // System prompt (from "system" handle or manual input)
   outputImage: string | null;
   outputImageRef?: string; // External image reference for storage optimization
   aspectRatio: AspectRatio;

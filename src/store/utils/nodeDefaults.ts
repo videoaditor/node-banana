@@ -157,6 +157,7 @@ export const createDefaultNodeData = (type: NodeType): WorkflowNodeData => {
       return {
         inputImages: [],
         inputPrompt: null,
+        systemPrompt: null,
         outputImage: null,
         aspectRatio,
         resolution,

@@ -578,30 +578,51 @@ export function GenerateImageNode({ id, data, selected }: NodeProps<NanoBananaNo
           );
         })}
 
-        {/* Text input handle */}
+        {/* Text input handles: Prompt + System Prompt */}
         {(() => {
-          const totalHandles = (nodeData.imageInputHandles || 1) + 1;
-          const textPosition = (((nodeData.imageInputHandles || 1) + 1) / (totalHandles + 1)) * 100;
+          const totalHandles = (nodeData.imageInputHandles || 1) + 2; // +2 for prompt + system prompt
+          const promptPosition = (((nodeData.imageInputHandles || 1) + 1) / (totalHandles + 1)) * 100;
+          const systemPosition = (((nodeData.imageInputHandles || 1) + 2) / (totalHandles + 1)) * 100;
           return (
             <>
+              {/* Prompt handle */}
               <Handle
                 type="target"
                 position={Position.Left}
                 id="text"
-                style={{ top: `${textPosition}%` }}
+                style={{ top: `${promptPosition}%` }}
                 data-handletype="text"
                 isConnectable={true}
               />
-              {/* Prompt label */}
               <div
                 className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none text-right"
                 style={{
                   right: `calc(100% + 8px)`,
-                  top: `calc(${textPosition}% - 18px)`,
+                  top: `calc(${promptPosition}% - 18px)`,
                   color: "var(--handle-color-text)",
                 }}
               >
                 Prompt
+              </div>
+
+              {/* System Prompt handle */}
+              <Handle
+                type="target"
+                position={Position.Left}
+                id="system"
+                style={{ top: `${systemPosition}%` }}
+                data-handletype="text"
+                isConnectable={true}
+              />
+              <div
+                className="absolute text-[10px] font-medium whitespace-nowrap pointer-events-none text-right"
+                style={{
+                  right: `calc(100% + 8px)`,
+                  top: `calc(${systemPosition}% - 18px)`,
+                  color: "#a78bfa",
+                }}
+              >
+                System
               </div>
             </>
           );

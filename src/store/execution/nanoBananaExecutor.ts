@@ -46,6 +46,26 @@ export async function executeNanoBanana(
   const freshNode = getFreshNode(node.id);
   const nodeData = (freshNode?.data || node.data) as NanoBananaNodeData;
 
+  // Extract system prompt from "system" handle or node's own field
+  let systemPrompt: string | null = nodeData.systemPrompt || null;
+  const edges = getEdges();
+  const allNodes = getNodes();
+  for (const edge of edges) {
+    if (edge.target === node.id && edge.targetHandle === "system") {
+      const sourceNode = allNodes.find((n: { id: string }) => n.id === edge.source);
+      if (sourceNode) {
+        const d = sourceNode.data as Record<string, unknown>;
+        const connectedSystemText =
+          (d.outputText as string | null) ??
+          (d.prompt as string | null) ??
+          (d.currentText as string | null) ??
+          (d.currentItem as string | null) ??
+          null;
+        if (connectedSystemText) systemPrompt = connectedSystemText;
+      }
+    }
+  }
+
   // Determine images and text (with optional fallback to stored values)
   let images: string[];
   let promptText: string | null;
@@ -70,9 +90,15 @@ export async function executeNanoBanana(
     throw new Error("Missing text input");
   }
 
+  // If system prompt exists, prepend it to the prompt for models that don't support it natively
+  const fullPrompt = systemPrompt
+    ? `${systemPrompt}\n\n${promptText}`
+    : promptText;
+
   updateNodeData(node.id, {
     inputImages: images,
     inputPrompt: promptText,
+    systemPrompt,
     status: "loading",
     error: null,
   });
@@ -82,7 +108,8 @@ export async function executeNanoBanana(
 
   const requestPayload = {
     images,
-    prompt: promptText,
+    prompt: fullPrompt,
+    systemPrompt,
     aspectRatio: nodeData.aspectRatio,
     resolution: nodeData.resolution,
     model: nodeData.model,
