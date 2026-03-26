@@ -745,8 +745,8 @@ export function GenerateVideoNode({ id, data, selected }: NodeProps<GenerateVide
             </div>
           )}
 
-          {/* Connected inputs preview */}
-          <ConnectedInputsPreview nodeId={id} />
+          {/* Connected inputs preview — prompt is required for video gen */}
+          <ConnectedInputsPreview nodeId={id} requireText />
 
           {/* Model-specific parameters */}
           {nodeData.selectedModel?.modelId && (

@@ -358,7 +358,7 @@ export function LLMGenerateNode({ id, data, selected }: NodeProps<LLMGenerateNod
           </div>
 
           {/* Connected inputs preview */}
-          <ConnectedInputsPreview nodeId={id} textLabel="Text input" maxThumbnails={4} />
+          <ConnectedInputsPreview nodeId={id} textLabel="Text input" maxThumbnails={4} requireText />
 
           {/* Model selector */}
           <select

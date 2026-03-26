@@ -831,8 +831,8 @@ export function GenerateImageNode({ id, data, selected }: NodeProps<NanoBananaNo
             </label>
           )}
 
-          {/* Connected inputs preview */}
-          <ConnectedInputsPreview nodeId={id} />
+          {/* Connected inputs preview — prompt is required for image gen */}
+          <ConnectedInputsPreview nodeId={id} requireText />
 
           {/* Add Image Input button */}
           <button
