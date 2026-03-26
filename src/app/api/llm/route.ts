@@ -41,7 +41,8 @@ async function generateWithGoogle(
   maxTokens: number,
   images?: string[],
   requestId?: string,
-  userApiKey?: string | null
+  userApiKey?: string | null,
+  systemPrompt?: string | null
 ): Promise<string> {
   // User-provided key takes precedence over env variable
   const apiKey = userApiKey || process.env.GEMINI_API_KEY;
@@ -98,6 +99,7 @@ async function generateWithGoogle(
     config: {
       temperature,
       maxOutputTokens: maxTokens,
+      ...(systemPrompt && { systemInstruction: systemPrompt }),
     },
   });
   const duration = Date.now() - startTime;
@@ -125,7 +127,8 @@ async function generateWithOpenAI(
   maxTokens: number,
   images?: string[],
   requestId?: string,
-  userApiKey?: string | null
+  userApiKey?: string | null,
+  systemPrompt?: string | null
 ): Promise<string> {
   // User-provided key takes precedence over env variable
   const apiKey = userApiKey || process.env.OPENAI_API_KEY;
@@ -168,7 +171,10 @@ async function generateWithOpenAI(
     },
     body: JSON.stringify({
       model: modelId,
-      messages: [{ role: "user", content }],
+      messages: [
+        ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
+        { role: "user", content },
+      ],
       temperature,
       max_completion_tokens: maxTokens,
     }),
@@ -209,7 +215,8 @@ async function generateWithAnthropic(
   maxTokens: number,
   images?: string[],
   requestId?: string,
-  userApiKey?: string | null
+  userApiKey?: string | null,
+  systemPrompt?: string | null
 ): Promise<string> {
   const apiKey = userApiKey || process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -257,6 +264,7 @@ async function generateWithAnthropic(
       model: modelId,
       max_tokens: maxTokens,
       temperature,
+      ...(systemPrompt && { system: systemPrompt }),
       messages: [{ role: "user", content }],
     }),
   });
@@ -291,7 +299,8 @@ async function generateWithGroq(
   maxTokens: number,
   _images?: string[],
   requestId?: string,
-  userApiKey?: string | null
+  userApiKey?: string | null,
+  systemPrompt?: string | null
 ): Promise<string> {
   const apiKey = userApiKey || process.env.GROQ_API_KEY;
   if (!apiKey) {
@@ -316,7 +325,10 @@ async function generateWithGroq(
     },
     body: JSON.stringify({
       model: modelId,
-      messages: [{ role: "user", content: prompt }],
+      messages: [
+        ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
+        { role: "user", content: prompt },
+      ],
       temperature,
       max_tokens: maxTokens,
     }),

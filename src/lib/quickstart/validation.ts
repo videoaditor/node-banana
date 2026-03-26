@@ -257,6 +257,7 @@ function createDefaultNodeData(type: NodeType): WorkflowNodeData {
     case "llmGenerate":
       return {
         inputPrompt: null,
+        systemPrompt: null,
         inputImages: [],
         outputText: null,
         outputHistory: [],
