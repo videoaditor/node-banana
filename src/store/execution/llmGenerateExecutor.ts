@@ -22,6 +22,8 @@ export async function executeLlmGenerate(
     node,
     getConnectedInputs,
     updateNodeData,
+    getEdges,
+    getNodes,
     signal,
     providerSettings,
   } = ctx;
