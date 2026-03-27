@@ -65,8 +65,11 @@ export function ConnectedInputsPreview({
     })
   );
 
-  const upstreamText = showText ? useUpstreamText(nodeId) : null;
-  const upstreamImages = showImages ? useUpstreamImages(nodeId) : [];
+  // Hooks must be called unconditionally (React rules of hooks)
+  const rawUpstreamText = useUpstreamText(nodeId);
+  const rawUpstreamImages = useUpstreamImages(nodeId);
+  const upstreamText = showText ? rawUpstreamText : null;
+  const upstreamImages = showImages ? rawUpstreamImages : [];
 
   const hasContent = upstreamText || upstreamImages.length > 0 || systemText;
   const needsTextWarning = requireText && !hasTextEdge;
