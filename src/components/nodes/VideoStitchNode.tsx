@@ -41,10 +41,13 @@ export function VideoStitchNode({ id, data, selected }: NodeProps<VideoStitchNod
   const lastWrittenClipOrderRef = useRef<string[]>([]);
   useEffect(() => {
     const currentEdgeIds = videoEdges.map((e) => e.id);
-    const currentOrder = nodeData.clipOrder || [];
+    // Read clipOrder from store directly to avoid update-depth loop
+    // (this effect sets clipOrder, so it must NOT be in the dep array)
+    const currentNode = useWorkflowStore.getState().nodes.find((n) => n.id === id);
+    const currentOrder = (currentNode?.data as any)?.clipOrder || [];
 
     // Keep existing order for edges that still exist, append new ones
-    const validExisting = currentOrder.filter((eid) => currentEdgeIds.includes(eid));
+    const validExisting = currentOrder.filter((eid: string) => currentEdgeIds.includes(eid));
     const newEdges = currentEdgeIds.filter((eid) => !currentOrder.includes(eid));
     const newOrder = [...validExisting, ...newEdges];
 
@@ -58,12 +61,13 @@ export function VideoStitchNode({ id, data, selected }: NodeProps<VideoStitchNod
 
     if (
       newOrder.length !== currentOrder.length ||
-      !newOrder.every((eid, idx) => eid === currentOrder[idx])
+      !newOrder.every((eid: string, idx: number) => eid === currentOrder[idx])
     ) {
       lastWrittenClipOrderRef.current = newOrder;
       updateNodeData(id, { clipOrder: newOrder });
     }
-  }, [videoEdges, nodeData.clipOrder, id, updateNodeData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoEdges, id, updateNodeData]);
 
   // Get ordered clips based on clipOrder or connection order
   const orderedClips = useMemo(() => {

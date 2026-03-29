@@ -116,16 +116,23 @@ export function GenerateImageNode({ id, data, selected }: NodeProps<NanoBananaNo
 
   // Migrate legacy data: derive selectedModel from model field if missing,
   // OR correct provider if saved incorrectly (e.g., provider="kie" for a Gemini model)
+  // Runs once on mount — reads store directly to avoid re-trigger loops
+  const hasMigratedRef = useRef(false);
   useEffect(() => {
-    const modelId = nodeData.selectedModel?.modelId || nodeData.model;
-    const savedProvider = nodeData.selectedModel?.provider;
+    if (hasMigratedRef.current) return;
+    const node = useWorkflowStore.getState().nodes.find((n) => n.id === id);
+    if (!node) return;
+    const nd = node.data as NanoBananaNodeData;
+    const modelId = nd.selectedModel?.modelId || nd.model;
+    const savedProvider = nd.selectedModel?.provider;
 
     // Case 1: No selectedModel at all — create one from legacy model field
-    if (nodeData.model && !nodeData.selectedModel) {
-      const displayName = nodeData.model === "nano-banana" ? "Nano Banana" : "Nano Banana Pro";
+    if (nd.model && !nd.selectedModel) {
+      hasMigratedRef.current = true;
+      const displayName = nd.model === "nano-banana" ? "Nano Banana" : "Nano Banana Pro";
       const newSelectedModel: SelectedModel = {
         provider: "gemini",
-        modelId: nodeData.model,
+        modelId: nd.model,
         displayName,
       };
       updateNodeData(id, { selectedModel: newSelectedModel });
@@ -134,22 +141,23 @@ export function GenerateImageNode({ id, data, selected }: NodeProps<NanoBananaNo
 
     // Case 2: selectedModel exists but provider is wrong for a known Gemini model
     if (modelId && GEMINI_MODEL_IDS.includes(modelId) && savedProvider && savedProvider !== "gemini") {
-      const existingDisplay = nodeData.selectedModel?.displayName;
+      hasMigratedRef.current = true;
+      const existingDisplay = nd.selectedModel?.displayName;
       const displayName = existingDisplay ||
         (modelId === "nano-banana" ? "Nano Banana" :
           modelId === "nano-banana-pro" ? "Nano Banana Pro" :
             modelId === "veo-2.0-generate-video-001" ? "Veo 2" : modelId);
-      console.log(`[Node:${id}] Correcting provider from "${savedProvider}" to "gemini" for model "${modelId}"`);
       updateNodeData(id, {
         selectedModel: {
-          ...nodeData.selectedModel!,
+          ...nd.selectedModel!,
           provider: "gemini",
           displayName,
         }
       });
     }
+    hasMigratedRef.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, nodeData.model, nodeData.selectedModel?.modelId, nodeData.selectedModel?.provider]);
+  }, [id]);
 
 
   // Fetch models from external providers when provider changes

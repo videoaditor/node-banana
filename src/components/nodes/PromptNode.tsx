@@ -49,20 +49,27 @@ export function PromptNode({ id, data, selected }: NodeProps<PromptNodeType>) {
 
   // Track the last received text to detect changes
   const lastReceivedTextRef = useRef<string | null>(null);
+  // Refs for values the effect reads but must NOT react to (they are modified by the effect itself)
+  const promptsRef = useRef(prompts);
+  promptsRef.current = prompts;
+  const safeIndexRef = useRef(safeIndex);
+  safeIndexRef.current = safeIndex;
 
   // Update prompt when upstream text changes (live as user types in connected node)
   useEffect(() => {
     if (hasIncomingTextConnection && upstreamText !== null) {
       if (upstreamText !== lastReceivedTextRef.current) {
         lastReceivedTextRef.current = upstreamText;
-        const newPrompts = [...prompts];
-        newPrompts[safeIndex] = upstreamText;
+        const newPrompts = [...promptsRef.current];
+        newPrompts[safeIndexRef.current] = upstreamText;
         updateNodeData(id, { prompt: upstreamText, prompts: newPrompts });
       }
     } else if (!hasIncomingTextConnection) {
       lastReceivedTextRef.current = null;
     }
-  }, [hasIncomingTextConnection, upstreamText, id, updateNodeData, prompts, safeIndex]);
+    // Note: prompts/safeIndex read via refs to avoid update-depth loops when loading workflows
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasIncomingTextConnection, upstreamText, id, updateNodeData]);
 
   // Sync local prompt when active index changes or when not editing
   useEffect(() => {
