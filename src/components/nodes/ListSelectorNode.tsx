@@ -49,7 +49,11 @@ export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorN
       lastKeyRef.current = key;
       const items = splitText(upstreamText, mode, sep);
       if (items.length > 0) {
-        const selectedIdx = Math.min(nodeData.selectedIndex || 0, items.length - 1);
+        // Read selectedIndex from store directly to avoid update-depth loop
+        // (this effect sets selectedIndex, so it must NOT be in the dep array)
+        const currentNode = useWorkflowStore.getState().nodes.find((n) => n.id === id);
+        const currentIdx = (currentNode?.data as any)?.selectedIndex || 0;
+        const selectedIdx = Math.min(currentIdx, items.length - 1);
         updateNodeData(id, {
           items,
           upstreamItems: items,
@@ -62,7 +66,8 @@ export function ListSelectorNode({ id, data, selected }: NodeProps<ListSelectorN
       lastKeyRef.current = "";
       updateNodeData(id, { upstreamItems: [] });
     }
-  }, [upstreamText, nodeData.splitMode, nodeData.customSeparator, nodeData.selectedIndex, id, updateNodeData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [upstreamText, nodeData.splitMode, nodeData.customSeparator, id, updateNodeData]);
 
   const handleSelectionChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
