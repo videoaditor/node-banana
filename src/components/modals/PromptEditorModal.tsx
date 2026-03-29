@@ -21,19 +21,18 @@ export const PromptEditorModal: React.FC<PromptEditorModalProps> = ({
 }) => {
   const [prompt, setPrompt] = useState(initialPrompt);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [fontSize, setFontSize] = useState(() => {
-    // Load font size from localStorage on mount
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(FONT_SIZE_STORAGE_KEY);
-      if (saved) {
-        const parsed = parseInt(saved, 10);
-        if (!isNaN(parsed) && parsed >= MIN_FONT_SIZE && parsed <= MAX_FONT_SIZE) {
-          return parsed;
-        }
+  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
+
+  // Load font size from localStorage after mount
+  useEffect(() => {
+    const saved = localStorage.getItem(FONT_SIZE_STORAGE_KEY);
+    if (saved) {
+      const parsed = parseInt(saved, 10);
+      if (!isNaN(parsed) && parsed >= MIN_FONT_SIZE && parsed <= MAX_FONT_SIZE) {
+        setFontSize(parsed);
       }
     }
-    return DEFAULT_FONT_SIZE;
-  });
+  }, []);
 
   // Update local state when initial prompt changes
   useEffect(() => {

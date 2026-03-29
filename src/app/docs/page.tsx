@@ -177,7 +177,7 @@ All keys are in \`.env.local\` (gitignored). The server reads them at startup.
 7. **Wire connected inputs** in \`src/store/utils/connectedInputs.ts\`:
    - Add case for how downstream nodes read this node's output
 
-### Current node types (${new Date().toLocaleDateString()}):
+### Current node types:
 prompt, imageInput, imageIterator, nanoBanana, llmGenerate, output, outputGallery, 
 promptConcatenator, promptConstructor, annotation, generateVideo, conditionalRouter, 
 textIterator, generate3d, webScraper, stickyNote, soraBlueprint, brollBatch, subWorkflow

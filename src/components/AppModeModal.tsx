@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useWorkflowStore } from "@/store/workflowStore";
 import { WorkflowNode, PromptNodeData, ImageInputNodeData, OutputNodeData, OutputGalleryNodeData } from "@/types";
 
@@ -19,12 +19,15 @@ export function AppModeModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
   const [outputImages, setOutputImages] = useState<string[]>([]);
   const [showPreviousRuns, setShowPreviousRuns] = useState(false);
 
-  // Load previous runs from localStorage
-  const [previousRuns, setPreviousRuns] = useState<AppModeRun[]>(() => {
-    if (typeof window === "undefined") return [];
+  const [previousRuns, setPreviousRuns] = useState<AppModeRun[]>([]);
+
+  // Load previous runs from localStorage after mount
+  useEffect(() => {
     const stored = localStorage.getItem("appmode-runs");
-    return stored ? JSON.parse(stored) : [];
-  });
+    if (stored) {
+      try { setPreviousRuns(JSON.parse(stored)); } catch {}
+    }
+  }, []);
 
   // Find app input nodes (prompt and imageInput with isAppInput: true)
   const appInputNodes = useMemo(() => {

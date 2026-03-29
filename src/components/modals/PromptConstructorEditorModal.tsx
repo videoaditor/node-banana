@@ -26,18 +26,18 @@ export const PromptConstructorEditorModal: React.FC<PromptConstructorEditorModal
   const [template, setTemplate] = useState(initialTemplate);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [fontSize, setFontSize] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem(FONT_SIZE_STORAGE_KEY);
-      if (saved) {
-        const parsed = parseInt(saved, 10);
-        if (!isNaN(parsed) && parsed >= MIN_FONT_SIZE && parsed <= MAX_FONT_SIZE) {
-          return parsed;
-        }
+  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
+
+  // Load font size from localStorage after mount
+  useEffect(() => {
+    const saved = localStorage.getItem(FONT_SIZE_STORAGE_KEY);
+    if (saved) {
+      const parsed = parseInt(saved, 10);
+      if (!isNaN(parsed) && parsed >= MIN_FONT_SIZE && parsed <= MAX_FONT_SIZE) {
+        setFontSize(parsed);
       }
     }
-    return DEFAULT_FONT_SIZE;
-  });
+  }, []);
 
   useEffect(() => {
     setTemplate(initialTemplate);
