@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     },
   },
   turbopack: {
-    root: __dirname,
+    root: typeof __dirname !== "undefined" ? __dirname : process.cwd(),
   },
 };
 
