@@ -582,12 +582,22 @@ export async function POST(request: NextRequest) {
       }
     };
 
+    // Merge dynamicInputs.prompt into the prompt for Gemini
+    // (other providers receive dynamicInputs via GenerationInput, but Gemini uses a direct prompt string)
+    let geminiPrompt = prompt || "";
+    if (dynamicInputs?.prompt) {
+      const diPrompt = Array.isArray(dynamicInputs.prompt)
+        ? dynamicInputs.prompt.join("\n")
+        : dynamicInputs.prompt;
+      geminiPrompt = geminiPrompt ? `${geminiPrompt}\n${diPrompt}` : diPrompt;
+    }
+
     // Try Gemini (with fal.ai fallback on transient errors)
     try {
       const geminiResult = await generateWithGemini(
         requestId,
         geminiApiKey,
-        prompt,
+        geminiPrompt,
         images || [],
         geminiModel,
         aspectRatio,
