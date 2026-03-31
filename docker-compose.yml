@@ -3,10 +3,25 @@ services:
     build: .
     container_name: node-banana
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     env_file:
       - .env
     environment:
       - NODE_ENV=production
       - PORT=3000
+    networks:
+      - coolify
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.node-banana.rule=Host(`nodes.aditor.ai`)"
+      - "traefik.http.routers.node-banana.entrypoints=https"
+      - "traefik.http.routers.node-banana.tls=true"
+      - "traefik.http.routers.node-banana.tls.certresolver=letsencrypt"
+      - "traefik.http.services.node-banana.loadbalancer.server.port=3000"
+      - "traefik.http.routers.node-banana-http.rule=Host(`nodes.aditor.ai`)"
+      - "traefik.http.routers.node-banana-http.entrypoints=http"
+      - "traefik.http.routers.node-banana-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+networks:
+  coolify:
+    external: true
