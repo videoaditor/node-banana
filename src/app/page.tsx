@@ -8,6 +8,7 @@ import { FloatingActionBar } from "@/components/FloatingActionBar";
 import { AnnotationModal } from "@/components/AnnotationModal";
 import { AppView } from "@/components/AppView";
 import { useWorkflowStore } from "@/store/workflowStore";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default function Home() {
   const initializeAutoSave = useWorkflowStore(
@@ -22,19 +23,21 @@ export default function Home() {
   }, [initializeAutoSave, cleanupAutoSave]);
 
   return (
-    <ReactFlowProvider>
-      <div className="h-screen flex flex-col">
-        <Header />
-        {viewMode === "edit" ? (
-          <>
-            <WorkflowCanvas />
-            <FloatingActionBar />
-            <AnnotationModal />
-          </>
-        ) : (
-          <AppView />
-        )}
-      </div>
-    </ReactFlowProvider>
+    <ErrorBoundary>
+      <ReactFlowProvider>
+        <div className="h-screen flex flex-col">
+          <Header />
+          {viewMode === "edit" ? (
+            <>
+              <WorkflowCanvas />
+              <FloatingActionBar />
+              <AnnotationModal />
+            </>
+          ) : (
+            <AppView />
+          )}
+        </div>
+      </ReactFlowProvider>
+    </ErrorBoundary>
   );
 }
