@@ -608,6 +608,9 @@ export async function POST(request: NextRequest) {
       // Check response for transient errors
       const cloned = geminiResult.clone();
       const body = await cloned.json() as GenerateResponse;
+      if (!body.success && body.error) {
+        console.error(`[API:${requestId}] Gemini error response: ${body.error}`);
+      }
       if (!body.success && body.error && isTransientGeminiError(body.error)) {
         const falResult = await tryFalFallback(geminiPrompt || "", images || []);
         if (falResult) return falResult;
@@ -617,6 +620,7 @@ export async function POST(request: NextRequest) {
     } catch (geminiErr) {
       // Gemini threw an exception (e.g. 503 from SDK) — try fal.ai fallback
       const errMsg = geminiErr instanceof Error ? geminiErr.message : String(geminiErr);
+      console.error(`[API:${requestId}] Gemini exception: ${errMsg}`);
       if (isTransientGeminiError(errMsg)) {
         const falResult = await tryFalFallback(geminiPrompt || "", images || []);
         if (falResult) return falResult;
