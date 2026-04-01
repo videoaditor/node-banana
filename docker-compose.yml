@@ -1,0 +1,35 @@
+services:
+  node-banana:
+    build: .
+    container_name: node-banana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - workflow-data:/data/workflows
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - WORKFLOWS_DIR=/data/workflows
+    networks:
+      - coolify
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.node-banana.rule=Host(`nodes.aditor.ai`)"
+      - "traefik.http.routers.node-banana.entrypoints=https"
+      - "traefik.http.routers.node-banana.tls=true"
+      - "traefik.http.routers.node-banana.tls.certresolver=letsencrypt"
+      - "traefik.http.services.node-banana.loadbalancer.server.port=3000"
+      - "traefik.http.routers.node-banana-http.rule=Host(`nodes.aditor.ai`)"
+      - "traefik.http.routers.node-banana-http.entrypoints=http"
+      - "traefik.http.routers.node-banana-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+volumes:
+  workflow-data:
+
+networks:
+  coolify:
+    external: true

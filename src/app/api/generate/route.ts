@@ -582,12 +582,22 @@ export async function POST(request: NextRequest) {
       }
     };
 
+    // Merge dynamicInputs.prompt into the prompt for Gemini
+    // (other providers receive dynamicInputs via GenerationInput, but Gemini uses a direct prompt string)
+    let geminiPrompt = prompt || "";
+    if (dynamicInputs?.prompt) {
+      const diPrompt = Array.isArray(dynamicInputs.prompt)
+        ? dynamicInputs.prompt.join("\n")
+        : dynamicInputs.prompt;
+      geminiPrompt = geminiPrompt ? `${geminiPrompt}\n${diPrompt}` : diPrompt;
+    }
+
     // Try Gemini (with fal.ai fallback on transient errors)
     try {
       const geminiResult = await generateWithGemini(
         requestId,
         geminiApiKey,
-        prompt,
+        geminiPrompt,
         images || [],
         geminiModel,
         aspectRatio,
@@ -598,8 +608,11 @@ export async function POST(request: NextRequest) {
       // Check response for transient errors
       const cloned = geminiResult.clone();
       const body = await cloned.json() as GenerateResponse;
+      if (!body.success && body.error) {
+        console.error(`[API:${requestId}] Gemini error response: ${body.error}`);
+      }
       if (!body.success && body.error && isTransientGeminiError(body.error)) {
-        const falResult = await tryFalFallback(prompt || "", images || []);
+        const falResult = await tryFalFallback(geminiPrompt || "", images || []);
         if (falResult) return falResult;
       }
 
@@ -607,8 +620,9 @@ export async function POST(request: NextRequest) {
     } catch (geminiErr) {
       // Gemini threw an exception (e.g. 503 from SDK) — try fal.ai fallback
       const errMsg = geminiErr instanceof Error ? geminiErr.message : String(geminiErr);
+      console.error(`[API:${requestId}] Gemini exception: ${errMsg}`);
       if (isTransientGeminiError(errMsg)) {
-        const falResult = await tryFalFallback(prompt || "", images || []);
+        const falResult = await tryFalFallback(geminiPrompt || "", images || []);
         if (falResult) return falResult;
       }
       // Re-throw to be caught by outer catch
