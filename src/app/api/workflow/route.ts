@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { logger } from "@/utils/logger";
-import os from "os";
+import { getDefaultProjectsDir } from "@/utils/paths";
 
 export const maxDuration = 300; // 5 minute timeout for large workflow files
 
 // Default projects directory
-const DEFAULT_PROJECTS_DIR = path.join(os.homedir(), "clawd", "projects", "node-banana-workflows");
+const DEFAULT_PROJECTS_DIR = getDefaultProjectsDir();
 
 // POST: Save workflow to file
 export async function POST(request: NextRequest) {

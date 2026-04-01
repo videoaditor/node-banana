@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { logger } from "@/utils/logger";
-import os from "os";
+import { getDefaultProjectsDir } from "@/utils/paths";
 
 // Default projects directory
-const DEFAULT_PROJECTS_DIR = path.join(os.homedir(), "clawd", "projects", "node-banana-workflows");
+const DEFAULT_PROJECTS_DIR = getDefaultProjectsDir();
 
 // GET: List all workflow JSON files in a project directory
 export async function GET(request: NextRequest) {

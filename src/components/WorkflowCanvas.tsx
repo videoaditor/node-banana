@@ -278,11 +278,17 @@ export function WorkflowCanvas() {
   useEffect(() => {
     const state = useWorkflowStore.getState();
     if (!state.saveDirectoryPath) {
-      const defaultPath = '/Users/player/clawd/projects/node-banana-workflows';
-      const defaultId = 'aditor-workflows';
-      const defaultName = 'aditor-workflows';
-      setWorkflowMetadata(defaultId, defaultName, defaultPath);
-      console.log('[AutoSetup] Default project created:', defaultPath);
+      fetch("/api/projects/default-path")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.defaultPath) {
+            const defaultId = 'aditor-workflows';
+            const defaultName = 'aditor-workflows';
+            setWorkflowMetadata(defaultId, defaultName, data.defaultPath);
+            console.log('[AutoSetup] Default project created:', data.defaultPath);
+          }
+        })
+        .catch((err) => console.error('[AutoSetup] Failed to fetch default path:', err));
     }
   }, [setWorkflowMetadata]);
 

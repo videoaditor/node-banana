@@ -7,9 +7,12 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    volumes:
+      - workflow-data:/data/workflows
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - WORKFLOWS_DIR=/data/workflows
     networks:
       - coolify
     labels:
@@ -23,6 +26,9 @@ services:
       - "traefik.http.routers.node-banana-http.entrypoints=http"
       - "traefik.http.routers.node-banana-http.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+volumes:
+  workflow-data:
 
 networks:
   coolify:
