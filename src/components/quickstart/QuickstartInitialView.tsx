@@ -73,10 +73,13 @@ export function QuickstartInitialView({
   useEffect(() => {
     async function fetchProjects() {
       try {
+        // Get the server-configured default path
+        const pathRes = await fetch("/api/projects/default-path");
+        const pathData = await pathRes.json();
+        const defaultPath = pathData.success ? pathData.defaultPath : "";
+
         const response = await fetch(
-          `/api/projects?path=${encodeURIComponent(
-            "/Users/player/clawd/projects/node-banana-workflows"
-          )}`
+          `/api/projects?path=${encodeURIComponent(defaultPath)}`
         );
         const result = await response.json();
 

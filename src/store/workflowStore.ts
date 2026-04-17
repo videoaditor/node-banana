@@ -341,7 +341,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   // Auto-save initial state
   workflowId: null,
   workflowName: null,
-  saveDirectoryPath: "/Users/player/clawd/projects/node-banana-workflows",
+  saveDirectoryPath: null,
   generationsPath: null,
   lastSavedAt: null,
   hasUnsavedChanges: false,

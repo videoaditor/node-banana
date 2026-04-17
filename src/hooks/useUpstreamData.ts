@@ -11,7 +11,6 @@
 
 import { useMemo } from "react";
 import { useWorkflowStore } from "@/store/workflowStore";
-import { useShallow } from "zustand/shallow";
 import { getSourceOutput } from "@/store/utils/connectedInputs";
 import type { WorkflowNode } from "@/types";
 
@@ -27,17 +26,28 @@ interface UpstreamData {
  * Re-renders whenever any connected upstream node's output changes.
  */
 export function useUpstreamData(nodeId: string): UpstreamData {
-  // Step 1: Get the source node IDs and their edge info (reactive to edge changes)
-  const sourceEdges = useWorkflowStore(
-    useShallow((state) =>
-      state.edges
-        .filter((e) => e.target === nodeId)
-        .map((e) => ({
-          sourceId: e.source,
-          sourceHandle: e.sourceHandle || null,
-          targetHandle: e.targetHandle || null,
-        }))
-    )
+  // Single selector that computes a stable serialized key + the actual values.
+  // We derive a string key from edges so React only re-renders when edges actually change.
+  const edgeKey = useWorkflowStore((state) =>
+    state.edges
+      .filter((e) => e.target === nodeId)
+      .map((e) => `${e.source}|${e.sourceHandle || ""}|${e.targetHandle || ""}`)
+      .join(",")
+  );
+
+  const sourceEdges = useMemo(
+    () =>
+      edgeKey
+        ? edgeKey.split(",").map((s) => {
+            const [sourceId, sourceHandle, targetHandle] = s.split("|");
+            return {
+              sourceId,
+              sourceHandle: sourceHandle || null,
+              targetHandle: targetHandle || null,
+            };
+          })
+        : [],
+    [edgeKey]
   );
 
   const sourceNodeIds = useMemo(
@@ -45,26 +55,30 @@ export function useUpstreamData(nodeId: string): UpstreamData {
     [sourceEdges]
   );
 
-  // Step 2: Subscribe to the upstream nodes' data (reactive to their data changes)
-  // We extract just the fields we care about so we don't over-subscribe
-  const upstreamOutputs = useWorkflowStore(
-    useShallow((state) => {
-      return sourceEdges.map((edge) => {
+  // Subscribe to upstream node outputs — returns a serialized key for stability
+  const outputKey = useWorkflowStore((state) => {
+    return sourceEdges
+      .map((edge) => {
         const sourceNode = state.nodes.find((n) => n.id === edge.sourceId);
-        if (!sourceNode) return { type: "text" as const, value: null };
-        return getSourceOutput(sourceNode, edge.sourceHandle);
-      });
-    })
-  );
+        if (!sourceNode) return "null";
+        const output = getSourceOutput(sourceNode, edge.sourceHandle);
+        // Return a short fingerprint: type + truncated value hash
+        return `${output.type}:${output.value ? output.value.substring(0, 100) : ""}`;
+      })
+      .join("||");
+  });
 
-  // Step 3: Aggregate into text and images
+  // Aggregate into text and images — recalculates only when outputKey changes
   const result = useMemo(() => {
     let text: string | null = null;
     const images: string[] = [];
 
-    for (let i = 0; i < upstreamOutputs.length; i++) {
-      const output = upstreamOutputs[i];
+    const nodes = useWorkflowStore.getState().nodes;
+    for (let i = 0; i < sourceEdges.length; i++) {
       const edge = sourceEdges[i];
+      const sourceNode = nodes.find((n) => n.id === edge.sourceId);
+      if (!sourceNode) continue;
+      const output = getSourceOutput(sourceNode, edge.sourceHandle);
       if (!output?.value) continue;
 
       if (output.type === "text") {
@@ -75,7 +89,8 @@ export function useUpstreamData(nodeId: string): UpstreamData {
     }
 
     return { text, images, sourceNodeIds };
-  }, [upstreamOutputs, sourceEdges, sourceNodeIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outputKey, sourceEdges, sourceNodeIds]);
 
   return result;
 }
@@ -85,36 +100,43 @@ export function useUpstreamData(nodeId: string): UpstreamData {
  * Lighter weight than useUpstreamData when you only need text.
  */
 export function useUpstreamText(nodeId: string): string | null {
-  const textEdges = useWorkflowStore(
-    useShallow((state) =>
-      state.edges
-        .filter(
-          (e) =>
-            e.target === nodeId &&
-            (e.targetHandle === "text" ||
-              e.targetHandle?.startsWith("text") ||
-              !e.targetHandle)
-        )
-        .map((e) => ({
-          sourceId: e.source,
-          sourceHandle: e.sourceHandle || null,
-        }))
-    )
+  // Derive a stable string key from edge connections
+  const edgeKey = useWorkflowStore((state) =>
+    state.edges
+      .filter(
+        (e) =>
+          e.target === nodeId &&
+          (e.targetHandle === "text" ||
+            e.targetHandle?.startsWith("text") ||
+            !e.targetHandle)
+      )
+      .map((e) => `${e.source}|${e.sourceHandle || ""}`)
+      .join(",")
   );
 
-  const text = useWorkflowStore(
-    useShallow((state) => {
-      for (const edge of textEdges) {
-        const sourceNode = state.nodes.find((n) => n.id === edge.sourceId);
-        if (!sourceNode) continue;
-        const output = getSourceOutput(sourceNode, edge.sourceHandle);
-        if (output.type === "text" && output.value) {
-          return output.value;
-        }
-      }
-      return null;
-    })
+  const textEdges = useMemo(
+    () =>
+      edgeKey
+        ? edgeKey.split(",").map((s) => {
+            const [sourceId, sourceHandle] = s.split("|");
+            return { sourceId, sourceHandle: sourceHandle || null };
+          })
+        : [],
+    [edgeKey]
   );
+
+  // Subscribe to the actual text value — returns a primitive string
+  const text = useWorkflowStore((state) => {
+    for (const edge of textEdges) {
+      const sourceNode = state.nodes.find((n) => n.id === edge.sourceId);
+      if (!sourceNode) continue;
+      const output = getSourceOutput(sourceNode, edge.sourceHandle);
+      if (output.type === "text" && output.value) {
+        return output.value;
+      }
+    }
+    return null;
+  });
 
   return text;
 }
@@ -123,51 +145,92 @@ export function useUpstreamText(nodeId: string): string | null {
  * Reactively get upstream images for a node.
  */
 export function useUpstreamImages(nodeId: string): string[] {
-  const imageEdges = useWorkflowStore(
-    useShallow((state) =>
-      state.edges
-        .filter(
-          (e) =>
-            e.target === nodeId &&
-            (e.targetHandle === "image" ||
-              e.targetHandle?.startsWith("image") ||
-              !e.targetHandle)
-        )
-        .map((e) => ({
-          sourceId: e.source,
-          sourceHandle: e.sourceHandle || null,
-        }))
-    )
+  // Derive a stable string key from edge connections
+  const edgeKey = useWorkflowStore((state) =>
+    state.edges
+      .filter(
+        (e) =>
+          e.target === nodeId &&
+          (e.targetHandle === "image" ||
+            e.targetHandle?.startsWith("image") ||
+            !e.targetHandle)
+      )
+      .map((e) => `${e.source}|${e.sourceHandle || ""}`)
+      .join(",")
   );
 
-  const images = useWorkflowStore(
-    useShallow((state) => {
-      const result: string[] = [];
-      for (const edge of imageEdges) {
-        const sourceNode = state.nodes.find((n) => n.id === edge.sourceId) as WorkflowNode | undefined;
-        if (!sourceNode) continue;
+  const imageEdges = useMemo(
+    () =>
+      edgeKey
+        ? edgeKey.split(",").map((s) => {
+            const [sourceId, sourceHandle] = s.split("|");
+            return { sourceId, sourceHandle: sourceHandle || null };
+          })
+        : [],
+    [edgeKey]
+  );
 
-        // Special multi-image sources
-        if (sourceNode.type === "imageFilter") {
-          const filtered = (sourceNode.data as any).outputImages || [];
-          result.push(...filtered);
-          continue;
-        }
-        if (sourceNode.type === "webScraper") {
-          const allImages = (sourceNode.data as any).outputImages || [];
-          if (allImages.length > 0) result.push(...allImages);
-          else if ((sourceNode.data as any).outputImage) result.push((sourceNode.data as any).outputImage);
-          continue;
-        }
+  // Subscribe to image data — returns a stable string key for comparison
+  const imageKey = useWorkflowStore((state) => {
+    const parts: string[] = [];
+    for (const edge of imageEdges) {
+      const sourceNode = state.nodes.find((n) => n.id === edge.sourceId) as WorkflowNode | undefined;
+      if (!sourceNode) continue;
 
-        const output = getSourceOutput(sourceNode, edge.sourceHandle);
-        if (output.type === "image" && output.value) {
-          result.push(output.value);
-        }
+      if (sourceNode.type === "imageFilter") {
+        const filtered = (sourceNode.data as Record<string, unknown>).outputImages as string[] || [];
+        parts.push(...filtered.map((img) => img.substring(0, 50)));
+        continue;
       }
-      return result;
-    })
-  );
+      if (sourceNode.type === "webScraper") {
+        const allImages = (sourceNode.data as Record<string, unknown>).outputImages as string[] || [];
+        if (allImages.length > 0) parts.push(...allImages.map((img) => img.substring(0, 50)));
+        else {
+          const single = (sourceNode.data as Record<string, unknown>).outputImage as string | undefined;
+          if (single) parts.push(single.substring(0, 50));
+        }
+        continue;
+      }
+
+      const output = getSourceOutput(sourceNode, edge.sourceHandle);
+      if (output.type === "image" && output.value) {
+        parts.push(output.value.substring(0, 50));
+      }
+    }
+    return parts.join("||");
+  });
+
+  // Compute actual images only when key changes
+  const images = useMemo(() => {
+    const result: string[] = [];
+    const nodes = useWorkflowStore.getState().nodes;
+    for (const edge of imageEdges) {
+      const sourceNode = nodes.find((n) => n.id === edge.sourceId) as WorkflowNode | undefined;
+      if (!sourceNode) continue;
+
+      if (sourceNode.type === "imageFilter") {
+        const filtered = (sourceNode.data as Record<string, unknown>).outputImages as string[] || [];
+        result.push(...filtered);
+        continue;
+      }
+      if (sourceNode.type === "webScraper") {
+        const allImages = (sourceNode.data as Record<string, unknown>).outputImages as string[] || [];
+        if (allImages.length > 0) result.push(...allImages);
+        else {
+          const single = (sourceNode.data as Record<string, unknown>).outputImage as string | undefined;
+          if (single) result.push(single);
+        }
+        continue;
+      }
+
+      const output = getSourceOutput(sourceNode, edge.sourceHandle);
+      if (output.type === "image" && output.value) {
+        result.push(output.value);
+      }
+    }
+    return result;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageKey, imageEdges]);
 
   return images;
 }

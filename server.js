@@ -2,6 +2,14 @@
 // Node.js default server.requestTimeout is 5 minutes (300,000ms)
 // We extend it to 10 minutes for long-running fal.ai video generation
 
+process.on('unhandledRejection', (reason) => {
+  console.error('=== UNHANDLED REJECTION ===');
+  console.error(reason);
+  if (reason instanceof Error) {
+    console.error('Stack:', reason.stack);
+  }
+});
+
 const { createServer } = require('http');
 const next = require('next');
 
