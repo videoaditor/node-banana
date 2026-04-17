@@ -1188,7 +1188,11 @@ export async function GET(
   }
 
   // Check if we got any models
-  if (allModels.length === 0 && errors.length === providersToFetch.length) {
+  if (
+    allModels.length === 0 &&
+    errors.length > 0 &&
+    errors.length === providersToFetch.length
+  ) {
     // All providers failed
     return NextResponse.json<ModelsErrorResponse>(
       {
